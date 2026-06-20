@@ -1,0 +1,278 @@
+<main class="sc-app">
+  <header class="sc-topbar">
+    <button class="sc-brand" type="button" (click)="selectScreen('landing')" aria-label="Open landing page">
+      <span class="sc-brand-mark">$_</span>
+      <span>
+        <strong>ShellCraft</strong>
+        <small>Interactive Linux Lab</small>
+      </span>
+    </button>
+
+    <nav class="sc-nav" aria-label="Prototype screens">
+      @for (screen of screens; track screen.key) {
+        <button
+          type="button"
+          [class.is-active]="selectedScreen() === screen.key"
+          (click)="selectScreen(screen.key)"
+        >
+          {{ screen.label }}
+        </button>
+      }
+    </nav>
+
+    <div class="sc-session">
+      <span>{{ screenTitle() }}</span>
+      <strong>Pro Developer</strong>
+    </div>
+  </header>
+
+  @switch (selectedScreen()) {
+    @case ('landing') {
+      <section class="sc-screen sc-landing" aria-label="ShellCraft landing page">
+        <div class="sc-hero-copy">
+          <span class="sc-chip sc-chip-blue">v0.1.4 Live Lab</span>
+          <h1>Learn Linux by seeing what commands actually do.</h1>
+          <p>
+            A visual lab experience for developers. Interact with a simulated terminal, watch file
+            structures shift in real time, and level up through focused shell missions.
+          </p>
+          <div class="sc-actions">
+            <button class="sc-btn sc-btn-primary" type="button" (click)="startLab()">
+              Start Learning
+            </button>
+            <button class="sc-btn sc-btn-ghost" type="button" (click)="selectScreen('path')">
+              View Labs
+            </button>
+          </div>
+        </div>
+
+        <aside class="sc-terminal-card sc-hero-terminal" aria-label="Terminal preview">
+          <div class="sc-window-bar">
+            <span class="dot red"></span>
+            <span class="dot amber"></span>
+            <span class="dot green"></span>
+            <small>bash - lab-01-filesystem</small>
+          </div>
+          <div class="sc-terminal-body">
+            <p class="prompt">{{ promptLine() }}</p>
+            @for (line of selectedDemo().output; track line) {
+              <p>{{ line }}</p>
+            }
+          </div>
+          <div class="sc-observation">
+            <span></span>
+            <div>
+              <strong>Active observation</strong>
+              <small>{{ selectedDemo().label }}</small>
+            </div>
+          </div>
+        </aside>
+
+        <div class="sc-feature-row">
+          <article class="sc-card">
+            <span class="sc-card-icon blue">01</span>
+            <h3>Interactive Terminal</h3>
+            <p>A sandboxed environment that responds exactly like a real Linux terminal.</p>
+          </article>
+          <article class="sc-card">
+            <span class="sc-card-icon purple">02</span>
+            <h3>Visual Command Engine</h3>
+            <p>Watch filesystem and permission diagrams update as commands run.</p>
+          </article>
+          <article class="sc-card">
+            <span class="sc-card-icon orange">03</span>
+            <h3>Gamified Labs</h3>
+            <p>Challenge yourself with structured paths, XP, and badge unlocks.</p>
+          </article>
+        </div>
+
+        <section class="sc-cta-panel">
+          <h2>Ready to start your first Linux lab?</h2>
+          <p>Start with permissions, networking, and basic shell scripts today.</p>
+          <button class="sc-btn sc-btn-primary" type="button" (click)="selectScreen('path')">
+            Start Lab 01
+          </button>
+        </section>
+      </section>
+    }
+
+    @case ('path') {
+      <section class="sc-screen sc-path" aria-label="Learning path">
+        <aside class="sc-sidebar">
+          <span class="sc-chip sc-chip-purple">Learning Path</span>
+          <h2>Master the art of the terminal.</h2>
+          <p>Build shell confidence through interactive missions and visual command feedback.</p>
+          <div class="sc-stat-list">
+            @for (item of stats; track item.label) {
+              <div>
+                <strong>{{ item.value }}</strong>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </aside>
+
+        <div class="sc-path-main">
+          <div class="sc-section-heading">
+            <span>Recommended route</span>
+            <h2>Pro Developer Track</h2>
+          </div>
+
+          <div class="sc-lab-grid">
+            @for (lab of labs; track lab.id) {
+              <article class="sc-lab-card" [class.is-locked]="lab.locked" [class]="'accent-' + lab.accent">
+                <div>
+                  <span>{{ lab.tag }}</span>
+                  <strong>{{ lab.status }}</strong>
+                </div>
+                <h3>{{ lab.title }}</h3>
+                <p>{{ lab.description }}</p>
+                <div class="sc-command-tags">
+                  @for (command of lab.commands; track command) {
+                    <small>{{ command }}</small>
+                  }
+                </div>
+                <button
+                  class="sc-btn"
+                  type="button"
+                  [class.sc-btn-primary]="!lab.locked"
+                  [class.sc-btn-disabled]="lab.locked"
+                  (click)="startLab(lab)"
+                >
+                  {{ lab.actionLabel }}
+                </button>
+              </article>
+            }
+          </div>
+
+          <div class="sc-path-terminal">
+            <div class="sc-window-bar">
+              <span class="dot red"></span>
+              <span class="dot amber"></span>
+              <span class="dot green"></span>
+              <small>guest@shellcraft</small>
+            </div>
+            <code>$ whoami<br />guest_student<br />$ ls learning_path<br />lab_01_filesystem lab_02_permissions lab_03_pipes</code>
+          </div>
+        </div>
+      </section>
+    }
+
+    @case ('lab') {
+      <section class="sc-screen sc-lab-workbench" aria-label="Lab screen">
+        <aside class="sc-task-panel">
+          <span class="sc-chip sc-chip-orange">Lab 02 Permissions</span>
+          <h2>{{ currentLab().title }}</h2>
+          <p>Linux uses a permission model built from owner, group, and others.</p>
+
+          <div class="sc-current-task">
+            <small>Current task</small>
+            <strong>Run chmod 755 deploy.sh</strong>
+            <p>This will make the script executable while keeping write access limited.</p>
+          </div>
+
+          <div class="sc-actions stacked">
+            <button class="sc-btn sc-btn-ghost" type="button">Hint</button>
+            <button class="sc-btn sc-btn-ghost" type="button">Reset</button>
+            <button class="sc-btn sc-btn-ghost" type="button">View theory</button>
+          </div>
+        </aside>
+
+        <section class="sc-terminal-card sc-lab-terminal">
+          <div class="sc-window-bar">
+            <span class="dot red"></span>
+            <span class="dot amber"></span>
+            <span class="dot green"></span>
+            <small>guest@linux-lab</small>
+          </div>
+          <div class="sc-terminal-body">
+            <p class="prompt">{{ promptLine() }}</p>
+            @for (line of selectedDemo().output; track line) {
+              <p>{{ line }}</p>
+            }
+            <p class="prompt">guest@shellcraft:~$</p>
+          </div>
+
+          <div class="sc-command-bar">
+            @for (demo of commandDemos; track demo.command) {
+              <button
+                type="button"
+                [class.is-active]="selectedDemo().command === demo.command"
+                (click)="selectDemo(demo)"
+              >
+                {{ demo.command }}
+              </button>
+            }
+          </div>
+        </section>
+
+        <aside class="sc-inspector">
+          <div class="sc-panel">
+            <span class="sc-chip sc-chip-blue">Visual map</span>
+            <h3>{{ selectedDemo().label }}</h3>
+            <div class="sc-permission-grid">
+              @for (row of permissionRows; track row.role) {
+                <div [class]="'tone-' + row.tone">
+                  <span>{{ row.role }}</span>
+                  <strong>{{ row.value }}</strong>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="sc-panel">
+            <span class="sc-chip sc-chip-purple">Explanation</span>
+            <p>{{ selectedDemo().insight }}</p>
+            <div class="sc-command-tags">
+              @for (step of selectedDemo().visualSteps; track step) {
+                <small>{{ step }}</small>
+              }
+            </div>
+          </div>
+
+          <button class="sc-btn sc-btn-primary wide" type="button" (click)="completeLab()">
+            Complete lab
+          </button>
+        </aside>
+      </section>
+    }
+
+    @case ('complete') {
+      <section class="sc-screen sc-complete" aria-label="Lab completed">
+        <article class="sc-complete-card">
+          <span class="sc-chip sc-chip-blue">Lab completed</span>
+          <h1>Permissions Master</h1>
+          <p>You secured the deployment script and unlocked the central permission system.</p>
+
+          <div class="sc-reward-grid">
+            <div>
+              <span>XP earned</span>
+              <strong>+150 XP</strong>
+              <div class="sc-progress"><i></i></div>
+            </div>
+            <div>
+              <span>Badge unlocked</span>
+              <strong>Permission Core</strong>
+              <small>Tier 1</small>
+            </div>
+          </div>
+
+          <div class="sc-command-tags centered">
+            @for (command of learnedCommands; track command) {
+              <small>{{ command }}</small>
+            }
+          </div>
+
+          <div class="sc-actions centered">
+            <button class="sc-btn sc-btn-primary" type="button" (click)="selectScreen('lab')">
+              Continue to next lab
+            </button>
+            <button class="sc-btn sc-btn-ghost" type="button" (click)="selectScreen('path')">
+              Learning Path
+            </button>
+          </div>
+        </article>
+      </section>
+    }
+  }
+</main>

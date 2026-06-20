@@ -1,0 +1,63 @@
+# Node / Angular
+node_modules/
+dist/
+.angular/
+coverage/
+.cache/
+.eslintcache
+.vite/
+
+# Python / FastAPI
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.*
+!.env.example
+!.env.*.example
+
+# Secrets / local credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.kdbx
+*.sqlite
+*.sqlite3
+*.db
+.npmrc
+.pypirc
+
+# Codex / local planning memory
+REQUIREMENTS/
+PLANS/
+FINDINGS_LOG/
+STATUS/
+.codex/
+.agents/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
