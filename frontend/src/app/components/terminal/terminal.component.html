@@ -1,0 +1,41 @@
+<div class="sc-terminal-card sc-live-terminal">
+  <div class="sc-window-bar">
+    <span class="dot red"></span>
+    <span class="dot amber"></span>
+    <span class="dot green"></span>
+    <small>guest@linux-lab — {{ engine.lab()?.title }}</small>
+  </div>
+
+  <div class="sc-terminal-body" #scrollback>
+    @for (entry of engine.history(); track $index) {
+      <p class="prompt">{{ prompt() }} {{ entry.command }}</p>
+      @for (line of entry.output; track $index) {
+        <p [class.sc-error-line]="!entry.correct">{{ line }}</p>
+      }
+    }
+
+    @if (engine.completed()) {
+      <p class="sc-success-line">✓ Lab complete — every step cleared.</p>
+    } @else {
+      <p class="sc-input-line">
+        <span class="prompt">{{ prompt() }}</span>
+        <input
+          #cmdInput
+          class="sc-cmd-input"
+          type="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Terminal command input"
+          [value]="input()"
+          [disabled]="busy()"
+          (input)="setInput($any($event.target).value)"
+          (keydown.enter)="onEnter()"
+          (keydown.arrowUp)="$event.preventDefault(); recall(-1)"
+          (keydown.arrowDown)="$event.preventDefault(); recall(1)"
+          (keydown.tab)="$event.preventDefault(); complete()"
+        />
+      </p>
+    }
+  </div>
+</div>

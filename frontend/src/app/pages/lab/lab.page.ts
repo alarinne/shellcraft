@@ -1,33 +1,40 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  COMMAND_DEMOS,
-  CommandDemo,
-  findLab,
-  PERMISSION_ROWS,
-} from '../../core/shellcraft-data';
+import { TerminalComponent } from '../../components/terminal/terminal.component';
+import { LabEngine } from '../../core/execution/lab-engine';
+import { getLab } from '../../core/labs';
+import { LAB_02_PERMISSIONS } from '../../core/labs/lab-02-permissions';
 
 @Component({
   selector: 'sc-lab-page',
+  imports: [TerminalComponent],
   templateUrl: './lab.page.html',
 })
 export class LabPage {
   private readonly router = inject(Router);
+  protected readonly engine = inject(LabEngine);
 
   /** Bound from the `/lab/:id` route param via `withComponentInputBinding()`. */
   readonly id = input<string>();
 
-  protected readonly lab = computed(() => findLab(this.id()));
-  protected readonly commandDemos = COMMAND_DEMOS;
-  protected readonly permissionRows = PERMISSION_ROWS;
+  protected readonly hintVisible = signal(false);
 
-  protected readonly selectedDemo = signal<CommandDemo>(COMMAND_DEMOS[1]);
-  protected readonly promptLine = computed(
-    () => `guest@shellcraft:~$ ${this.selectedDemo().command}`,
-  );
+  protected readonly progressPercent = computed(() => Math.round(this.engine.progress() * 100));
 
-  protected selectDemo(demo: CommandDemo): void {
-    this.selectedDemo.set(demo);
+  protected toggleHint(): void {
+    this.hintVisible.update((v) => !v);
+  }
+
+  constructor() {
+    // Load (or reload) the lab whenever the route id changes.
+    effect(() => {
+      const lab = getLab(this.id()) ?? LAB_02_PERMISSIONS;
+      this.engine.load(lab);
+    });
+  }
+
+  protected reset(): void {
+    this.engine.reset();
   }
 
   protected completeLab(): void {

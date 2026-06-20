@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.sc-live-terminal .sc-terminal-body {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.sc-input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.sc-cmd-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #dbe8ff;
+  font: inherit;
+  caret-color: #7cffb2;
+}
+
+.sc-error-line {
+  color: #ff8e8e;
+}
+
+.sc-success-line {
+  margin-top: 10px;
+  color: #7cffb2;
+  font-weight: 700;
+}
