@@ -1,0 +1,54 @@
+<div class="sc-signals">
+  <div class="sc-signal-picker" role="group" aria-label="Choose a signal">
+    @for (s of signals; track s.signal) {
+      <button
+        type="button"
+        class="sc-signal-btn"
+        [class.is-active]="selected() === s.signal"
+        [class.uncatchable]="!s.catchable"
+        (click)="select(s.signal)"
+        [title]="s.label"
+      >
+        <strong>{{ s.signal }}</strong>
+        <small>{{ s.number }} · {{ s.catchable ? 'catchable' : 'uncatchable' }}</small>
+      </button>
+    }
+  </div>
+
+  <table class="sc-proc-table">
+    <thead>
+      <tr><th>PID</th><th>Process</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (p of processes(); track p.pid) {
+        <tr [class]="'status-' + p.status">
+          <td class="mono">{{ p.pid }}</td>
+          <td class="mono">{{ p.name }}</td>
+          <td><span class="sc-status-badge" [class]="'status-' + p.status">{{ p.status }}</span></td>
+          <td>
+            <button
+              type="button"
+              class="sc-btn sc-btn-ghost sc-send"
+              [disabled]="p.status === 'terminated'"
+              (click)="send(p.pid)"
+            >
+              Send {{ selected() }}
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="sc-signal-actions">
+    <button type="button" class="sc-btn sc-btn-ghost" (click)="reset()">Reset processes</button>
+  </div>
+
+  <ul class="sc-signal-log" aria-label="Signal log">
+    @for (line of log(); track $index) {
+      <li>{{ line }}</li>
+    } @empty {
+      <li class="muted">Pick a signal and send it to a process to see what happens.</li>
+    }
+  </ul>
+</div>

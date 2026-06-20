@@ -29,6 +29,7 @@ export class App {
     { label: 'Landing', path: '/', match: '/' },
     { label: 'Learning Path', path: '/path', match: '/path' },
     { label: 'Lab Screen', path: '/lab/lab-02', match: '/lab' },
+    { label: 'Signals', path: '/signals', match: '/signals' },
     { label: 'Completed', path: '/complete', match: '/complete' },
   ];
 

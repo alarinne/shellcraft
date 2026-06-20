@@ -35,5 +35,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/complete/complete.page').then((m) => m.CompletePage),
     title: 'ShellCraft — Lab Completed',
   },
+  {
+    path: 'signals',
+    loadComponent: () => import('./pages/signals/signals.page').then((m) => m.SignalsPage),
+    title: 'ShellCraft — Signals',
+  },
   { path: '**', redirectTo: '' },
 ];
