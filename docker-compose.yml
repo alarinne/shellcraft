@@ -1,0 +1,22 @@
+# ShellCraft clean-run stack.
+#
+#   docker compose up --build          # frontend on http://localhost:4200
+#   docker compose --profile full up   # frontend + backend (once #8 lands)
+services:
+  frontend:
+    build:
+      context: ./frontend
+    image: shellcraft-frontend
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+
+  # Enabled once the FastAPI backend (#8) ships a Dockerfile.
+  backend:
+    build:
+      context: ./backend
+    image: shellcraft-backend
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    profiles: ["full"]
