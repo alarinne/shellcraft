@@ -1,0 +1,19 @@
+<div class="sc-perm-viz">
+  @if (file()) {
+    <code class="sc-perm-file">{{ file() }}</code>
+  }
+  <div class="sc-perm-rows">
+    @for (role of roles(); track role.role) {
+      <div class="sc-perm-row" [class]="'tone-' + role.tone">
+        <span class="sc-perm-role">{{ role.role }}</span>
+        <div class="sc-perm-bits">
+          @for (bit of role.bits; track bit.label) {
+            <span class="sc-perm-bit" [class.on]="bit.on" [attr.aria-label]="bit.label + (bit.on ? ' enabled' : ' disabled')">
+              {{ bit.on ? bit.label : '–' }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

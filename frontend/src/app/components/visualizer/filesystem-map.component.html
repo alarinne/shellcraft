@@ -1,0 +1,21 @@
+<div class="sc-fs-map">
+  <div class="sc-fs-breadcrumb" aria-label="Current working directory">
+    <span class="sc-fs-root">/</span>
+    @for (segment of segments(); track $index) {
+      <span class="sc-fs-sep">/</span>
+      <span class="sc-fs-seg" [class.is-current]="$last">{{ segment }}</span>
+    }
+  </div>
+
+  <ul class="sc-fs-entries">
+    @for (entry of entries(); track entry.name) {
+      <li class="sc-fs-entry" [class.is-dir]="entry.type === 'dir'">
+        <span class="sc-fs-icon">{{ entry.type === 'dir' ? '📁' : '📄' }}</span>
+        <span class="sc-fs-name">{{ entry.name }}</span>
+        <code class="sc-fs-perm">{{ entry.permissions }}</code>
+      </li>
+    } @empty {
+      <li class="sc-fs-empty">empty directory</li>
+    }
+  </ul>
+</div>

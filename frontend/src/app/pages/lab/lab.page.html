@@ -33,7 +33,16 @@
 
   <aside class="sc-inspector">
     <div class="sc-panel">
-      <span class="sc-chip sc-chip-blue">Explanation</span>
+      <span class="sc-chip sc-chip-blue">Visual map</span>
+      @if (visualFocus() === 'permissions' && focusFile(); as file) {
+        <sc-permission-grid [file]="fileName(file.path)" [permissions]="file.permissions" />
+      } @else if (engine.state(); as state) {
+        <sc-filesystem-map [state]="state" />
+      }
+    </div>
+
+    <div class="sc-panel">
+      <span class="sc-chip sc-chip-purple">Explanation</span>
       <p>{{ engine.currentStep()?.explanation ?? 'Run the commands to learn what each one does.' }}</p>
       <div class="sc-command-tags">
         @for (label of engine.currentStep()?.visual?.labels ?? []; track label) {

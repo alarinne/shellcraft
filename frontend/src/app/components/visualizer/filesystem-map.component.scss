@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.sc-fs-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  color: #8f9fb1;
+}
+
+.sc-fs-root,
+.sc-fs-sep {
+  color: #5f7186;
+}
+
+.sc-fs-seg {
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: #cdddf2;
+}
+
+.sc-fs-seg.is-current {
+  color: #04111d;
+  background: #7cffb2;
+  font-weight: 700;
+}
+
+.sc-fs-entries {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.sc-fs-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 170, 199, 0.14);
+}
+
+.sc-fs-name {
+  flex: 1;
+  color: #e7f1ff;
+  font-size: 0.86rem;
+}
+
+.sc-fs-entry.is-dir .sc-fs-name {
+  color: #8fc2ff;
+  font-weight: 600;
+}
+
+.sc-fs-perm {
+  color: #8f9fb1;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.76rem;
+}
+
+.sc-fs-empty {
+  padding: 8px 10px;
+  color: #67788c;
+  font-style: italic;
+}

@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.sc-perm-file {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #7cffb2;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.sc-perm-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.sc-perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 170, 199, 0.14);
+}
+
+.sc-perm-role {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dfe9f7;
+}
+
+.sc-perm-bits {
+  display: flex;
+  gap: 6px;
+}
+
+.sc-perm-bit {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+  color: #67788c;
+  background: rgba(4, 10, 12, 0.5);
+  border: 1px solid rgba(148, 170, 199, 0.14);
+  transition: all 0.2s ease;
+}
+
+.sc-perm-bit.on {
+  color: #04111d;
+  font-weight: 800;
+}
+
+.tone-blue .sc-perm-bit.on {
+  background: #58aaff;
+  border-color: #58aaff;
+}
+
+.tone-purple .sc-perm-bit.on {
+  background: #a586ff;
+  border-color: #a586ff;
+}
+
+.tone-orange .sc-perm-bit.on {
+  background: #ffc65d;
+  border-color: #ffc65d;
+}

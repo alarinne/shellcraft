@@ -24,6 +24,8 @@ describe('LabPage', () => {
     expect(TestBed.inject(LabEngine).lab()?.id).toBe('lab-02');
     expect(compiled.textContent).toContain('Inspect the current permissions of deploy.sh');
     expect(compiled.querySelector('sc-terminal')).toBeTruthy();
+    // lab-02 step-01 focuses permissions, so the permission grid is shown.
+    expect(compiled.querySelector('sc-permission-grid')).toBeTruthy();
   });
 
   it('keeps the Complete button disabled until the lab is finished', async () => {
