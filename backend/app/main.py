@@ -23,6 +23,7 @@ from pydantic import BaseModel
 
 from . import __version__
 from .engine import check_command, next_step_id
+from .sandbox import DockerSandbox, SandboxDisabled
 
 LABS_DIR = Path(__file__).parent / "labs"
 
@@ -49,6 +50,10 @@ class CommandCheckRequest(BaseModel):
     state: dict[str, Any] | None = None
 
 
+class SandboxRunRequest(BaseModel):
+    command: str
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="shellcraft-api", version=__version__)
     app.add_middleware(
@@ -59,10 +64,23 @@ def create_app() -> FastAPI:
     )
 
     labs = load_labs()
+    sandbox = DockerSandbox()
 
     @app.get("/api/health")
     def health() -> dict[str, str]:
         return {"status": "ok", "service": "shellcraft-api"}
+
+    @app.get("/api/sandbox/status")
+    def sandbox_status() -> dict[str, bool]:
+        return {"enabled": sandbox.enabled}
+
+    @app.post("/api/sandbox/run")
+    def sandbox_run(req: SandboxRunRequest) -> dict[str, Any]:
+        # Opt-in only: returns 503 unless SHELLCRAFT_SANDBOX=1 and Docker exists.
+        try:
+            return sandbox.run(req.command)
+        except SandboxDisabled as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     @app.get("/api/labs")
     def list_labs() -> list[dict[str, Any]]:
