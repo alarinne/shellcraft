@@ -1,0 +1,51 @@
+<div class="sc-pipes">
+  <div class="sc-pipe-command mono">
+    <span class="prompt">$</span> {{ command() }}
+  </div>
+
+  <label class="sc-field sc-pipe-pattern">
+    <span>grep pattern</span>
+    <input
+      type="text"
+      class="mono"
+      [value]="pattern()"
+      (input)="setPattern($any($event.target).value)"
+      aria-label="grep pattern"
+    />
+  </label>
+
+  <div class="sc-pipe-stages">
+    <!-- input -->
+    <div class="sc-pipe-stage">
+      <span class="sc-pipe-label mono">cat access.log</span>
+      <ul class="sc-pipe-lines">
+        @for (line of input; track $index) {
+          <li class="mono" [class.is-match]="matched().has(line)">{{ line }}</li>
+        }
+      </ul>
+    </div>
+
+    <div class="sc-pipe-arrow">|</div>
+
+    <!-- grep -->
+    <div class="sc-pipe-stage">
+      <span class="sc-pipe-label mono">{{ results()[1].label }}</span>
+      <ul class="sc-pipe-lines">
+        @for (line of results()[1].lines; track $index) {
+          <li class="mono is-match">{{ line }}</li>
+        } @empty {
+          <li class="muted">no matching lines</li>
+        }
+      </ul>
+    </div>
+
+    <div class="sc-pipe-arrow">|</div>
+
+    <!-- wc -->
+    <div class="sc-pipe-stage sc-pipe-count">
+      <span class="sc-pipe-label mono">wc -l</span>
+      <strong class="sc-pipe-number">{{ results()[2].lines[0] }}</strong>
+      <small>matching lines</small>
+    </div>
+  </div>
+</div>

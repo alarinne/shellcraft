@@ -40,5 +40,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/signals/signals.page').then((m) => m.SignalsPage),
     title: 'ShellCraft — Signals',
   },
+  {
+    path: 'pipes',
+    loadComponent: () => import('./pages/pipes/pipes.page').then((m) => m.PipesPage),
+    title: 'ShellCraft — Pipes & grep',
+  },
   { path: '**', redirectTo: '' },
 ];
