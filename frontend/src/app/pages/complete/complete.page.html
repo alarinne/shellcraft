@@ -1,0 +1,35 @@
+<section class="sc-screen sc-complete" aria-label="Lab completed">
+  <article class="sc-complete-card">
+    <span class="sc-chip sc-chip-blue">Lab completed</span>
+    <h1>Permissions Master</h1>
+    <p>You secured the deployment script and unlocked the central permission system.</p>
+
+    <div class="sc-reward-grid">
+      <div>
+        <span>XP earned</span>
+        <strong>+150 XP</strong>
+        <div class="sc-progress"><i></i></div>
+      </div>
+      <div>
+        <span>Badge unlocked</span>
+        <strong>Permission Core</strong>
+        <small>Tier 1</small>
+      </div>
+    </div>
+
+    <div class="sc-command-tags centered">
+      @for (command of learnedCommands; track command) {
+        <small>{{ command }}</small>
+      }
+    </div>
+
+    <div class="sc-actions centered">
+      <button class="sc-btn sc-btn-primary" type="button" (click)="continueNext()">
+        Continue to next lab
+      </button>
+      <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
+        Learning Path
+      </button>
+    </div>
+  </article>
+</section>

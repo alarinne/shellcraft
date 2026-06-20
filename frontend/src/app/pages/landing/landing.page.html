@@ -1,0 +1,66 @@
+<section class="sc-screen sc-landing" aria-label="ShellCraft landing page">
+  <div class="sc-hero-copy">
+    <span class="sc-chip sc-chip-blue">v0.1.4 Live Lab</span>
+    <h1>Learn Linux by seeing what commands actually do.</h1>
+    <p>
+      A visual lab experience for developers. Interact with a simulated terminal, watch file
+      structures shift in real time, and level up through focused shell missions.
+    </p>
+    <div class="sc-actions">
+      <button class="sc-btn sc-btn-primary" type="button" (click)="startLearning()">
+        Start Learning
+      </button>
+      <button class="sc-btn sc-btn-ghost" type="button" (click)="viewLabs()">
+        View Labs
+      </button>
+    </div>
+  </div>
+
+  <aside class="sc-terminal-card sc-hero-terminal" aria-label="Terminal preview">
+    <div class="sc-window-bar">
+      <span class="dot red"></span>
+      <span class="dot amber"></span>
+      <span class="dot green"></span>
+      <small>bash - lab-01-filesystem</small>
+    </div>
+    <div class="sc-terminal-body">
+      <p class="prompt">{{ promptLine() }}</p>
+      @for (line of demo().output; track line) {
+        <p>{{ line }}</p>
+      }
+    </div>
+    <div class="sc-observation">
+      <span></span>
+      <div>
+        <strong>Active observation</strong>
+        <small>{{ demo().label }}</small>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sc-feature-row">
+    <article class="sc-card">
+      <span class="sc-card-icon blue">01</span>
+      <h3>Interactive Terminal</h3>
+      <p>A sandboxed environment that responds exactly like a real Linux terminal.</p>
+    </article>
+    <article class="sc-card">
+      <span class="sc-card-icon purple">02</span>
+      <h3>Visual Command Engine</h3>
+      <p>Watch filesystem and permission diagrams update as commands run.</p>
+    </article>
+    <article class="sc-card">
+      <span class="sc-card-icon orange">03</span>
+      <h3>Gamified Labs</h3>
+      <p>Challenge yourself with structured paths, XP, and badge unlocks.</p>
+    </article>
+  </div>
+
+  <section class="sc-cta-panel">
+    <h2>Ready to start your first Linux lab?</h2>
+    <p>Start with permissions, networking, and basic shell scripts today.</p>
+    <button class="sc-btn sc-btn-primary" type="button" (click)="viewLabs()">
+      Start Lab 01
+    </button>
+  </section>
+</section>

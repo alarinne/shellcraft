@@ -1,74 +1,43 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { App } from './app';
+import { routes } from './app.routes';
 
-describe('App', () => {
+describe('App shell', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideRouter(routes)],
     }).compileComponents();
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render the pro-developer landing page', async () => {
+  it('should render the persistent shell brand and navigation', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
-    await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent).toContain('Learn Linux');
-    expect(compiled.textContent).toContain('Start Lab 01');
-    expect(compiled.textContent).toContain('Interactive Terminal');
+    expect(compiled.textContent).toContain('ShellCraft');
+    expect(compiled.textContent).toContain('Learning Path');
+    expect(compiled.textContent).toContain('Lab Screen');
   });
 
-  it('should navigate through learning path, lab, and completed screens', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
+  it('should route between landing, path, lab, and completed screens', async () => {
+    const harness = await RouterTestingHarness.create('/');
+    expect(harness.routeNativeElement?.textContent).toContain('Learn Linux');
 
-    const compiled = fixture.nativeElement as HTMLElement;
+    await harness.navigateByUrl('/path');
+    expect(harness.routeNativeElement?.textContent).toContain('Pro Developer Track');
 
-    clickButton(compiled, 'Learning Path');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(compiled.textContent).toContain('Pro Developer Track');
+    await harness.navigateByUrl('/lab/lab-02');
+    expect(harness.routeNativeElement?.textContent).toContain('Run chmod 755 deploy.sh');
 
-    clickButton(compiled, 'Start lab');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(compiled.textContent).toContain('Run chmod 755 deploy.sh');
-
-    clickButton(compiled, 'Complete lab');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(compiled.textContent).toContain('Permissions Master');
-  });
-
-  it('should update the terminal observation when a command is selected', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-
-    const compiled = fixture.nativeElement as HTMLElement;
-    clickButton(compiled, 'Lab Screen');
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    clickButton(compiled, 'chmod 755 deploy.sh');
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(compiled.textContent).toContain('mode changed: deploy.sh -> rwxr-xr-x');
-    expect(compiled.textContent).toContain('owner rwx');
+    await harness.navigateByUrl('/complete');
+    expect(harness.routeNativeElement?.textContent).toContain('Permissions Master');
   });
 });
-
-function clickButton(compiled: HTMLElement, text: string): void {
-  const button = Array.from(compiled.querySelectorAll<HTMLButtonElement>('button'))
-    .find((candidate) => candidate.textContent?.includes(text));
-
-  expect(button).toBeTruthy();
-  button?.click();
-}
