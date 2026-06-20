@@ -6,6 +6,7 @@ import { PermissionGridComponent } from '../../components/visualizer/permission-
 import { LabEngine } from '../../core/execution/lab-engine';
 import { getLab } from '../../core/labs';
 import { LAB_02_PERMISSIONS } from '../../core/labs/lab-02-permissions';
+import { ProgressService } from '../../core/progress/progress.service';
 
 @Component({
   selector: 'sc-lab-page',
@@ -14,6 +15,7 @@ import { LAB_02_PERMISSIONS } from '../../core/labs/lab-02-permissions';
 })
 export class LabPage {
   private readonly router = inject(Router);
+  private readonly progress = inject(ProgressService);
   protected readonly engine = inject(LabEngine);
 
   /** Bound from the `/lab/:id` route param via `withComponentInputBinding()`. */
@@ -42,6 +44,14 @@ export class LabPage {
     effect(() => {
       const lab = getLab(this.id()) ?? LAB_02_PERMISSIONS;
       this.engine.load(lab);
+    });
+
+    // Record XP/badges the moment the lab is finished (idempotent).
+    effect(() => {
+      const lab = this.engine.lab();
+      if (lab && this.engine.completed()) {
+        this.progress.completeLab(lab.id, lab.xp);
+      }
     });
   }
 
