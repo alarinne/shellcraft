@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06090d"/>
+      <stop offset="0.5" stop-color="#090f11"/>
+      <stop offset="1" stop-color="#050608"/>
+    </linearGradient>
+    <style>
+      .box{fill:rgba(255,255,255,0.04);stroke:rgba(148,170,199,0.25);rx:10;}
+      .t{fill:#f4f8ff;font-size:14px;font-weight:700;}
+      .s{fill:#aab8c8;font-size:11px;}
+      .lbl{fill:#7cffb2;font-size:10px;font-weight:700;letter-spacing:.06em;}
+      .arrow{stroke:#58aaff;stroke-width:1.6;fill:none;marker-end:url(#a);}
+    </style>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#58aaff"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="470" fill="url(#bg)"/>
+  <text x="32" y="42" fill="#59a8ff" font-size="20" font-weight="800">ShellCraft — Architecture</text>
+  <text x="32" y="64" class="s">Interactive Linux trainer · Angular 21 (signals) + FastAPI · hybrid execution backend (ADR-0002)</text>
+
+  <!-- Frontend container -->
+  <rect x="28" y="92" width="520" height="346" rx="12" fill="rgba(89,168,255,0.06)" stroke="rgba(89,168,255,0.25)"/>
+  <text x="46" y="116" class="lbl">ANGULAR 21 FRONTEND</text>
+
+  <!-- shell + router -->
+  <rect x="46" y="128" width="484" height="56" rx="10" class="box"/>
+  <text x="60" y="152" class="t">App shell + Router</text>
+  <text x="60" y="170" class="s">topbar · auth-guarded routes · lazy-loaded pages (landing/path/lab/complete/auth)</text>
+
+  <!-- pages row -->
+  <rect x="46" y="196" width="150" height="58" rx="10" class="box"/>
+  <text x="60" y="220" class="t">Terminal</text>
+  <text x="60" y="238" class="s">type · history · Tab</text>
+
+  <rect x="206" y="196" width="150" height="58" rx="10" class="box"/>
+  <text x="220" y="220" class="t">Visualizers</text>
+  <text x="220" y="238" class="s">FHS map · permissions</text>
+
+  <rect x="366" y="196" width="164" height="58" rx="10" class="box"/>
+  <text x="380" y="220" class="t">Auth pages</text>
+  <text x="380" y="238" class="s">login · register</text>
+
+  <!-- services -->
+  <rect x="46" y="266" width="234" height="64" rx="10" class="box"/>
+  <text x="60" y="290" class="t">LabEngine (signals)</text>
+  <text x="60" y="308" class="s">steps · state · history · progress</text>
+
+  <rect x="290" y="266" width="240" height="64" rx="10" class="box"/>
+  <text x="304" y="290" class="t">Progress + Auth services</text>
+  <text x="304" y="308" class="s">XP · badges · streak · session (localStorage)</text>
+
+  <!-- execution backend interface -->
+  <rect x="46" y="342" width="484" height="80" rx="10" fill="rgba(124,255,178,0.06)" stroke="rgba(124,255,178,0.3)"/>
+  <text x="60" y="364" class="lbl">EXECUTION BACKEND (interface)</text>
+  <rect x="60" y="374" width="220" height="38" rx="8" class="box"/>
+  <text x="74" y="398" class="t">SimulatedBackend ✓ default</text>
+  <rect x="296" y="374" width="220" height="38" rx="8" class="box"/>
+  <text x="310" y="398" class="t">DockerSandboxBackend ⌛</text>
+
+  <!-- Backend container -->
+  <rect x="576" y="92" width="296" height="220" rx="12" fill="rgba(124,255,178,0.05)" stroke="rgba(124,255,178,0.22)"/>
+  <text x="594" y="116" class="lbl">FASTAPI BACKEND</text>
+  <rect x="594" y="128" width="260" height="80" rx="10" class="box"/>
+  <text x="608" y="152" class="t">/api routes</text>
+  <text x="608" y="172" class="s">health · labs · labs/{id}</text>
+  <text x="608" y="188" class="s">commands/check</text>
+  <rect x="594" y="220" width="260" height="76" rx="10" class="box"/>
+  <text x="608" y="244" class="t">engine.py (safe)</text>
+  <text x="608" y="262" class="s">normalize + whitelist match</text>
+  <text x="608" y="280" class="s">labs/*.json · never runs a shell</text>
+
+  <!-- Infra -->
+  <rect x="576" y="330" width="296" height="108" rx="12" fill="rgba(255,198,93,0.05)" stroke="rgba(255,198,93,0.22)"/>
+  <text x="594" y="354" class="lbl">CLEAN RUN + CI</text>
+  <text x="594" y="378" class="s">docker compose up  ·  ./run.sh</text>
+  <text x="594" y="398" class="s">nginx SPA · profile-gated backend</text>
+  <text x="594" y="418" class="s">GitHub Actions: build + tests</text>
+
+  <!-- arrows -->
+  <path class="arrow" d="M530 392 H560 V168 H572"/>
+  <text x="540" y="160" class="s">HTTP /api</text>
+</svg>

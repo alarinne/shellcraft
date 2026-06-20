@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06090d"/>
+      <stop offset="0.5" stop-color="#090f11"/>
+      <stop offset="1" stop-color="#050608"/>
+    </linearGradient>
+    <style>
+      .panel{fill:rgba(8,13,17,0.74);stroke:rgba(148,170,199,0.14);}
+      .h{fill:#f8fbff;font-weight:800;}
+      .s{fill:#aab8c8;font-size:11px;}
+      .mono{font-family:"Cascadia Code",Consolas,monospace;}
+      .green{fill:#7cffb2;}
+      .chip{fill:rgba(89,168,255,0.14);}
+    </style>
+  </defs>
+  <rect width="900" height="520" fill="url(#bg2)"/>
+
+  <!-- topbar -->
+  <rect x="24" y="20" width="852" height="46" rx="8" class="panel"/>
+  <text x="42" y="48" class="green mono" font-weight="800">$_ ShellCraft</text>
+  <text x="180" y="48" class="s">Landing · Learning Path · Lab Screen · Completed</text>
+  <text x="720" y="42" class="s">Signed in</text>
+  <text x="720" y="56" class="h" font-size="12">ada</text>
+
+  <!-- task panel -->
+  <rect x="24" y="82" width="250" height="414" rx="10" class="panel"/>
+  <rect x="40" y="98" width="120" height="20" rx="10" fill="rgba(255,198,93,0.16)"/>
+  <text x="50" y="112" fill="#ffc65d" font-size="10" font-weight="700">PERMISSIONS</text>
+  <text x="40" y="146" class="h" font-size="15">Current task</text>
+  <text x="40" y="170" class="s">Run chmod 755 deploy.sh</text>
+  <rect x="40" y="186" width="218" height="8" rx="4" fill="rgba(255,255,255,0.06)"/>
+  <rect x="40" y="186" width="109" height="8" rx="4" fill="#7cffb2"/>
+  <text x="40" y="212" class="s">50% complete</text>
+  <rect x="40" y="232" width="100" height="34" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(174,193,218,0.18)"/>
+  <text x="62" y="254" class="s">Hint</text>
+  <rect x="148" y="232" width="100" height="34" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(174,193,218,0.18)"/>
+  <text x="170" y="254" class="s">Reset</text>
+
+  <!-- terminal -->
+  <rect x="288" y="82" width="358" height="414" rx="10" fill="#05090b" stroke="rgba(124,255,178,0.16)"/>
+  <rect x="288" y="82" width="358" height="32" rx="10" fill="rgba(255,255,255,0.04)"/>
+  <circle cx="306" cy="98" r="4" fill="#ff5d5d"/>
+  <circle cx="320" cy="98" r="4" fill="#ffc65d"/>
+  <circle cx="334" cy="98" r="4" fill="#31dc7c"/>
+  <text x="356" y="102" class="s mono">guest@linux-lab — Permissions</text>
+  <text x="304" y="142" class="green mono" font-size="12">guest@shellcraft:~$ ls -l</text>
+  <text x="304" y="162" class="mono" font-size="12" fill="#dbe8ff">-rw-r--r-- 1 guest guest 913 deploy.sh</text>
+  <text x="304" y="190" class="green mono" font-size="12">guest@shellcraft:~$ chmod 755 deploy.sh</text>
+  <text x="304" y="210" class="mono" font-size="12" fill="#dbe8ff">mode changed: deploy.sh -> rwxr-xr-x</text>
+  <text x="304" y="238" class="green mono" font-size="12">guest@shellcraft:~$ ▋</text>
+
+  <!-- inspector: permission grid -->
+  <rect x="660" y="82" width="216" height="414" rx="10" class="panel"/>
+  <rect x="676" y="98" width="86" height="20" rx="10" class="chip"/>
+  <text x="686" y="112" fill="#58aaff" font-size="10" font-weight="700">VISUAL MAP</text>
+  <text x="676" y="142" class="green mono" font-size="11">deploy.sh</text>
+
+  <!-- owner -->
+  <rect x="676" y="156" width="184" height="40" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(148,170,199,0.14)"/>
+  <text x="688" y="181" class="h" font-size="12">Owner</text>
+  <rect x="788" y="166" width="20" height="20" rx="5" fill="#58aaff"/><text x="794" y="181" fill="#04111d" font-size="11" font-weight="800" class="mono">r</text>
+  <rect x="812" y="166" width="20" height="20" rx="5" fill="#58aaff"/><text x="818" y="181" fill="#04111d" font-size="11" font-weight="800" class="mono">w</text>
+  <rect x="836" y="166" width="20" height="20" rx="5" fill="#58aaff"/><text x="842" y="181" fill="#04111d" font-size="11" font-weight="800" class="mono">x</text>
+
+  <!-- group -->
+  <rect x="676" y="204" width="184" height="40" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(148,170,199,0.14)"/>
+  <text x="688" y="229" class="h" font-size="12">Group</text>
+  <rect x="788" y="214" width="20" height="20" rx="5" fill="#a586ff"/><text x="794" y="229" fill="#04111d" font-size="11" font-weight="800" class="mono">r</text>
+  <rect x="812" y="214" width="20" height="20" rx="5" fill="rgba(4,10,12,0.5)" stroke="rgba(148,170,199,0.14)"/><text x="819" y="229" fill="#67788c" font-size="11" class="mono">–</text>
+  <rect x="836" y="214" width="20" height="20" rx="5" fill="#a586ff"/><text x="842" y="229" fill="#04111d" font-size="11" font-weight="800" class="mono">x</text>
+
+  <!-- others -->
+  <rect x="676" y="252" width="184" height="40" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(148,170,199,0.14)"/>
+  <text x="688" y="277" class="h" font-size="12">Others</text>
+  <rect x="788" y="262" width="20" height="20" rx="5" fill="#ffc65d"/><text x="794" y="277" fill="#04111d" font-size="11" font-weight="800" class="mono">r</text>
+  <rect x="812" y="262" width="20" height="20" rx="5" fill="rgba(4,10,12,0.5)" stroke="rgba(148,170,199,0.14)"/><text x="819" y="277" fill="#67788c" font-size="11" class="mono">–</text>
+  <rect x="836" y="262" width="20" height="20" rx="5" fill="#ffc65d"/><text x="842" y="277" fill="#04111d" font-size="11" font-weight="800" class="mono">x</text>
+
+  <text x="676" y="322" class="s">Explanation</text>
+  <text x="676" y="342" class="s" font-size="10">Owner keeps write; group + others</text>
+  <text x="676" y="356" class="s" font-size="10">can read and execute.</text>
+</svg>
