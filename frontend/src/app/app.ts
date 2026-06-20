@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
+import { AuthService } from './core/auth/auth.service';
 
 interface ShellNavItem {
   label: string;
@@ -22,6 +23,7 @@ interface ShellNavItem {
 })
 export class App {
   private readonly router = inject(Router);
+  protected readonly auth = inject(AuthService);
 
   protected readonly nav: ShellNavItem[] = [
     { label: 'Landing', path: '/', match: '/' },
@@ -46,5 +48,10 @@ export class App {
 
   protected go(path: string): void {
     void this.router.navigateByUrl(path);
+  }
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigateByUrl('/');
   }
 }

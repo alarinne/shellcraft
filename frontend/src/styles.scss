@@ -756,3 +756,79 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Auth (sign in / register) --- */
+.sc-session-action {
+  margin-top: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 255, 178, 0.22);
+  background: rgba(124, 255, 178, 0.1);
+  color: #7cffb2;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sc-session-action:hover {
+  background: rgba(124, 255, 178, 0.18);
+}
+
+.sc-auth {
+  display: grid;
+  place-items: center;
+  min-height: calc(100dvh - 120px);
+}
+
+.sc-auth-card {
+  display: grid;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 32px;
+  border-radius: 12px;
+  background: rgba(8, 13, 17, 0.82);
+  border: 1px solid rgba(148, 170, 199, 0.16);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+}
+
+.sc-field {
+  display: grid;
+  gap: 6px;
+}
+
+.sc-field span {
+  font-size: 0.78rem;
+  color: #aab8c8;
+}
+
+.sc-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(174, 193, 218, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f8ff;
+  font: inherit;
+}
+
+.sc-field input:focus {
+  outline: none;
+  border-color: #58aaff;
+}
+
+.sc-auth-error {
+  color: #ff8e8e;
+  font-size: 0.84rem;
+}
+
+.sc-auth-switch {
+  font-size: 0.84rem;
+  color: #aab8c8;
+}
+
+.sc-auth-switch a {
+  color: #58aaff;
+  font-weight: 700;
+}

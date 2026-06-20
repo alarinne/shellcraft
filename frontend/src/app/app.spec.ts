@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { App } from './app';
 import { routes } from './app.routes';
+import { AuthService } from './core/auth/auth.service';
 import { EXECUTION_BACKEND } from './core/execution/execution-backend';
 import { SimulatedBackend } from './core/execution/simulated-backend';
 
@@ -35,6 +36,9 @@ describe('App shell', () => {
   it('should route between landing, path, lab, and completed screens', async () => {
     const harness = await RouterTestingHarness.create('/');
     expect(harness.routeNativeElement?.textContent).toContain('Learn Linux');
+
+    // Protected routes require an authenticated user (authGuard).
+    TestBed.inject(AuthService).register('learner@shellcraft.dev', 'pw');
 
     await harness.navigateByUrl('/path');
     expect(harness.routeNativeElement?.textContent).toContain('Pro Developer Track');

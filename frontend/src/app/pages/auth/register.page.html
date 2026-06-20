@@ -1,0 +1,48 @@
+<section class="sc-screen sc-auth" aria-label="Create account">
+  <form class="sc-auth-card" (submit)="$event.preventDefault(); submit()">
+    <span class="sc-chip sc-chip-purple">Get started</span>
+    <h1>Create your ShellCraft account</h1>
+    <p>Track progress across labs and earn badges as you learn.</p>
+
+    <label class="sc-field">
+      <span>Display name</span>
+      <input
+        type="text"
+        autocomplete="nickname"
+        [value]="displayName()"
+        (input)="displayName.set($any($event.target).value)"
+      />
+    </label>
+
+    <label class="sc-field">
+      <span>Email</span>
+      <input
+        type="email"
+        autocomplete="email"
+        [value]="email()"
+        (input)="email.set($any($event.target).value)"
+        required
+      />
+    </label>
+
+    <label class="sc-field">
+      <span>Password</span>
+      <input
+        type="password"
+        autocomplete="new-password"
+        [value]="password()"
+        (input)="password.set($any($event.target).value)"
+        required
+      />
+    </label>
+
+    @if (error()) {
+      <p class="sc-auth-error" role="alert">{{ error() }}</p>
+    }
+
+    <button class="sc-btn sc-btn-primary wide" type="submit">Create account</button>
+    <p class="sc-auth-switch">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </form>
+</section>

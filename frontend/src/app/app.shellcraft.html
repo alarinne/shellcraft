@@ -21,8 +21,14 @@
     </nav>
 
     <div class="sc-session">
-      <span>ShellCraft</span>
-      <strong>Pro Developer</strong>
+      @if (auth.currentUser(); as user) {
+        <span>Signed in</span>
+        <strong>{{ user.displayName }}</strong>
+        <button class="sc-session-action" type="button" (click)="logout()">Sign out</button>
+      } @else {
+        <span>Guest</span>
+        <button class="sc-session-action" type="button" (click)="go('/login')">Sign in</button>
+      }
     </div>
   </header>
 
