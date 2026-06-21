@@ -4,6 +4,8 @@ Documentation for the ShellCraft **FastAPI** service (`backend/`).
 
 - [Architecture](architecture.md) — app structure, request flow, the safe
   engine, and the opt-in Docker sandbox.
+- [Best practices](best-practices.md) — FastAPI conventions, typing, security,
+  testing, and tooling.
 - API surface is the root [`docs/api-contract.md`](../../docs/api-contract.md).
 - Conventions live in the root [`CLAUDE.md`](../../CLAUDE.md) and the
   [`shellcraft-backend` skill](../../.claude/skills/shellcraft-backend/SKILL.md).

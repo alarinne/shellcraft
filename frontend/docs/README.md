@@ -4,6 +4,8 @@ Documentation for the ShellCraft **Angular 21** app (`frontend/`).
 
 - [Architecture](architecture.md) — shell, routing, pages, core services, the
   pluggable execution backend, and visualizers.
+- [Best practices](best-practices.md) — Angular 21 conventions, signals,
+  testing, security, and tooling.
 - Conventions live in the root [`CLAUDE.md`](../../CLAUDE.md) and the
   [`shellcraft-frontend` skill](../../.claude/skills/shellcraft-frontend/SKILL.md).
 - Cross-cutting docs (ADRs, API contract, lab schema) stay in the root
