@@ -47,6 +47,9 @@ STATUS/
 .codex/
 .agents/
 
+# Claude Code (keep .claude/skills tracked; ignore user-local settings)
+.claude/settings.local.json
+
 # IDE
 .idea/
 .vscode/
