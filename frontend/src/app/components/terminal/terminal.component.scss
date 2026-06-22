@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.sc-live-terminal {
+  height: 100%;
+  overflow: hidden;
+}
+
+.sc-live-terminal .sc-terminal-body {
+  min-height: 430px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.sc-input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  margin-top: 6px;
+}
+
+.sc-cmd-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #dbe8ff;
+  background: transparent;
+  font: inherit;
+  caret-color: var(--sc-green);
+}
+
+.sc-cmd-input:disabled {
+  color: #728197;
+}
+
+.sc-terminal-run {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(50, 239, 143, 0.22);
+  border-radius: var(--sc-radius);
+  color: #06111d;
+  background: var(--sc-green);
+  font-weight: 850;
+}
+
+.sc-terminal-run:disabled {
+  color: #617184;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(142, 160, 180, 0.18);
+  cursor: not-allowed;
+}
+
+.sc-error-line {
+  color: #ff8e8e;
+}
+
+.sc-success-line {
+  color: var(--sc-green);
+  font-weight: 800;
+}
