@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { App } from './app';
 import { routes } from './app.routes';
@@ -11,7 +11,7 @@ describe('App shell', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        provideRouter(routes),
+        provideRouter(routes, withComponentInputBinding()),
         { provide: EXECUTION_BACKEND, useClass: SimulatedBackend },
       ],
     }).compileComponents();
@@ -30,9 +30,10 @@ describe('App shell', () => {
     expect(compiled.textContent).toContain('ShellCraft');
     expect(compiled.textContent).toContain('Learning Path');
     expect(compiled.textContent).toContain('Lab Screen');
+    expect(compiled.textContent).toContain('Completed');
   });
 
-  it('should route between landing, path, lab, and completed screens', async () => {
+  it('should route between landing, path, and lab screens', async () => {
     const harness = await RouterTestingHarness.create('/');
     expect(harness.routeNativeElement?.textContent).toContain('Learn Linux');
 
@@ -43,8 +44,5 @@ describe('App shell', () => {
     expect(harness.routeNativeElement?.textContent).toContain(
       'Inspect the current permissions of deploy.sh',
     );
-
-    await harness.navigateByUrl('/complete');
-    expect(harness.routeNativeElement?.textContent).toContain('Permissions Master');
   });
 });

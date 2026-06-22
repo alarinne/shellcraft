@@ -1,0 +1,23 @@
+<div class="sc-filesystem-map" aria-label="Filesystem map">
+  <div class="sc-fs-breadcrumb" aria-label="Current path">
+    @for (crumb of breadcrumbs(); track crumb.path) {
+      <span [class.is-current]="crumb.current">{{ crumb.label }}</span>
+    }
+  </div>
+
+  <div class="sc-fs-entries">
+    @for (entry of entries(); track entry.file.path) {
+      <div
+        class="sc-fs-entry"
+        [class.is-dir]="entry.file.type === 'dir'"
+        [class.is-target]="entry.target"
+      >
+        <span>{{ entry.file.type }}</span>
+        <strong>{{ entry.name }}</strong>
+        <small>{{ entry.file.permissions }}</small>
+      </div>
+    } @empty {
+      <p>No visible files in this directory.</p>
+    }
+  </div>
+</div>

@@ -32,6 +32,7 @@ export interface LabStep {
   visual?: {
     focus?: string;
     labels?: string[];
+    targetPath?: string;
   };
 }
 

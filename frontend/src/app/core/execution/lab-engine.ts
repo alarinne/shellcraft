@@ -34,6 +34,7 @@ export class LabEngine {
   readonly lab = this._lab.asReadonly();
   readonly state = this._state.asReadonly();
   readonly history = this._history.asReadonly();
+  readonly stepIndex = this._stepIndex.asReadonly();
 
   readonly currentStep = computed<LabStep | null>(() => {
     const lab = this._lab();
@@ -53,10 +54,17 @@ export class LabEngine {
     return Math.min(1, this._stepIndex() / lab.steps.length);
   });
 
+  readonly totalSteps = computed(() => this._lab()?.steps.length ?? 0);
+
   /** Accepted commands for the active step (used for autocomplete). */
   readonly acceptedCommands = computed(() => this.currentStep()?.acceptedCommands ?? []);
 
-  load(lab: Lab): void {
+  load(lab: Lab, options: { force?: boolean } = {}): void {
+    const currentLab = this._lab();
+    if (!options.force && currentLab?.id === lab.id && this._state()) {
+      return;
+    }
+
     this._lab.set(lab);
     this._stepIndex.set(0);
     this._state.set(cloneState(lab.initialState));
@@ -90,7 +98,7 @@ export class LabEngine {
   reset(): void {
     const lab = this._lab();
     if (lab) {
-      this.load(lab);
+      this.load(lab, { force: true });
     }
   }
 }

@@ -453,7 +453,7 @@ button {
 .sc-stat-list div,
 .sc-current-task,
 .sc-permission-grid div,
-.sc-reward-grid div {
+.sc-reward-grid > div {
   border: 1px solid var(--sc-line-soft);
   border-radius: var(--sc-radius);
   background: rgba(255, 255, 255, 0.035);
@@ -680,7 +680,7 @@ button {
   text-align: left;
 }
 
-.sc-reward-grid div {
+.sc-reward-grid > div {
   padding: 16px;
 }
 
@@ -694,6 +694,22 @@ button {
   display: block;
   margin-top: 8px;
   color: var(--sc-purple);
+}
+
+.sc-complete-card.is-empty .sc-reward-grid strong {
+  color: var(--sc-blue);
+}
+
+.sc-complete-card.is-empty .sc-reward-grid small {
+  color: var(--sc-purple);
+}
+
+.sc-complete-card .sc-command-tags.centered {
+  margin-top: 24px;
+}
+
+.sc-complete-card .sc-actions.centered {
+  margin-top: 30px;
 }
 
 .sc-progress {
@@ -711,8 +727,28 @@ button {
   background: var(--sc-orange);
 }
 
+.sc-complete-card.is-empty .sc-progress i {
+  width: 0;
+}
+
+.sc-complete-card.is-empty .sc-progress {
+  height: 4px;
+  border: 0;
+  background: rgba(142, 160, 180, 0.18);
+}
+
 .sc-progress-label {
   display: block;
+  margin-top: 8px;
+  color: var(--sc-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sc-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 8px;
   color: var(--sc-muted);
   font-size: 0.78rem;

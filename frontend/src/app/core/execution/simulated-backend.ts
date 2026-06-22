@@ -76,7 +76,7 @@ export class SimulatedBackend implements ExecutionBackend {
     const normalized = normalizeCommand(command);
     const accepted = step.acceptedCommands.map(normalizeCommand);
     const correct = accepted.includes(normalized);
-    const newState = applyCommand(state, command);
+    const newState = correct ? applyCommand(state, command) : undefined;
 
     if (correct) {
       return Promise.resolve({

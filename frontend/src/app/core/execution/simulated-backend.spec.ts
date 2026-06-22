@@ -65,6 +65,12 @@ describe('SimulatedBackend', () => {
     expect(result.explanation).toBe('7 = rwx, 5 = r-x.');
   });
 
+  it('does not apply state changes for rejected commands', async () => {
+    const result = await backend.run('cd labs', ctx);
+    expect(result.correct).toBe(false);
+    expect(result.newState).toBeUndefined();
+  });
+
   it('never mutates the input state', async () => {
     await backend.run('chmod 755 deploy.sh', ctx);
     expect(state.files[0].permissions).toBe('rw-r--r--');
