@@ -3,6 +3,7 @@ import { EXECUTION_BACKEND } from './execution-backend';
 import { CommandResult, Lab, LabState, LabStep } from './types';
 
 export interface TerminalEntry {
+  prompt: string;
   command: string;
   output: string[];
   correct: boolean;
@@ -70,6 +71,7 @@ export class LabEngine {
       return null;
     }
 
+    const prompt = `guest@shellcraft:${state.cwd}$`;
     const result = await this.backend.run(command, { step, state });
 
     if (result.newState) {
@@ -77,7 +79,7 @@ export class LabEngine {
     }
     this._history.update((entries) => [
       ...entries,
-      { command, output: result.output, correct: result.correct },
+      { prompt, command, output: result.output, correct: result.correct },
     ]);
     if (result.correct) {
       this._stepIndex.update((i) => i + 1);

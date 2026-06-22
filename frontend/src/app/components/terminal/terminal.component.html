@@ -1,0 +1,49 @@
+<div class="sc-terminal-card sc-live-terminal">
+  <div class="sc-window-bar">
+    <span class="dot red"></span>
+    <span class="dot amber"></span>
+    <span class="dot green"></span>
+    <small>guest@linux-lab@if (labTitle()) { - {{ labTitle() }} }</small>
+  </div>
+
+  <div class="sc-terminal-body" aria-live="polite">
+    @for (entry of history(); track $index) {
+      <p class="prompt">{{ entry.prompt }} {{ entry.command }}</p>
+      @for (line of entry.output; track $index) {
+        <p [class.sc-error-line]="!entry.correct">{{ line }}</p>
+      }
+    }
+
+    @if (completed()) {
+      <p class="sc-success-line">Lab complete - every step cleared.</p>
+    } @else {
+      <div class="sc-input-line">
+        <span class="prompt">{{ prompt() }}</span>
+        <input
+          class="sc-cmd-input"
+          type="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Terminal command"
+          [value]="command()"
+          [disabled]="busy()"
+          (input)="setCommand($any($event.target).value)"
+          (keydown.enter)="$event.preventDefault(); runCommand()"
+          (keydown.arrowUp)="$event.preventDefault(); recall(-1)"
+          (keydown.arrowDown)="$event.preventDefault(); recall(1)"
+          (keydown.tab)="$event.preventDefault(); autocomplete()"
+        />
+        <button
+          class="sc-terminal-run"
+          type="button"
+          [disabled]="!canSubmit()"
+          (click)="runCommand()"
+          aria-label="Run command"
+        >
+          Run
+        </button>
+      </div>
+    }
+  </div>
+</div>

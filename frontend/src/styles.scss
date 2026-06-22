@@ -711,6 +711,18 @@ button {
   background: var(--sc-orange);
 }
 
+.sc-progress-label {
+  display: block;
+  margin-top: 8px;
+  color: var(--sc-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.sc-btn:disabled {
+  cursor: not-allowed;
+}
+
 @media (max-width: 1080px) {
   .sc-topbar,
   .sc-landing,

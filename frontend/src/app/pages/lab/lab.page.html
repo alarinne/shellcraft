@@ -1,56 +1,52 @@
 <section class="sc-screen sc-lab-workbench" aria-label="Lab screen">
   <aside class="sc-task-panel">
-    <span class="sc-chip sc-chip-orange">Lab 02 Permissions</span>
+    <span class="sc-chip sc-chip-orange">{{ lab().title }}</span>
     <h2>{{ lab().title }}</h2>
-    <p>Linux uses a permission model built from owner, group, and others.</p>
+    <p>{{ lab().summary }}</p>
 
     <div class="sc-current-task">
       <small>Current task</small>
-      <strong>Run chmod 755 deploy.sh</strong>
-      <p>This will make the script executable while keeping write access limited.</p>
+      @if (engine.completed()) {
+        <strong>All steps cleared</strong>
+        <p>You finished every task in this lab.</p>
+      } @else {
+        <strong>{{ engine.currentStep()?.prompt }}</strong>
+        @if (hintVisible()) {
+          <p>{{ engine.currentStep()?.hint }}</p>
+        }
+      }
     </div>
 
+    <div class="sc-progress" aria-label="Lab progress">
+      <i [style.width.%]="progressPercent()"></i>
+    </div>
+    <small class="sc-progress-label">{{ progressPercent() }}% complete</small>
+
     <div class="sc-actions stacked">
-      <button class="sc-btn sc-btn-ghost" type="button">Hint</button>
-      <button class="sc-btn sc-btn-ghost" type="button">Reset</button>
-      <button class="sc-btn sc-btn-ghost" type="button">View theory</button>
+      <button class="sc-btn sc-btn-ghost" type="button" (click)="toggleHint()">
+        {{ hintVisible() ? 'Hide hint' : 'Hint' }}
+      </button>
+      <button class="sc-btn sc-btn-ghost" type="button" (click)="reset()">Reset</button>
     </div>
   </aside>
 
-  <section class="sc-terminal-card sc-lab-terminal">
-    <div class="sc-window-bar">
-      <span class="dot red"></span>
-      <span class="dot amber"></span>
-      <span class="dot green"></span>
-      <small>guest@linux-lab</small>
-    </div>
-    <div class="sc-terminal-body">
-      <p class="prompt">{{ promptLine() }}</p>
-      @for (line of selectedDemo().output; track line) {
-        <p>{{ line }}</p>
-      }
-      <p class="prompt">guest@shellcraft:~$</p>
-    </div>
-
-    <div class="sc-command-bar">
-      @for (demo of commandDemos; track demo.command) {
-        <button
-          type="button"
-          [class.is-active]="selectedDemo().command === demo.command"
-          (click)="selectDemo(demo)"
-        >
-          {{ demo.command }}
-        </button>
-      }
-    </div>
-  </section>
+  <sc-terminal
+    class="sc-lab-terminal"
+    [labTitle]="lab().title"
+    [prompt]="prompt()"
+    [history]="engine.history()"
+    [acceptedCommands]="engine.acceptedCommands()"
+    [busy]="busy()"
+    [completed]="engine.completed()"
+    (commandSubmit)="submitCommand($event)"
+  />
 
   <aside class="sc-inspector">
     <div class="sc-panel">
       <span class="sc-chip sc-chip-blue">Visual map</span>
-      <h3>{{ selectedDemo().label }}</h3>
+      <h3>{{ fileName(focusFile()) }}</h3>
       <div class="sc-permission-grid">
-        @for (row of permissionRows; track row.role) {
+        @for (row of permissionRows(); track row.role) {
           <div [class]="'tone-' + row.tone">
             <span>{{ row.role }}</span>
             <strong>{{ row.value }}</strong>
@@ -61,15 +57,30 @@
 
     <div class="sc-panel">
       <span class="sc-chip sc-chip-purple">Explanation</span>
-      <p>{{ selectedDemo().insight }}</p>
+      <p>{{ explanation() }}</p>
       <div class="sc-command-tags">
-        @for (step of selectedDemo().visualSteps; track step) {
-          <small>{{ step }}</small>
+        @for (label of engine.currentStep()?.visual?.labels ?? []; track label) {
+          <small>{{ label }}</small>
         }
       </div>
     </div>
 
-    <button class="sc-btn sc-btn-primary wide" type="button" (click)="completeLab()">
+    <div class="sc-panel">
+      <span class="sc-chip sc-chip-blue">Accepted</span>
+      <div class="sc-command-tags">
+        @for (command of engine.acceptedCommands(); track command) {
+          <small>{{ command }}</small>
+        }
+      </div>
+    </div>
+
+    <button
+      class="sc-btn sc-btn-primary wide"
+      type="button"
+      [disabled]="!engine.completed()"
+      [class.sc-btn-disabled]="!engine.completed()"
+      (click)="completeLab()"
+    >
       Complete lab
     </button>
   </aside>
