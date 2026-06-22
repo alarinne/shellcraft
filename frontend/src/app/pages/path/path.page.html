@@ -1,0 +1,59 @@
+<section class="sc-screen sc-path" aria-label="Learning path">
+  <aside class="sc-sidebar">
+    <span class="sc-chip sc-chip-purple">Learning Path</span>
+    <h2>Master the art of the terminal.</h2>
+    <p>Build shell confidence through interactive missions and visual command feedback.</p>
+    <div class="sc-stat-list">
+      @for (item of stats; track item.label) {
+        <div>
+          <strong>{{ item.value }}</strong>
+          <span>{{ item.label }}</span>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <div class="sc-path-main">
+    <div class="sc-section-heading">
+      <span>Recommended route</span>
+      <h2>Pro Developer Track</h2>
+    </div>
+
+    <div class="sc-lab-grid">
+      @for (lab of labs; track lab.id) {
+        <article class="sc-lab-card" [class.is-locked]="lab.locked" [class]="'accent-' + lab.accent">
+          <div>
+            <span>{{ lab.tag }}</span>
+            <strong>{{ lab.status }}</strong>
+          </div>
+          <h3>{{ lab.title }}</h3>
+          <p>{{ lab.description }}</p>
+          <div class="sc-command-tags">
+            @for (command of lab.commands; track command) {
+              <small>{{ command }}</small>
+            }
+          </div>
+          <button
+            class="sc-btn"
+            type="button"
+            [class.sc-btn-primary]="!lab.locked"
+            [class.sc-btn-disabled]="lab.locked"
+            (click)="startLab(lab)"
+          >
+            {{ lab.actionLabel }}
+          </button>
+        </article>
+      }
+    </div>
+
+    <div class="sc-path-terminal">
+      <div class="sc-window-bar">
+        <span class="dot red"></span>
+        <span class="dot amber"></span>
+        <span class="dot green"></span>
+        <small>guest@shellcraft</small>
+      </div>
+      <code>$ whoami<br />guest_student<br />$ ls learning_path<br />lab_01_filesystem lab_02_permissions lab_03_pipes</code>
+    </div>
+  </div>
+</section>
