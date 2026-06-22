@@ -48,4 +48,14 @@ describe('LabEngine', () => {
     expect(engine.currentStep()?.id).toBe('step-01-inspect');
     expect(engine.history()).toHaveLength(0);
   });
+
+  it('preserves progress when the same lab is loaded again', async () => {
+    await engine.submit('ls -l');
+
+    engine.load(LAB_02_PERMISSIONS);
+
+    expect(engine.currentStep()?.id).toBe('step-02-chmod');
+    expect(engine.history()).toHaveLength(1);
+    expect(engine.progress()).toBe(0.5);
+  });
 });

@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 import { EXECUTION_BACKEND } from '../../core/execution/execution-backend';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { SimulatedBackend } from '../../core/execution/simulated-backend';
+import { LabProgress } from '../../core/progress/lab-progress';
 import { LabPage } from './lab.page';
 
 describe('LabPage', () => {
@@ -22,14 +23,35 @@ describe('LabPage', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(TestBed.inject(LabEngine).lab()?.id).toBe('lab-02');
-    expect(compiled.textContent).toContain('Inspect the current permissions of deploy.sh');
+    expect(TestBed.inject(LabEngine).lab()?.id).toBe('lab-01');
+    expect(compiled.textContent).toContain('Check where this terminal session starts.');
     expect(compiled.querySelector('sc-terminal')).toBeTruthy();
     expect(compiled.textContent).toContain('0% complete');
+    expect(compiled.textContent).toContain('0/5 steps cleared');
+    expect(compiled.textContent).not.toContain('Explanation');
+  });
+
+  it('loads Lab 01 as a filesystem quest with the filesystem map', () => {
+    const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-01');
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(TestBed.inject(LabEngine).lab()?.id).toBe('lab-01');
+    expect(compiled.textContent).toContain('Filesystem Quest');
+    expect(compiled.textContent).toContain('Check where this terminal session starts.');
+    expect(compiled.textContent).toContain('Filesystem map');
+    expect(compiled.textContent).toContain('labs');
+    expect(compiled.textContent).not.toContain('deploy.sh');
+    expect(compiled.textContent).not.toContain('README.md');
+    expect(compiled.textContent).toContain('0/5 steps cleared');
+    expect(compiled.textContent).not.toContain('Accepted');
+    expect(compiled.textContent).not.toContain('Owner');
   });
 
   it('submits a typed command through LabEngine and advances the step', async () => {
     const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-02');
     fixture.detectChanges();
 
     await submitCommand(fixture, 'ls -l');
@@ -43,6 +65,7 @@ describe('LabPage', () => {
 
   it('records wrong commands without advancing', async () => {
     const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-02');
     fixture.detectChanges();
 
     await submitCommand(fixture, 'sudo rm -rf /');
@@ -55,6 +78,7 @@ describe('LabPage', () => {
 
   it('keeps completion disabled until all steps pass', async () => {
     const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-02');
     fixture.detectChanges();
 
     expect(TestBed.inject(LabEngine).completed()).toBe(false);
@@ -71,16 +95,50 @@ describe('LabPage', () => {
   it('navigates to the completion route only after the lab is complete', async () => {
     const fixture = TestBed.createComponent(LabPage);
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    fixture.componentRef.setInput('id', 'lab-02');
     fixture.detectChanges();
 
     completeButton(fixture.nativeElement).click();
     expect(navigate).not.toHaveBeenCalled();
+    expect(TestBed.inject(LabProgress).isCompleted('lab-02')).toBe(false);
 
     await submitCommand(fixture, 'ls -l');
     await submitCommand(fixture, 'chmod 755 deploy.sh');
     completeButton(fixture.nativeElement).click();
 
+    expect(TestBed.inject(LabProgress).isCompleted('lab-02')).toBe(true);
     expect(navigate).toHaveBeenCalledWith(['/complete']);
+  });
+
+  it('runs the Lab 01 quest through the mission file step', async () => {
+    const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-01');
+    fixture.detectChanges();
+
+    await submitCommand(fixture, 'pwd');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Explanation');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'pwd prints the current working directory',
+    );
+    expect(TestBed.inject(LabEngine).currentStep()?.id).toBe('step-02-scan-projects');
+
+    await submitCommand(fixture, 'ls -la');
+    expect(TestBed.inject(LabEngine).currentStep()?.id).toBe('step-03-enter-labs');
+
+    await submitCommand(fixture, 'cd labs');
+    expect(TestBed.inject(LabEngine).state()?.cwd).toBe('/home/guest/projects/labs');
+    expect(TestBed.inject(LabEngine).currentStep()?.id).toBe('step-04-find-mission');
+
+    await submitCommand(fixture, 'ls -la');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('4/5 steps cleared');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('80% complete');
+
+    await submitCommand(fixture, 'cat mission.txt');
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.textContent).toContain('MISSION_READY=filesystem');
+    expect(TestBed.inject(LabEngine).completed()).toBe(true);
+    expect(completeButton(compiled).disabled).toBe(false);
   });
 });
 

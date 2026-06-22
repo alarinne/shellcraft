@@ -4,7 +4,7 @@
     <h2>Master the art of the terminal.</h2>
     <p>Build shell confidence through interactive missions and visual command feedback.</p>
     <div class="sc-stat-list">
-      @for (item of stats; track item.label) {
+      @for (item of stats(); track item.label) {
         <div>
           <strong>{{ item.value }}</strong>
           <span>{{ item.label }}</span>
@@ -20,7 +20,7 @@
     </div>
 
     <div class="sc-lab-grid">
-      @for (lab of labs; track lab.id) {
+      @for (lab of labs(); track lab.id) {
         <article class="sc-lab-card" [class.is-locked]="lab.locked" [class]="'accent-' + lab.accent">
           <div>
             <span>{{ lab.tag }}</span>

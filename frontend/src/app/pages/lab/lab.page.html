@@ -20,7 +20,10 @@
     <div class="sc-progress" aria-label="Lab progress">
       <i [style.width.%]="progressPercent()"></i>
     </div>
-    <small class="sc-progress-label">{{ progressPercent() }}% complete</small>
+    <div class="sc-progress-meta">
+      <small>{{ completedStepCount() }}/{{ engine.totalSteps() }} steps cleared</small>
+      <small>{{ progressPercent() }}% complete</small>
+    </div>
 
     <div class="sc-actions stacked">
       <button class="sc-btn sc-btn-ghost" type="button" (click)="toggleHint()">
@@ -42,37 +45,33 @@
   />
 
   <aside class="sc-inspector">
-    <div class="sc-panel">
-      <span class="sc-chip sc-chip-blue">Visual map</span>
-      <h3>{{ fileName(focusFile()) }}</h3>
-      <div class="sc-permission-grid">
-        @for (row of permissionRows(); track row.role) {
-          <div [class]="'tone-' + row.tone">
-            <span>{{ row.role }}</span>
-            <strong>{{ row.value }}</strong>
-          </div>
-        }
+    @if (showFilesystemMap()) {
+      <div class="sc-panel">
+        <span class="sc-chip sc-chip-blue">Filesystem map</span>
+        <h3>{{ engine.state()?.cwd ?? 'workspace' }}</h3>
+        <sc-filesystem-map [state]="engine.state()" [targetPath]="visualTargetPath()" />
       </div>
-    </div>
+    } @else {
+      <div class="sc-panel">
+        <span class="sc-chip sc-chip-blue">Visual map</span>
+        <h3>{{ fileName(focusFile()) }}</h3>
+        <div class="sc-permission-grid">
+          @for (row of permissionRows(); track row.role) {
+            <div [class]="'tone-' + row.tone">
+              <span>{{ row.role }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
-    <div class="sc-panel">
-      <span class="sc-chip sc-chip-purple">Explanation</span>
-      <p>{{ explanation() }}</p>
-      <div class="sc-command-tags">
-        @for (label of engine.currentStep()?.visual?.labels ?? []; track label) {
-          <small>{{ label }}</small>
-        }
+    @if (lastResult()) {
+      <div class="sc-panel">
+        <span class="sc-chip sc-chip-purple">Explanation</span>
+        <p>{{ explanation() }}</p>
       </div>
-    </div>
-
-    <div class="sc-panel">
-      <span class="sc-chip sc-chip-blue">Accepted</span>
-      <div class="sc-command-tags">
-        @for (command of engine.acceptedCommands(); track command) {
-          <small>{{ command }}</small>
-        }
-      </div>
-    </div>
+    }
 
     <button
       class="sc-btn sc-btn-primary wide"

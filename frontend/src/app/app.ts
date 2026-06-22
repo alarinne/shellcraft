@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
+import { DEFAULT_LAB_ID } from './core/shellcraft-data';
 
 interface ShellNavItem {
   label: string;
@@ -26,7 +27,7 @@ export class App {
   protected readonly nav: ShellNavItem[] = [
     { label: 'Landing', path: '/', match: '/' },
     { label: 'Learning Path', path: '/path', match: '/path' },
-    { label: 'Lab Screen', path: '/lab/lab-02', match: '/lab' },
+    { label: 'Lab Screen', path: `/lab/${DEFAULT_LAB_ID}`, match: '/lab' },
     { label: 'Completed', path: '/complete', match: '/complete' },
   ];
 

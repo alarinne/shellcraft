@@ -1,35 +1,71 @@
-<section class="sc-screen sc-complete" aria-label="Lab completed">
-  <article class="sc-complete-card">
-    <span class="sc-chip sc-chip-blue">Lab completed</span>
-    <h1>Permissions Master</h1>
-    <p>You secured the deployment script and unlocked the central permission system.</p>
+@if (completed()) {
+  <section class="sc-screen sc-complete" aria-label="Lab completed">
+    <article class="sc-complete-card">
+      <span class="sc-chip sc-chip-blue">Lab completed</span>
+      <h1>Filesystem Scout</h1>
+      <p>You found the mission file and mapped your first Linux workspace.</p>
 
-    <div class="sc-reward-grid">
-      <div>
-        <span>XP earned</span>
-        <strong>+150 XP</strong>
-        <div class="sc-progress"><i></i></div>
+      <div class="sc-reward-grid">
+        <div>
+          <span>XP earned</span>
+          <strong>+120 XP</strong>
+          <div class="sc-progress"><i></i></div>
+        </div>
+        <div>
+          <span>Badge unlocked</span>
+          <strong>Mission Finder</strong>
+          <small>Tier 1</small>
+        </div>
       </div>
-      <div>
-        <span>Badge unlocked</span>
-        <strong>Permission Core</strong>
-        <small>Tier 1</small>
+
+      <div class="sc-command-tags centered">
+        @for (command of learnedCommands; track command) {
+          <small>{{ command }}</small>
+        }
       </div>
-    </div>
 
-    <div class="sc-command-tags centered">
-      @for (command of learnedCommands; track command) {
-        <small>{{ command }}</small>
-      }
-    </div>
+      <div class="sc-actions centered">
+        <button class="sc-btn sc-btn-primary" type="button" (click)="continueNext()">
+          Continue to next lab
+        </button>
+        <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
+          Learning Path
+        </button>
+      </div>
+    </article>
+  </section>
+} @else {
+  <section class="sc-screen sc-complete" aria-label="No labs completed">
+    <article class="sc-complete-card is-empty">
+      <span class="sc-chip sc-chip-blue">Progress</span>
+      <h1>No labs completed yet</h1>
+      <p>Complete your first quest to unlock XP, badges, and mastered commands.</p>
 
-    <div class="sc-actions centered">
-      <button class="sc-btn sc-btn-primary" type="button" (click)="continueNext()">
-        Continue to next lab
-      </button>
-      <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
-        Learning Path
-      </button>
-    </div>
-  </article>
-</section>
+      <div class="sc-reward-grid">
+        <div>
+          <span>XP earned</span>
+          <strong>0 XP</strong>
+          <div class="sc-progress"><i></i></div>
+        </div>
+        <div>
+          <span>Badges unlocked</span>
+          <strong>None yet</strong>
+          <small>Finish Lab 01 to unlock your first badge.</small>
+        </div>
+      </div>
+
+      <div class="sc-command-tags centered">
+        <small>No commands mastered yet</small>
+      </div>
+
+      <div class="sc-actions centered">
+        <button class="sc-btn sc-btn-primary" type="button" (click)="startFirstLab()">
+          Start Lab 01
+        </button>
+        <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
+          Learning Path
+        </button>
+      </div>
+    </article>
+  </section>
+}

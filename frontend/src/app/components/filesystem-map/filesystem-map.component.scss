@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.sc-filesystem-map {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.sc-fs-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 38px;
+  padding: 9px;
+  border: 1px solid rgba(82, 168, 255, 0.18);
+  border-radius: var(--sc-radius);
+  background: rgba(82, 168, 255, 0.06);
+}
+
+.sc-fs-breadcrumb span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #9db3ca;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.sc-fs-breadcrumb span.is-current {
+  color: #06111d;
+  background: var(--sc-green);
+  font-weight: 850;
+}
+
+.sc-fs-entries {
+  display: grid;
+  gap: 8px;
+}
+
+.sc-fs-entries p {
+  margin: 0;
+  color: var(--sc-muted);
+}
+
+.sc-fs-entry {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 5px 10px;
+  align-items: center;
+  min-height: 58px;
+  padding: 11px;
+  border: 1px solid var(--sc-line-soft);
+  border-radius: var(--sc-radius);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.sc-fs-entry span {
+  color: var(--sc-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.sc-fs-entry strong {
+  min-width: 0;
+  color: var(--sc-text);
+  overflow-wrap: anywhere;
+}
+
+.sc-fs-entry small {
+  grid-column: 2;
+  color: #91a5bb;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+}
+
+.sc-fs-entry.is-dir {
+  border-color: rgba(82, 168, 255, 0.26);
+}
+
+.sc-fs-entry.is-target {
+  border-color: rgba(50, 239, 143, 0.55);
+  background: rgba(50, 239, 143, 0.08);
+}
+
+.sc-fs-entry.is-target strong {
+  color: var(--sc-green);
+}

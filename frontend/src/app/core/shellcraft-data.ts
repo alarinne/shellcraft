@@ -40,34 +40,34 @@ export interface PermissionRow {
 }
 
 export const STATS: readonly StatItem[] = [
-  { label: 'Labs', value: '03' },
-  { label: 'XP', value: '270' },
-  { label: 'Streak', value: '04' },
+  { label: 'Completed', value: '0' },
+  { label: 'XP earned', value: '0' },
+  { label: 'Streak', value: '0' },
 ];
 
 export const LABS: readonly LabCard[] = [
   {
     id: 'lab-01',
-    title: 'Terminal & Filesystem',
+    title: 'Filesystem Quest',
     tag: 'Lab 01',
-    status: 'Ready',
-    description: 'Master pwd, ls, cd, and visual directory context.',
+    status: 'Current',
+    description: 'Find mission.txt by moving through a tiny Linux workspace.',
     xp: 120,
     accent: 'blue',
     locked: false,
-    actionLabel: 'Review',
-    commands: ['pwd', 'ls -la', 'cd'],
+    actionLabel: 'Start lab',
+    commands: ['pwd', 'ls -la', 'cd', 'cat'],
   },
   {
     id: 'lab-02',
     title: 'Permissions',
     tag: 'Lab 02',
-    status: 'Current',
+    status: 'Next',
     description: 'Learn chmod, ownership, and the rwx permission model.',
     xp: 150,
     accent: 'purple',
-    locked: false,
-    actionLabel: 'Start lab',
+    locked: true,
+    actionLabel: 'Locked',
     commands: ['chmod', 'stat', 'ls -l'],
   },
   {
@@ -97,18 +97,16 @@ export const COMMAND_DEMOS: readonly CommandDemo[] = [
     label: 'Inspect directory',
     output: [
       'drwxr-xr-x 2 guest guest 4096 labs',
-      '-rw-r--r-- 1 guest guest  248 README.md',
-      '-rwxr-xr-x 1 guest guest  913 deploy.sh',
     ],
     insight: 'Long listing shows permissions, owner, group, size, and file names.',
     visualSteps: ['type', 'permissions', 'owner', 'name'],
   },
   {
-    command: 'chmod 755 deploy.sh',
-    label: 'Shift permissions',
-    output: ['mode changed: deploy.sh -> rwxr-xr-x'],
-    insight: 'Owner keeps write access while group and others can read and execute.',
-    visualSteps: ['owner rwx', 'group r-x', 'others r-x'],
+    command: 'cat mission.txt',
+    label: 'Reveal mission',
+    output: ['MISSION_READY=filesystem'],
+    insight: 'cat prints the mission file after you navigate into the labs directory.',
+    visualSteps: ['labs', 'mission.txt', 'message'],
   },
 ];
 
@@ -118,11 +116,12 @@ export const PERMISSION_ROWS: readonly PermissionRow[] = [
   { role: 'Others', value: 'r-x', tone: 'orange' },
 ];
 
-export const LEARNED_COMMANDS: readonly string[] = ['ls -la', 'chmod', 'stat', 'cd'];
+export const LEARNED_COMMANDS: readonly string[] = ['pwd', 'ls -la', 'cd', 'cat'];
 
 /** Default lab id used when navigating to the lab screen without a selection. */
-export const DEFAULT_LAB_ID = 'lab-02';
+export const DEFAULT_LAB_ID = 'lab-01';
+export const NEXT_LAB_ID = 'lab-02';
 
 export function findLab(id: string | undefined): LabCard {
-  return LABS.find((lab) => lab.id === id) ?? LABS[1];
+  return LABS.find((lab) => lab.id === id) ?? LABS[0];
 }
