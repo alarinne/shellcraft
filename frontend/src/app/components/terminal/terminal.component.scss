@@ -7,6 +7,10 @@
   overflow: hidden;
 }
 
+.sc-live-terminal.is-busy .sc-cmd-input {
+  opacity: 0.72;
+}
+
 .sc-live-terminal .sc-terminal-body {
   min-height: 430px;
   max-height: 520px;
@@ -14,16 +18,27 @@
 }
 
 .sc-input-line {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  cursor: text;
+}
+
+.sc-input-prompt {
+  margin: 0;
+}
+
+.sc-input-row {
   display: flex;
   align-items: center;
   gap: 8px;
   min-height: 34px;
-  margin-top: 6px;
 }
 
 .sc-cmd-input {
   flex: 1;
   min-width: 0;
+  width: 100%;
   border: 0;
   outline: 0;
   color: #dbe8ff;
@@ -32,25 +47,8 @@
   caret-color: var(--sc-green);
 }
 
-.sc-cmd-input:disabled {
-  color: #728197;
-}
-
-.sc-terminal-run {
-  min-height: 30px;
-  padding: 0 12px;
-  border: 1px solid rgba(50, 239, 143, 0.22);
-  border-radius: var(--sc-radius);
-  color: #06111d;
-  background: var(--sc-green);
-  font-weight: 850;
-}
-
-.sc-terminal-run:disabled {
-  color: #617184;
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(142, 160, 180, 0.18);
-  cursor: not-allowed;
+.sc-cmd-input::placeholder {
+  color: #5a6d82;
 }
 
 .sc-error-line {

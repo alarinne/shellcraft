@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.engine import check_command, next_step_id, normalize_command
+from app.lab_checker import check_lab_progress
 from app.main import app
 
 client = TestClient(app)
@@ -9,7 +10,10 @@ client = TestClient(app)
 def test_health():
     res = client.get("/api/health")
     assert res.status_code == 200
-    assert res.json() == {"status": "ok", "service": "shellcraft-api"}
+    body = res.json()
+    assert body["status"] == "ok"
+    assert body["service"] == "shellcraft-api"
+    assert "sandbox" in body
 
 
 def test_list_labs():
@@ -22,6 +26,12 @@ def test_list_labs():
 def test_get_lab_and_404():
     assert client.get("/api/labs/lab-02").json()["title"] == "Permissions"
     assert client.get("/api/labs/nope").status_code == 404
+
+
+def test_lab_01_has_five_steps():
+    lab = client.get("/api/labs/lab-01").json()
+    assert lab["title"] == "Filesystem Quest"
+    assert len(lab["steps"]) == 5
 
 
 def test_check_correct_advances_step():
@@ -62,3 +72,40 @@ def test_engine_helpers():
     step = {"acceptedCommands": ["pwd"], "expectedOutput": ["/x"], "explanation": "e"}
     assert check_command(step, "pwd")["correct"] is True
     assert check_command(step, "ls")["correct"] is False
+
+
+def test_lab_checker_lab_01_full_quest():
+    lab = client.get("/api/labs/lab-01").json()
+    history = [
+        {"command": "pwd", "stdout": ["/home/guest/projects"], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {
+            "command": "ls -la",
+            "stdout": ["total 0", "drwxr-xr-x 2 guest guest 4096 labs"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects",
+        },
+        {"command": "cd labs", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects/labs"},
+        {
+            "command": "ls -la",
+            "stdout": ["-rw-r--r-- 1 guest guest 160 mission.txt"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects/labs",
+        },
+        {
+            "command": "cat mission.txt",
+            "stdout": ["MISSION_READY=filesystem", "You found the mission file. Next stop: permissions."],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects/labs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["completed"] is True
+    assert result["stepsCompleted"] == 5
+
+
+def test_sandbox_routes_disabled_by_default():
+    res = client.post("/api/sandbox/sessions", json={"labId": "lab-01"})
+    assert res.status_code == 503

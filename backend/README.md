@@ -25,6 +25,13 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload      # http://localhost:8000
 ```
 
+### Real Linux sandbox (Lab 01)
+
+```bash
+docker build -t shellcraft-sandbox-lab-01:latest sandbox
+SHELLCRAFT_SANDBOX=1 uvicorn app.main:app --reload
+```
+
 Interactive docs at `http://localhost:8000/docs`.
 
 ## Test

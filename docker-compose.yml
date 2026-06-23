@@ -1,7 +1,9 @@
 # ShellCraft clean-run stack.
 #
-#   docker compose up --build          # frontend on http://localhost:4200
-#   docker compose --profile full up   # frontend + backend (once #8 lands)
+#   docker compose up --build                    # frontend on http://localhost:4200
+#   docker compose --profile full up --build     # frontend + backend + sandbox image
+#
+# Real Linux terminal (Lab 01) needs the full profile and Docker socket on the host.
 services:
   frontend:
     build:
@@ -11,12 +13,24 @@ services:
       - "4200:80"
     restart: unless-stopped
 
-  # Enabled once the FastAPI backend (#8) ships a Dockerfile.
+  sandbox-lab-01:
+    build:
+      context: ./backend/sandbox
+    image: shellcraft-sandbox-lab-01:latest
+    profiles: ["full"]
+
   backend:
     build:
       context: ./backend
     image: shellcraft-backend
     ports:
       - "8000:8000"
+    environment:
+      SHELLCRAFT_SANDBOX: "1"
+      SHELLCRAFT_SANDBOX_IMAGE: shellcraft-sandbox-lab-01:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - sandbox-lab-01
     restart: unless-stopped
     profiles: ["full"]

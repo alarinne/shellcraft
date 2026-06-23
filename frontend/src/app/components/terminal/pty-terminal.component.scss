@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.sc-pty-terminal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sc-pty-host {
+  flex: 1;
+  min-height: 430px;
+  max-height: 520px;
+  padding: 8px 12px 12px;
+  background: #030608;
+}
+
+.sc-pty-host :global(.xterm) {
+  height: 100%;
+}
+
+.sc-pty-host :global(.xterm-viewport) {
+  overflow-y: auto !important;
+}

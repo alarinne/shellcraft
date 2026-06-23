@@ -1,12 +1,24 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { FilesystemMapComponent } from '../../components/filesystem-map/filesystem-map.component';
+import { PtyTerminalComponent } from '../../components/terminal/pty-terminal.component';
 import { TerminalComponent } from '../../components/terminal/terminal.component';
-import { CommandResult, Lab, LabFile } from '../../core/execution/types';
+import { CommandResult, Lab, LabFile, LabState } from '../../core/execution/types';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { getLab } from '../../core/labs';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
 import { LabProgress } from '../../core/progress/lab-progress';
+import { DockerLabSession } from '../../core/sandbox/docker-lab-session';
+import { SandboxCheckResult, SandboxStepStatus } from '../../core/sandbox/sandbox.service';
 
 interface PermissionRow {
   role: 'Owner' | 'Group' | 'Others';
@@ -15,38 +27,100 @@ interface PermissionRow {
 }
 
 const DEFAULT_LAB: Lab = LAB_01_FILESYSTEM;
+const DOCKER_LAB_IDS = new Set(['lab-01']);
 
 @Component({
   selector: 'sc-lab-page',
-  imports: [FilesystemMapComponent, TerminalComponent],
+  imports: [FilesystemMapComponent, TerminalComponent, PtyTerminalComponent],
   templateUrl: './lab.page.html',
 })
 export class LabPage {
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly engine = inject(LabEngine);
   private readonly progress = inject(LabProgress);
+  protected readonly dockerSession = inject(DockerLabSession);
 
-  /** Bound from the `/lab/:id` route param via `withComponentInputBinding()`. */
   readonly id = input<string>();
 
   protected readonly hintVisible = signal(false);
   protected readonly busy = signal(false);
   protected readonly lastResult = signal<CommandResult | null>(null);
+  protected readonly dockerMode = signal(false);
+  protected readonly checkMessage = signal<string | null>(null);
+  protected readonly dockerChecked = signal(false);
 
   protected readonly lab = computed(() => getLab(this.id()) ?? DEFAULT_LAB);
-  protected readonly progressPercent = computed(() => Math.round(this.engine.progress() * 100));
-  protected readonly completedStepCount = computed(() => {
-    const total = this.engine.totalSteps();
-    return Math.min(total, this.engine.stepIndex());
+  protected readonly usesDocker = computed(
+    () => this.dockerMode() && DOCKER_LAB_IDS.has(this.lab().id),
+  );
+  protected readonly sandboxSessionId = computed(() => this.dockerSession.sessionId());
+  protected readonly progressPercent = computed(() =>
+    this.usesDocker()
+      ? Math.round(this.dockerSession.progress() * 100)
+      : Math.round(this.engine.progress() * 100),
+  );
+  protected readonly completedStepCount = computed(() =>
+    this.usesDocker()
+      ? this.dockerSession.stepsCompleted()
+      : Math.min(this.engine.totalSteps(), this.engine.stepIndex()),
+  );
+  protected readonly totalSteps = computed(() =>
+    this.usesDocker() ? this.dockerSession.totalSteps() : this.engine.totalSteps(),
+  );
+  protected readonly labCompleted = computed(() =>
+    this.usesDocker() ? this.dockerSession.completed() : this.engine.completed(),
+  );
+  protected readonly currentTaskPrompt = computed(() => {
+    if (this.labCompleted()) {
+      return 'All steps cleared';
+    }
+    if (this.usesDocker()) {
+      return 'Work through the tasks below, then click Check my work.';
+    }
+    return this.engine.currentStep()?.prompt ?? '';
   });
-  protected readonly focusFile = computed(() => this.engine.state()?.files[0] ?? null);
+  protected readonly dockerStepStatuses = computed((): SandboxStepStatus[] => {
+    if (!this.usesDocker()) {
+      return [];
+    }
+    const checked = this.dockerSession.stepStatuses();
+    if (checked.length > 0) {
+      return checked;
+    }
+    return this.lab().steps.map((step) => ({
+      id: step.id,
+      prompt: step.prompt,
+      completed: false,
+      reason: null,
+    }));
+  });
+  protected readonly terminalHistory = computed(() => this.engine.history());
+  protected readonly terminalPrompt = computed(
+    () => `guest@shellcraft:${this.engine.state()?.cwd ?? '~'}$`,
+  );
+  protected readonly filesystemState = computed((): LabState | null => {
+    if (this.usesDocker()) {
+      const lab = this.lab();
+      return {
+        cwd: this.dockerSession.cwd(),
+        files: lab.initialState.files.map((file) => ({ ...file })),
+      };
+    }
+    return this.engine.state();
+  });
+  protected readonly visualTargetPath = computed(() => {
+    if (this.usesDocker()) {
+      const pending = this.dockerStepStatuses().find((step) => !step.completed);
+      const step = this.lab().steps.find((item) => item.id === pending?.id);
+      return step?.visual?.targetPath ?? this.dockerSession.cwd();
+    }
+    return this.engine.currentStep()?.visual?.targetPath;
+  });
+  protected readonly focusFile = computed(() => this.filesystemState()?.files[0] ?? null);
   protected readonly visualFocus = computed(() => this.engine.currentStep()?.visual?.focus);
-  protected readonly visualTargetPath = computed(() => this.engine.currentStep()?.visual?.targetPath);
   protected readonly showFilesystemMap = computed(
     () => this.lab().id === 'lab-01' || this.visualFocus() === 'filesystem',
-  );
-  protected readonly prompt = computed(
-    () => `guest@shellcraft:${this.engine.state()?.cwd ?? '~'}$`,
   );
   protected readonly permissionRows = computed<PermissionRow[]>(() => {
     const [owner, group, others] = splitPermissions(this.focusFile()?.permissions);
@@ -56,13 +130,44 @@ export class LabPage {
       { role: 'Others', value: others, tone: 'orange' },
     ];
   });
-  protected readonly explanation = computed(() => this.lastResult()?.explanation ?? '');
+  protected readonly explanation = computed(
+    () => this.lastResult()?.explanation ?? this.checkMessage() ?? this.dockerSession.error() ?? '',
+  );
+  protected readonly filesystemCwd = computed(
+    () => this.filesystemState()?.cwd ?? 'workspace',
+  );
 
   constructor() {
     effect(() => {
-      this.engine.load(this.lab());
+      const lab = this.lab();
+      this.engine.load(lab);
       this.hintVisible.set(false);
       this.lastResult.set(null);
+      this.checkMessage.set(null);
+      this.dockerChecked.set(false);
+    });
+
+    // Start docker only when the lab id changes. Never tear down in effect
+    // cleanup — that runs on every re-run (e.g. route input settling) and was
+    // killing the container every second.
+    effect(() => {
+      const labId = this.lab().id;
+      if (!DOCKER_LAB_IDS.has(labId)) {
+        untracked(() => {
+          void this.dockerSession.stop();
+          this.dockerMode.set(false);
+        });
+        return;
+      }
+
+      void this.dockerSession.start(labId).then((started) => {
+        untracked(() => this.dockerMode.set(started));
+      });
+    });
+
+    this.destroyRef.onDestroy(() => {
+      void this.dockerSession.stop();
+      this.dockerMode.set(false);
     });
   }
 
@@ -83,11 +188,42 @@ export class LabPage {
     }
   }
 
+  protected onSandboxCwd(cwd: string): void {
+    this.dockerSession.setCwd(cwd);
+  }
+
+  protected async checkWork(): Promise<void> {
+    if (!this.usesDocker() || this.busy()) {
+      return;
+    }
+
+    this.busy.set(true);
+    try {
+      const result = await this.dockerSession.checkWork();
+      this.dockerChecked.set(true);
+      this.checkMessage.set(result ? this.feedbackForCheck(result) : null);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
   protected toggleHint(): void {
     this.hintVisible.update((visible) => !visible);
   }
 
-  protected reset(): void {
+  protected async reset(): Promise<void> {
+    if (this.usesDocker()) {
+      this.busy.set(true);
+      try {
+        await this.dockerSession.reset(this.lab().id);
+        this.checkMessage.set(null);
+        this.dockerChecked.set(false);
+      } finally {
+        this.busy.set(false);
+      }
+      return;
+    }
+
     this.engine.reset();
     this.progress.resetLab(this.lab().id);
     this.hintVisible.set(false);
@@ -102,12 +238,19 @@ export class LabPage {
   }
 
   protected completeLab(): void {
-    if (!this.engine.completed()) {
+    if (!this.labCompleted()) {
       return;
     }
 
     this.progress.complete(this.lab());
     void this.router.navigate(['/complete']);
+  }
+
+  private feedbackForCheck(result: SandboxCheckResult): string {
+    if (result.completed) {
+      return result.message;
+    }
+    return result.message;
   }
 }
 
