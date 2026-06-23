@@ -12,8 +12,8 @@ describe('DockerLabSession', () => {
       available,
       createSession: vi.fn().mockResolvedValue({
         sessionId: 'abc',
-        cwd: '/home/guest/projects',
-        prompt: 'guest@shellcraft:/home/guest/projects$',
+        cwd: '/home/guest/lab-01',
+        prompt: 'guest@shellcraft:/home/guest/lab-01$',
       }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -41,13 +41,13 @@ describe('DockerLabSession', () => {
         .fn()
         .mockResolvedValueOnce({
           sessionId: 'abc',
-          cwd: '/home/guest/projects',
-          prompt: 'guest@shellcraft:/home/guest/projects$',
+          cwd: '/home/guest/lab-01',
+          prompt: 'guest@shellcraft:/home/guest/lab-01$',
         })
         .mockResolvedValueOnce({
           sessionId: 'def',
-          cwd: '/home/guest/projects',
-          prompt: 'guest@shellcraft:/home/guest/projects$',
+          cwd: '/home/guest/lab-01',
+          prompt: 'guest@shellcraft:/home/guest/lab-01$',
         }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -72,8 +72,8 @@ describe('DockerLabSession', () => {
       available,
       createSession: vi.fn().mockResolvedValue({
         sessionId: 'abc',
-        cwd: '/home/guest/projects',
-        prompt: 'guest@shellcraft:/home/guest/projects$',
+        cwd: '/home/guest/lab-01',
+        prompt: 'guest@shellcraft:/home/guest/lab-01$',
       }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -88,7 +88,7 @@ describe('DockerLabSession', () => {
 
     expect(started).toBe(true);
     expect(session.active()).toBe(true);
-    expect(session.cwd()).toBe('/home/guest/projects');
+    expect(session.cwd()).toBe('/home/guest/lab-01');
     expect(session.sessionId()).toBe('abc');
   });
 
@@ -107,7 +107,7 @@ describe('DockerLabSession', () => {
       nextStepPrompt: 'Move into the labs directory.',
       message: 'Not complete yet:\n• Run `cd labs` to move into the labs directory.',
       labId: 'lab-01',
-      cwd: '/home/guest/projects/labs',
+      cwd: '/home/guest/lab-01/labs',
       stepStatuses: [
         { id: 'step-01-orient', prompt: 'Check where this terminal session starts.', completed: true, reason: null },
         { id: 'step-02-scan-projects', prompt: 'List this directory and spot the labs folder.', completed: true, reason: null },
@@ -118,6 +118,6 @@ describe('DockerLabSession', () => {
     });
 
     expect(session.stepsCompleted()).toBe(2);
-    expect(session.cwd()).toBe('/home/guest/projects/labs');
+    expect(session.cwd()).toBe('/home/guest/lab-01/labs');
   });
 });

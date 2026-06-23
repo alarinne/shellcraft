@@ -7,10 +7,10 @@ def test_read_container_command_log_parses_shell_history(monkeypatch):
     class Result:
         returncode = 0
         stdout = (
-            "/home/guest/projects|ls\n"
-            "/home/guest/projects|pwd\n"
-            "/home/guest/projects|cd labs/\n"
-            "/home/guest/projects/labs|cat mission.txt\n"
+            "/home/guest/lab-01|ls\n"
+            "/home/guest/lab-01|pwd\n"
+            "/home/guest/lab-01|cd labs/\n"
+            "/home/guest/lab-01/labs|cat mission.txt\n"
         )
 
     monkeypatch.setattr(
@@ -21,7 +21,7 @@ def test_read_container_command_log_parses_shell_history(monkeypatch):
     entries = read_container_command_log("shellcraft-test")
     assert len(entries) == 4
     assert entries[2]["command"] == "cd labs/"
-    assert entries[3]["cwd"] == "/home/guest/projects/labs"
+    assert entries[3]["cwd"] == "/home/guest/lab-01/labs"
 
 
 def test_history_for_check_prefers_shell_log(monkeypatch):
@@ -37,7 +37,7 @@ def test_history_for_check_prefers_shell_log(monkeypatch):
                 "stdout": [],
                 "stderr": [],
                 "exitCode": 0,
-                "cwd": "/home/guest/projects",
+                "cwd": "/home/guest/lab-01",
             }
         ],
     )

@@ -11,12 +11,12 @@ from typing import Any
 
 from .engine import normalize_command
 
-_LABS_DIR = "/home/guest/projects/labs"
-_PROJECTS_DIR = "/home/guest/projects"
-_LOGS_DIR = "/home/guest/projects/logs"
+_LAB01_ROOT = "/home/guest/lab-01"
+_LAB01_MISSION_DIR = "/home/guest/lab-01/labs"
+_LAB03_LOGS_DIR = "/home/guest/lab-03/logs"
 
 _STEP_FAILURE_HINTS: dict[str, str] = {
-    "step-01-orient": "Run `pwd` to confirm you start in /home/guest/projects.",
+    "step-01-orient": "Run `pwd` to confirm you start in /home/guest/lab-01.",
     "step-02-scan-projects": "Run `ls` or `ls -la` here and look for the labs folder.",
     "step-03-enter-labs": "Run `cd labs` to move into the labs directory.",
     "step-04-find-mission": "Inside labs, run `ls` to find mission.txt.",
@@ -106,24 +106,24 @@ def _is_cd_to_labs(cmd: str, entry_cwd: str) -> bool:
         return False
     parts = cmd.split(" ", 1)
     target = parts[1] if len(parts) > 1 else "~"
-    return resolve_path(entry_cwd, target) == _LABS_DIR
+    return resolve_path(entry_cwd, target) == _LAB01_MISSION_DIR
 
 
 def _scan_projects_listing(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
-    if entry_cwd != _PROJECTS_DIR or not _is_listing_command(cmd):
+    if entry_cwd != _LAB01_ROOT or not _is_listing_command(cmd):
         return False
     if command_only:
         return True
     if re.search(r"\blabs\b", out):
         return True
-    return _listing_resolves_to(cmd, entry_cwd, _LABS_DIR)
+    return _listing_resolves_to(cmd, entry_cwd, _LAB01_MISSION_DIR)
 
 
 def _find_mission_listing(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
     if not _is_listing_command(cmd):
         return False
-    in_labs = entry_cwd == _LABS_DIR
-    lists_labs = _listing_resolves_to(cmd, entry_cwd, _LABS_DIR)
+    in_labs = entry_cwd == _LAB01_MISSION_DIR
+    lists_labs = _listing_resolves_to(cmd, entry_cwd, _LAB01_MISSION_DIR)
     if command_only:
         return in_labs or lists_labs
     if in_labs and "mission.txt" in out:
@@ -164,7 +164,7 @@ def _mentions_access_log(cmd: str) -> bool:
 
 
 def _view_access_log(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
-    if entry_cwd != _LOGS_DIR:
+    if entry_cwd != _LAB03_LOGS_DIR:
         return False
     if cmd.startswith("cat ") and _mentions_access_log(cmd):
         return command_only or "INFO" in out or "ERROR" in out
@@ -265,8 +265,8 @@ def _entry_matches_step(
 
     if step_id in ("step-01-orient", "step-01-pwd"):
         if cmd == "pwd":
-            return command_only or _PROJECTS_DIR in out or not out
-        return entry_cwd == _PROJECTS_DIR and cmd not in ("", "cd", "cd .")
+            return command_only or _LAB01_ROOT in out or not out
+        return entry_cwd == _LAB01_ROOT and cmd not in ("", "cd", "cd .")
 
     if step_id in ("step-02-scan-projects", "step-02-ls"):
         return _scan_projects_listing(cmd, entry_cwd, out, command_only=command_only)
@@ -275,7 +275,7 @@ def _entry_matches_step(
         if not cmd.startswith("cd "):
             return False
         replayed_cwd = entry.get("cwd", "")
-        if replayed_cwd == _LABS_DIR:
+        if replayed_cwd == _LAB01_MISSION_DIR:
             return True
         return entry.get("exitCode", 1) == 0 and _is_cd_to_labs(cmd, replayed_cwd)
 
@@ -351,7 +351,7 @@ def check_lab_progress(
 ) -> dict[str, Any]:
     """Grade every lab step; return per-step status and feedback for incomplete work."""
     steps: list[dict[str, Any]] = lab.get("steps", [])
-    initial_cwd = lab.get("initialState", {}).get("cwd", "/home/guest/projects")
+    initial_cwd = lab.get("initialState", {}).get("cwd", _LAB01_ROOT)
     graded_history = replay_history(history, initial_cwd)
 
     if not steps:
@@ -377,7 +377,7 @@ def check_lab_progress(
         if (
             not completed
             and step.get("id") in ("step-03-enter-labs", "step-03-cd")
-            and live_cwd == "/home/guest/projects/labs"
+            and live_cwd == _LAB01_MISSION_DIR
         ):
             completed = True
 

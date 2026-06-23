@@ -8,9 +8,9 @@ export const LAB_03_PIPES: Lab = {
   xp: 180,
   summary: 'Filter logs and connect commands through streams with grep and pipes.',
   initialState: {
-    cwd: '/home/guest/projects/logs',
+    cwd: '/home/guest/lab-03/logs',
     files: [
-      { path: '/home/guest/projects/logs/access.log', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
+      { path: '/home/guest/lab-03/logs/access.log', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
     ],
   },
   steps: [
@@ -27,7 +27,7 @@ export const LAB_03_PIPES: Lab = {
       ],
       explanation: 'cat and head print file contents so you can see what you will filter.',
       hint: 'Use cat or head on access.log.',
-      visual: { focus: 'filesystem', labels: ['access.log', 'log lines'], targetPath: '/home/guest/projects/logs/access.log' },
+      visual: { focus: 'filesystem', labels: ['access.log', 'log lines'], targetPath: '/home/guest/lab-03/logs/access.log' },
     },
     {
       id: 'step-02-grep-errors',
@@ -44,7 +44,7 @@ export const LAB_03_PIPES: Lab = {
       ],
       explanation: 'grep scans each line and prints matches — perfect for finding errors in a log.',
       hint: 'Use grep with the word ERROR and the log file name.',
-      visual: { focus: 'filesystem', labels: ['grep', 'ERROR'], targetPath: '/home/guest/projects/logs/access.log' },
+      visual: { focus: 'filesystem', labels: ['grep', 'ERROR'], targetPath: '/home/guest/lab-03/logs/access.log' },
     },
     {
       id: 'step-03-count-errors',
@@ -57,7 +57,7 @@ export const LAB_03_PIPES: Lab = {
       expectedOutput: ['2'],
       explanation: 'Piping grep into wc -l counts matching lines; grep -c does it in one command.',
       hint: 'Pipe grep output into wc -l, or use grep -c.',
-      visual: { focus: 'filesystem', labels: ['pipe', 'wc -l'], targetPath: '/home/guest/projects/logs/access.log' },
+      visual: { focus: 'filesystem', labels: ['pipe', 'wc -l'], targetPath: '/home/guest/lab-03/logs/access.log' },
     },
   ],
 };

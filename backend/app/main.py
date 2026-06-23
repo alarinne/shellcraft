@@ -119,7 +119,7 @@ def create_app() -> FastAPI:
         try:
             session = sandbox_manager.create_session(
                 req.labId,
-                lab.get("initialState", {}).get("cwd", "/home/guest/projects"),
+                lab.get("initialState", {}).get("cwd", "/home/guest/lab-01"),
             )
         except SandboxError as exc:
             raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc

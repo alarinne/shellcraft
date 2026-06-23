@@ -13,8 +13,7 @@ the ShellCraft learning path.
 
 ## What changed
 
-- **Unified sandbox image** (`backend/sandbox/Dockerfile`) — seeds filesystem
-  assets for all five labs (deploy.sh, access.log, worker.sh, hang.sh).
+- **Unified sandbox image** (`backend/sandbox/Dockerfile`) — isolated trees per lab under `/home/guest/lab-01` … `lab-05` (no cross-lab file clutter).
 - **`lab_checker.py`** — flexible graders for labs 02–05 (chmod, grep pipes,
   background jobs, pkill, SIGTERM).
 - **Lab JSON + frontend TS** — `lab-03.json` … `lab-05.json` and matching

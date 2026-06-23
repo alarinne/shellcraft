@@ -209,7 +209,7 @@ class SandboxManager:
             if name.startswith(CONTAINER_NAME_PREFIX) and name not in tracked:
                 self._remove_container(name)
 
-    def _run_container(self, name: str, workdir: str = "/home/guest/projects") -> None:
+    def _run_container(self, name: str, workdir: str = "/home/guest/lab-01") -> None:
         result = subprocess.run(
             [
                 "docker",

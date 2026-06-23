@@ -7,7 +7,7 @@ export class DockerLabSession {
   private readonly sandbox = inject(SandboxService);
 
   private readonly _sessionId = signal<string | null>(null);
-  private readonly _cwd = signal('/home/guest/projects');
+  private readonly _cwd = signal('/home/guest/lab-01');
   private readonly _checkResult = signal<SandboxCheckResult | null>(null);
   private readonly _error = signal<string | null>(null);
   private readonly _active = signal(false);

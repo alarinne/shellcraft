@@ -13,7 +13,7 @@ the frontend and backend record history and validate progress.
 
 ## What changed
 
-- **`backend/sandbox/Dockerfile`** — minimal Alpine image with Lab 01 filesystem.
+- **`backend/sandbox/Dockerfile`** — minimal Alpine image with Lab 01 tree at `/home/guest/lab-01/labs/mission.txt`.
 - **`backend/app/sandbox.py`** — session manager: start/stop containers, track cwd + history.
 - **`backend/app/terminal_ws.py`** — WebSocket PTY bridge for real shell I/O (Tab, Ctrl+C, history).
 - **`backend/app/lab_checker.py`** — flexible per-step history scan; accepts plain `ls`, `ls labs/`, trailing slashes on `cd`, and extra whitespace in flags.
@@ -36,7 +36,7 @@ Docker grading uses output-aware matching, not an exact whitelist. These all cou
 
 | Step | Goal | Examples that pass |
 |------|------|-------------------|
-| 1 | Confirm start path | `pwd` |
+| 1 | Confirm start path | `pwd` → `/home/guest/lab-01` |
 | 2 | Spot `labs` in projects | `ls`, `ls -la`, `ls -l`, `ls labs`, `ls labs/`, `ls ./labs`, extra spaces (`ls  -la`) |
 | 3 | Enter labs | `cd labs`, `cd labs/`, `cd ./labs`, `cd ./labs/` |
 | 4 | Find `mission.txt` | `ls` in labs, `ls -la`, `ls mission.txt`, or `ls labs/` from projects when output shows the file |

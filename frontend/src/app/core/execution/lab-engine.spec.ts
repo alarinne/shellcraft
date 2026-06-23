@@ -27,7 +27,7 @@ describe('LabEngine', () => {
     expect(result?.correct).toBe(false);
     expect(engine.currentStep()?.id).toBe('step-01-inspect');
     expect(engine.history()).toHaveLength(1);
-    expect(engine.history()[0].prompt).toBe('guest@shellcraft:/home/guest/projects$');
+    expect(engine.history()[0].prompt).toBe('guest@shellcraft:/home/guest/lab-02$');
   });
 
   it('advances through steps and completes the lab', async () => {

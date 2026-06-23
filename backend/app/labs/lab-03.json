@@ -6,9 +6,9 @@
   "xp": 180,
   "summary": "Filter logs and connect commands through streams with grep and pipes.",
   "initialState": {
-    "cwd": "/home/guest/projects/logs",
+    "cwd": "/home/guest/lab-03/logs",
     "files": [
-      { "path": "/home/guest/projects/logs/access.log", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
+      { "path": "/home/guest/lab-03/logs/access.log", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
     ]
   },
   "steps": [

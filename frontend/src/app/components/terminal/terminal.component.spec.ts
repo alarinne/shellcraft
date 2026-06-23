@@ -35,7 +35,7 @@ describe('TerminalComponent', () => {
     const fixture = TestBed.createComponent(TerminalComponent);
     fixture.componentRef.setInput('history', [
       {
-        prompt: 'guest@shellcraft:/home/guest/projects$',
+        prompt: 'guest@shellcraft:/home/guest/lab-01$',
         command: 'rm -rf /',
         output: ['shellcraft: not the expected command for this step'],
         correct: false,

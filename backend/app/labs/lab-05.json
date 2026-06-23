@@ -6,9 +6,9 @@
   "xp": 220,
   "summary": "Launch a long-running script and stop it with SIGTERM.",
   "initialState": {
-    "cwd": "/home/guest/projects",
+    "cwd": "/home/guest/lab-05",
     "files": [
-      { "path": "/home/guest/projects/hang.sh", "type": "file", "permissions": "rwxr-xr-x", "owner": "guest" }
+      { "path": "/home/guest/lab-05/hang.sh", "type": "file", "permissions": "rwxr-xr-x", "owner": "guest" }
     ]
   },
   "steps": [

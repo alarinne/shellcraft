@@ -112,7 +112,7 @@ export const COMMAND_DEMOS: readonly CommandDemo[] = [
   {
     command: 'pwd',
     label: 'Locate current path',
-    output: ['/home/guest/projects'],
+    output: ['/home/guest/lab-01'],
     insight: 'pwd prints the working directory before you move through the filesystem.',
     visualSteps: ['home', 'guest', 'projects'],
   },

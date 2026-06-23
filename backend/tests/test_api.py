@@ -77,28 +77,28 @@ def test_engine_helpers():
 def test_lab_checker_lab_01_full_quest():
     lab = client.get("/api/labs/lab-01").json()
     history = [
-        {"command": "pwd", "stdout": ["/home/guest/projects"], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "pwd", "stdout": ["/home/guest/lab-01"], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
         {
             "command": "ls -la",
             "stdout": ["total 0", "drwxr-xr-x 2 guest guest 4096 labs"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
-        {"command": "cd labs", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects/labs"},
+        {"command": "cd labs", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01/labs"},
         {
             "command": "ls -la",
             "stdout": ["-rw-r--r-- 1 guest guest 160 mission.txt"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
         {
             "command": "cat mission.txt",
             "stdout": ["MISSION_READY=filesystem", "You found the mission file. Next stop: permissions."],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
     ]
     result = check_lab_progress(lab, history)
