@@ -13,6 +13,7 @@ from .engine import normalize_command
 
 _LABS_DIR = "/home/guest/projects/labs"
 _PROJECTS_DIR = "/home/guest/projects"
+_LOGS_DIR = "/home/guest/projects/logs"
 
 _STEP_FAILURE_HINTS: dict[str, str] = {
     "step-01-orient": "Run `pwd` to confirm you start in /home/guest/projects.",
@@ -20,6 +21,17 @@ _STEP_FAILURE_HINTS: dict[str, str] = {
     "step-03-enter-labs": "Run `cd labs` to move into the labs directory.",
     "step-04-find-mission": "Inside labs, run `ls` to find mission.txt.",
     "step-05-read-mission": "Run `cat mission.txt` to read the mission file.",
+    "step-01-inspect": "Run `ls -l deploy.sh` or `stat deploy.sh` to read the current mode.",
+    "step-02-chmod": "Run `chmod 755 deploy.sh` to make the script executable.",
+    "step-01-view-log": "Run `cat access.log` or `head access.log` in the logs directory.",
+    "step-02-grep-errors": "Run `grep ERROR access.log` to filter error lines.",
+    "step-03-count-errors": "Run `grep ERROR access.log | wc -l` or `grep -c ERROR access.log`.",
+    "step-01-start-worker": "Run `./worker.sh &` to start the worker in the background.",
+    "step-02-find-worker": "Run `ps aux` or `pgrep -f worker` to locate the worker process.",
+    "step-03-stop-worker": "Run `pkill -f worker.sh` or `kill` with the worker PID.",
+    "step-01-start-hang": "Run `./hang.sh &` to launch the script in the background.",
+    "step-02-sigterm": "Run `kill -15 <pid>` or `kill -TERM` to send SIGTERM to hang.sh.",
+    "step-03-verify-gone": "Run `ps aux | grep hang` — hang.sh should no longer appear.",
 }
 
 
@@ -122,6 +134,120 @@ def _find_mission_listing(cmd: str, entry_cwd: str, out: str, *, command_only: b
     return any(arg.rstrip("/") in mission_paths for arg in _ls_path_args(cmd)) and "mission.txt" in out
 
 
+def _mentions_deploy_sh(cmd: str) -> bool:
+    return "deploy.sh" in cmd
+
+
+def _inspect_deploy_permissions(cmd: str, out: str, *, command_only: bool) -> bool:
+    if cmd.startswith("stat ") and _mentions_deploy_sh(cmd):
+        return command_only or "rw-r--r--" in out or "644" in out
+    if _is_listing_command(cmd) and (_mentions_deploy_sh(cmd) or cmd in ("ls -l", "ls -la")):
+        return command_only or "rw-r--r--" in out or "deploy.sh" in out
+    return False
+
+
+def _chmod_deploy_executable(cmd: str, out: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if normalized.startswith("chmod ") and "deploy.sh" in normalized:
+        mode = normalized.split()[1] if len(normalized.split()) > 1 else ""
+        if mode in ("755", "0755", "+x", "u+x"):
+            return True
+    if command_only:
+        return False
+    if _is_listing_command(cmd) and _mentions_deploy_sh(cmd):
+        return "rwxr-xr-x" in out
+    return "rwxr-xr-x" in out and "deploy.sh" in out
+
+
+def _mentions_access_log(cmd: str) -> bool:
+    return "access.log" in cmd
+
+
+def _view_access_log(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
+    if entry_cwd != _LOGS_DIR:
+        return False
+    if cmd.startswith("cat ") and _mentions_access_log(cmd):
+        return command_only or "INFO" in out or "ERROR" in out
+    if cmd.startswith("head") and _mentions_access_log(cmd):
+        return command_only or bool(out)
+    return False
+
+
+def _grep_errors(cmd: str, out: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if not normalized.startswith("grep"):
+        return False
+    if "access.log" not in normalized and "access.log" not in cmd:
+        return False
+    if "|" in cmd:
+        return False
+    if command_only:
+        return "error" in normalized.lower()
+    return "ERROR" in out
+
+
+def _count_errors(cmd: str, out: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if normalized.startswith("grep -c ") and "access.log" in normalized:
+        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
+    if "|" in cmd and "grep" in cmd and "wc" in cmd:
+        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
+    return False
+
+
+def _starts_background(cmd: str, script: str) -> bool:
+    normalized = normalize_command(cmd)
+    return script in normalized and "&" in normalized
+
+
+def _find_process(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if normalized.startswith("pgrep"):
+        return command_only or name in out or name in normalized
+    if normalized == "ps" or normalized.startswith("ps "):
+        return command_only or name in out or name in normalized
+    if "|" in cmd and "grep" in cmd:
+        return command_only or name in out or name in cmd
+    return False
+
+
+def _stop_process(cmd: str, name: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if normalized.startswith("pkill") or normalized.startswith("killall"):
+        return name.split(".")[0] in normalized
+    if normalized.startswith("kill "):
+        parts = normalized.split()
+        if len(parts) >= 2 and parts[1].lstrip("-").isdigit():
+            return True
+        if command_only and any(token in normalized for token in ("-15", "-TERM", "-9", "-KILL")):
+            return True
+    return False
+
+
+def _sigterm_hang(cmd: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if normalized.startswith("pkill") and ("hang" in normalized or "TERM" in normalized):
+        return True
+    if not normalized.startswith("kill "):
+        return False
+    if command_only:
+        return any(token in normalized for token in ("-15", "-TERM", "-SIGTERM"))
+    return any(token in normalized for token in ("-15", "-TERM", "-SIGTERM", "hang"))
+
+
+def _verify_process_gone(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
+    normalized = normalize_command(cmd)
+    if not (normalized.startswith("ps") or normalized.startswith("pgrep") or "|" in cmd):
+        return False
+    if command_only:
+        return name.split(".")[0] in normalized or name in cmd
+    if name not in out and f"{name}.sh" not in out:
+        return True
+    # grep often prints itself; a lone grep line without the target counts as gone.
+    lines = [line for line in out.splitlines() if name not in line and f"{name}.sh" not in line]
+    return len(lines) <= 1
+
+
 def _entry_matches_step(
     step: dict[str, Any],
     entry: dict[str, Any],
@@ -160,6 +286,39 @@ def _entry_matches_step(
         if cmd.startswith("cat ") and "mission.txt" in cmd:
             return command_only or "MISSION_READY=filesystem" in out or not out
         return "MISSION_READY=filesystem" in out
+
+    if step_id == "step-01-inspect":
+        return _inspect_deploy_permissions(cmd, out, command_only=command_only)
+
+    if step_id == "step-02-chmod":
+        return _chmod_deploy_executable(cmd, out, command_only=command_only)
+
+    if step_id == "step-01-view-log":
+        return _view_access_log(cmd, entry_cwd, out, command_only=command_only)
+
+    if step_id == "step-02-grep-errors":
+        return _grep_errors(cmd, out, command_only=command_only)
+
+    if step_id == "step-03-count-errors":
+        return _count_errors(cmd, out, command_only=command_only)
+
+    if step_id == "step-01-start-worker":
+        return _starts_background(cmd, "worker.sh")
+
+    if step_id == "step-02-find-worker":
+        return _find_process(cmd, "worker", out, command_only=command_only)
+
+    if step_id == "step-03-stop-worker":
+        return _stop_process(cmd, "worker", command_only=command_only)
+
+    if step_id == "step-01-start-hang":
+        return _starts_background(cmd, "hang.sh")
+
+    if step_id == "step-02-sigterm":
+        return _sigterm_hang(cmd, command_only=command_only)
+
+    if step_id == "step-03-verify-gone":
+        return _verify_process_gone(cmd, "hang", out, command_only=command_only)
 
     accepted = [normalize_command(c) for c in step.get("acceptedCommands", [])]
     if cmd not in accepted:

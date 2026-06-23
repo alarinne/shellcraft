@@ -20,6 +20,7 @@ from .lab_checker import resolve_path
 
 SANDBOX_ENABLED = os.environ.get("SHELLCRAFT_SANDBOX", "0") == "1"
 SANDBOX_IMAGE = os.environ.get("SHELLCRAFT_SANDBOX_IMAGE", "shellcraft-sandbox-lab-01:latest")
+SANDBOX_LAB_IDS = frozenset({"lab-01", "lab-02", "lab-03", "lab-04", "lab-05"})
 EXEC_TIMEOUT_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_EXEC_TIMEOUT", "5"))
 SESSION_TTL_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_SESSION_TTL", "600"))
 CONTAINER_NAME_PREFIX = "shellcraft-"
@@ -93,6 +94,8 @@ class SandboxManager:
     def create_session(self, lab_id: str, initial_cwd: str) -> SandboxSession:
         if not self.is_enabled():
             raise SandboxError("Docker sandbox is disabled. Set SHELLCRAFT_SANDBOX=1.", 503)
+        if lab_id not in SANDBOX_LAB_IDS:
+            raise SandboxError(f"Sandbox is not available for lab {lab_id!r}.", 400)
         if not self.image_ready():
             raise SandboxError(
                 f"Sandbox image {SANDBOX_IMAGE!r} not found. "
@@ -102,7 +105,7 @@ class SandboxManager:
 
         session_id = uuid.uuid4().hex
         container_name = f"{CONTAINER_NAME_PREFIX}{session_id[:12]}"
-        self._run_container(container_name)
+        self._run_container(container_name, initial_cwd)
 
         session = SandboxSession(
             session_id=session_id,
@@ -206,7 +209,7 @@ class SandboxManager:
             if name.startswith(CONTAINER_NAME_PREFIX) and name not in tracked:
                 self._remove_container(name)
 
-    def _run_container(self, name: str) -> None:
+    def _run_container(self, name: str, workdir: str = "/home/guest/projects") -> None:
         result = subprocess.run(
             [
                 "docker",
@@ -237,7 +240,7 @@ class SandboxManager:
                 "--user",
                 "learner",
                 "--workdir",
-                "/home/guest/projects",
+                workdir,
                 SANDBOX_IMAGE,
                 "sleep",
                 "infinity",

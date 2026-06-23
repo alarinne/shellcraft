@@ -1,0 +1,45 @@
+import { Lab } from '../execution/types';
+
+export const LAB_05_SIGNALS: Lab = {
+  id: 'lab-05',
+  title: 'Signals',
+  level: 'intermediate',
+  durationMinutes: 15,
+  xp: 220,
+  summary: 'Launch a long-running script and stop it with SIGTERM.',
+  initialState: {
+    cwd: '/home/guest/projects',
+    files: [
+      { path: '/home/guest/projects/hang.sh', type: 'file', permissions: 'rwxr-xr-x', owner: 'guest' },
+    ],
+  },
+  steps: [
+    {
+      id: 'step-01-start-hang',
+      prompt: 'Launch hang.sh in the background.',
+      acceptedCommands: ['./hang.sh &', 'bash hang.sh &', 'sh hang.sh &'],
+      expectedOutput: [],
+      explanation: 'Background jobs keep running while you return to the shell prompt.',
+      hint: 'Run ./hang.sh with & at the end.',
+      visual: { focus: 'permissions', labels: ['background', 'hang.sh'], targetPath: '/home/guest/projects/hang.sh' },
+    },
+    {
+      id: 'step-02-sigterm',
+      prompt: 'Send SIGTERM (signal 15) to stop hang.sh.',
+      acceptedCommands: ['kill -15', 'kill -TERM', 'kill -SIGTERM', 'pkill -TERM hang'],
+      expectedOutput: [],
+      explanation: 'SIGTERM asks a process to shut down gracefully before harder signals.',
+      hint: 'Use kill -15 or kill -TERM with the hang.sh PID.',
+      visual: { focus: 'permissions', labels: ['SIGTERM', 'kill -15'], targetPath: '/home/guest/projects/hang.sh' },
+    },
+    {
+      id: 'step-03-verify-gone',
+      prompt: 'Confirm hang.sh is no longer running.',
+      acceptedCommands: ['ps aux | grep hang', 'pgrep hang', 'ps aux', 'pgrep -f hang.sh'],
+      expectedOutput: [],
+      explanation: 'Re-running ps or pgrep shows whether the process survived the signal.',
+      hint: 'Use ps or pgrep — you should not see hang.sh running.',
+      visual: { focus: 'permissions', labels: ['ps', 'verify'], targetPath: '/home/guest/projects/hang.sh' },
+    },
+  ],
+};

@@ -3,7 +3,7 @@
 #   docker compose up --build                    # frontend on http://localhost:4200
 #   docker compose --profile full up --build     # frontend + backend + sandbox image
 #
-# Real Linux terminal (Lab 01) needs the full profile and Docker socket on the host.
+# Real Linux terminal (Labs 01–05) needs the full profile and Docker socket on the host.
 services:
   frontend:
     build:

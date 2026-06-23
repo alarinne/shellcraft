@@ -1,0 +1,49 @@
+{
+  "id": "lab-03",
+  "title": "Pipes & Grep",
+  "level": "beginner",
+  "durationMinutes": 15,
+  "xp": 180,
+  "summary": "Filter logs and connect commands through streams with grep and pipes.",
+  "initialState": {
+    "cwd": "/home/guest/projects/logs",
+    "files": [
+      { "path": "/home/guest/projects/logs/access.log", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
+    ]
+  },
+  "steps": [
+    {
+      "id": "step-01-view-log",
+      "prompt": "Open the access log and skim the lines.",
+      "acceptedCommands": ["cat access.log", "cat ./access.log", "head access.log", "head -n 5 access.log"],
+      "expectedOutput": [],
+      "explanation": "cat and head print file contents so you can see what you will filter.",
+      "hint": "Use cat or head on access.log."
+    },
+    {
+      "id": "step-02-grep-errors",
+      "prompt": "Filter the log for ERROR lines.",
+      "acceptedCommands": [
+        "grep ERROR access.log",
+        "grep -i error access.log",
+        "grep ERROR ./access.log",
+        "grep 'ERROR' access.log"
+      ],
+      "expectedOutput": [],
+      "explanation": "grep scans each line and prints matches — perfect for finding errors in a log.",
+      "hint": "Use grep with the word ERROR and the log file name."
+    },
+    {
+      "id": "step-03-count-errors",
+      "prompt": "Count how many ERROR lines appear in the log.",
+      "acceptedCommands": [
+        "grep ERROR access.log | wc -l",
+        "grep -c ERROR access.log",
+        "grep -i error access.log | wc -l"
+      ],
+      "expectedOutput": [],
+      "explanation": "Piping grep into wc -l counts matching lines; grep -c does it in one command.",
+      "hint": "Pipe grep output into wc -l, or use grep -c."
+    }
+  ]
+}

@@ -22,7 +22,8 @@ describe('PathPage', () => {
     expect(compiled.textContent).toContain('Permissions');
     expect(compiled.textContent).toContain('0');
     expect(compiled.textContent).toContain('XP earned');
-    expect(compiled.querySelectorAll('.sc-lab-card').length).toBe(3);
+    expect(compiled.textContent).toContain('Pipes & Grep');
+    expect(compiled.querySelectorAll('.sc-lab-card').length).toBe(5);
   });
 
   it('updates stats and lab status after Lab 01 is claimed', () => {
