@@ -24,7 +24,32 @@ def test_read_container_command_log_parses_shell_history(monkeypatch):
     assert entries[3]["cwd"] == "/home/guest/lab-01/labs"
 
 
-def test_history_for_check_prefers_shell_log(monkeypatch):
+def test_history_for_check_prefers_pty_history(monkeypatch):
+    session = MagicMock()
+    session.container_name = "shellcraft-test"
+    session.history = [
+        MagicMock(
+            as_dict=lambda: {
+                "command": "ls -l deploy.sh",
+                "stdout": ["-rw-r--r-- 1 learner learner 28 deploy.sh"],
+                "stderr": [],
+                "exitCode": 0,
+                "cwd": "/home/guest/lab-02",
+            }
+        )
+    ]
+
+    monkeypatch.setattr(
+        "app.sandbox.read_container_command_log",
+        lambda _name: [{"command": "pwd", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/"}],
+    )
+
+    history, command_only = sandbox_manager.history_for_check(session)
+    assert command_only is False
+    assert history[0]["command"] == "ls -l deploy.sh"
+
+
+def test_history_for_check_falls_back_to_shell_log(monkeypatch):
     session = MagicMock()
     session.container_name = "shellcraft-test"
     session.history = []

@@ -338,6 +338,24 @@ def test_lab_02_permissions_quest():
     assert result["completed"] is True
 
 
+def test_lab_02_inspects_with_ls_lh_output():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-02"},
+        "steps": [{"id": "step-01-inspect"}],
+    }
+    history = [
+        {
+            "command": "ls -lh deploy.sh",
+            "stdout": ["-rw-r--r-- 1 learner learner 28 Jun  1 12:00 deploy.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-02",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["stepsCompleted"] == 1
+
+
 def test_lab_03_pipes_quest():
     lab = {
         "initialState": {"cwd": "/home/guest/lab-03/logs"},

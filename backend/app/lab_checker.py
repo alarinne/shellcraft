@@ -141,8 +141,10 @@ def _mentions_deploy_sh(cmd: str) -> bool:
 def _inspect_deploy_permissions(cmd: str, out: str, *, command_only: bool) -> bool:
     if cmd.startswith("stat ") and _mentions_deploy_sh(cmd):
         return command_only or "rw-r--r--" in out or "644" in out
-    if _is_listing_command(cmd) and (_mentions_deploy_sh(cmd) or cmd in ("ls -l", "ls -la")):
+    if _is_listing_command(cmd) and _mentions_deploy_sh(cmd):
         return command_only or "rw-r--r--" in out or "deploy.sh" in out
+    if _is_listing_command(cmd) and cmd in ("ls -l", "ls -la", "ls"):
+        return command_only or "deploy.sh" in out
     return False
 
 

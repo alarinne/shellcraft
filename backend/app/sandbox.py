@@ -26,6 +26,10 @@ SESSION_TTL_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_SESSION_TTL", "600"))
 CONTAINER_NAME_PREFIX = "shellcraft-"
 
 
+def lab_root(lab_id: str) -> str:
+    return f"/home/guest/{lab_id}"
+
+
 @dataclass
 class ExecRecord:
     command: str
@@ -105,7 +109,8 @@ class SandboxManager:
 
         session_id = uuid.uuid4().hex
         container_name = f"{CONTAINER_NAME_PREFIX}{session_id[:12]}"
-        self._run_container(container_name, initial_cwd)
+        self._run_container(container_name, lab_id, initial_cwd)
+        self._seed_workspace(container_name, lab_id)
 
         session = SandboxSession(
             session_id=session_id,
@@ -142,11 +147,14 @@ class SandboxManager:
         return self._get_session(session_id)
 
     def history_for_check(self, session: SandboxSession) -> tuple[list[dict[str, Any]], bool]:
-        """Prefer the live shell command log; fall back to API-recorded PTY history."""
+        """Prefer PTY-captured output; fall back to the shell DEBUG log (command-only)."""
+        api_history = [entry.as_dict() for entry in session.history]
+        if api_history:
+            return api_history, False
         shell_log = read_container_command_log(session.container_name)
         if shell_log:
             return shell_log, True
-        return [entry.as_dict() for entry in session.history], False
+        return [], True
 
     def destroy_session(self, session_id: str) -> None:
         with self._lock:
@@ -209,7 +217,8 @@ class SandboxManager:
             if name.startswith(CONTAINER_NAME_PREFIX) and name not in tracked:
                 self._remove_container(name)
 
-    def _run_container(self, name: str, workdir: str = "/home/guest/lab-01") -> None:
+    def _run_container(self, name: str, lab_id: str, workdir: str) -> None:
+        root = lab_root(lab_id)
         result = subprocess.run(
             [
                 "docker",
@@ -233,6 +242,8 @@ class SandboxManager:
                 "--read-only",
                 "--tmpfs",
                 "/tmp:exec,size=8m",
+                "--tmpfs",
+                f"{root}:exec,size=8m,mode=1777",
                 "--security-opt",
                 "no-new-privileges",
                 "--cap-drop",
@@ -252,6 +263,32 @@ class SandboxManager:
         if result.returncode != 0:
             raise SandboxError(
                 f"Failed to start sandbox container: {result.stderr.strip() or result.stdout.strip()}",
+                503,
+            )
+
+    def _seed_workspace(self, container_name: str, lab_id: str) -> None:
+        """Copy read-only seeds into the per-lab tmpfs workspace."""
+        root = lab_root(lab_id)
+        seed = f"/opt/shellcraft-seeds/{lab_id}"
+        result = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-u",
+                "root",
+                container_name,
+                "sh",
+                "-c",
+                f"cp -a {seed}/. {root}/ && chown -R learner:learner {root}",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if result.returncode != 0:
+            self._remove_container(container_name)
+            raise SandboxError(
+                f"Failed to seed lab workspace: {result.stderr.strip() or result.stdout.strip()}",
                 503,
             )
 
