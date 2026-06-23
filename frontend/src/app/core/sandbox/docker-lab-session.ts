@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { SandboxCheckResult, SandboxService } from './sandbox.service';
 
-/** Manages a real Linux sandbox session for Lab 01 (PTY via WebSocket). */
+/** Manages a real Linux sandbox session for Docker-enabled labs (PTY via WebSocket). */
 @Injectable({ providedIn: 'root' })
 export class DockerLabSession {
   private readonly sandbox = inject(SandboxService);
@@ -23,7 +23,7 @@ export class DockerLabSession {
   readonly stepStatuses = computed(() => this._checkResult()?.stepStatuses ?? []);
 
   readonly stepsCompleted = computed(() => this._checkResult()?.stepsCompleted ?? 0);
-  readonly totalSteps = computed(() => this._checkResult()?.totalSteps ?? 5);
+  readonly totalSteps = computed(() => this._checkResult()?.totalSteps ?? 0);
   readonly completed = computed(() => this._checkResult()?.completed ?? false);
   readonly progress = computed(() => {
     const total = this.totalSteps();

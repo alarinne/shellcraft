@@ -14,7 +14,7 @@ import { PtyTerminalComponent } from '../../components/terminal/pty-terminal.com
 import { TerminalComponent } from '../../components/terminal/terminal.component';
 import { CommandResult, Lab, LabFile, LabState } from '../../core/execution/types';
 import { LabEngine } from '../../core/execution/lab-engine';
-import { getLab } from '../../core/labs';
+import { getLab, DOCKER_LAB_IDS } from '../../core/labs';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
 import { LabProgress } from '../../core/progress/lab-progress';
 import { DockerLabSession } from '../../core/sandbox/docker-lab-session';
@@ -27,7 +27,6 @@ interface PermissionRow {
 }
 
 const DEFAULT_LAB: Lab = LAB_01_FILESYSTEM;
-const DOCKER_LAB_IDS = new Set(['lab-01']);
 
 @Component({
   selector: 'sc-lab-page',
@@ -118,9 +117,19 @@ export class LabPage {
     return this.engine.currentStep()?.visual?.targetPath;
   });
   protected readonly focusFile = computed(() => this.filesystemState()?.files[0] ?? null);
-  protected readonly visualFocus = computed(() => this.engine.currentStep()?.visual?.focus);
+  protected readonly visualFocus = computed(() => {
+    if (this.usesDocker()) {
+      const pending = this.dockerStepStatuses().find((step) => !step.completed);
+      const step = this.lab().steps.find((item) => item.id === pending?.id);
+      return step?.visual?.focus;
+    }
+    return this.engine.currentStep()?.visual?.focus;
+  });
   protected readonly showFilesystemMap = computed(
-    () => this.lab().id === 'lab-01' || this.visualFocus() === 'filesystem',
+    () =>
+      this.lab().id === 'lab-01' ||
+      this.lab().id === 'lab-03' ||
+      this.visualFocus() === 'filesystem',
   );
   protected readonly permissionRows = computed<PermissionRow[]>(() => {
     const [owner, group, others] = splitPermissions(this.focusFile()?.permissions);

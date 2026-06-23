@@ -308,3 +308,102 @@ def test_check_lab_progress_out_of_order_history():
     result = check_lab_progress(lab, history)
     assert result["stepsCompleted"] == 2
     assert result["completed"] is True
+
+
+def test_lab_02_permissions_quest():
+    lab = {
+        "initialState": {"cwd": "/home/guest/projects"},
+        "steps": [
+            {"id": "step-01-inspect"},
+            {"id": "step-02-chmod"},
+        ],
+    }
+    history = [
+        {
+            "command": "ls -l deploy.sh",
+            "stdout": ["-rw-r--r-- 1 learner learner 28 deploy.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects",
+        },
+        {
+            "command": "chmod 755 deploy.sh",
+            "stdout": [],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects",
+        },
+    ]
+    result = check_lab_progress(lab, history, command_only=True)
+    assert result["completed"] is True
+
+
+def test_lab_03_pipes_quest():
+    lab = {
+        "initialState": {"cwd": "/home/guest/projects/logs"},
+        "steps": [
+            {"id": "step-01-view-log"},
+            {"id": "step-02-grep-errors"},
+            {"id": "step-03-count-errors"},
+        ],
+    }
+    history = [
+        {
+            "command": "cat access.log",
+            "stdout": ["2026-06-01 ERROR disk full"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects/logs",
+        },
+        {
+            "command": "grep ERROR access.log",
+            "stdout": ["2026-06-01 ERROR disk full", "2026-06-02 ERROR timeout"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects/logs",
+        },
+        {
+            "command": "grep ERROR access.log | wc -l",
+            "stdout": ["2"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/projects/logs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["completed"] is True
+
+
+def test_lab_04_process_quest_command_only():
+    lab = {
+        "steps": [
+            {"id": "step-01-start-worker"},
+            {"id": "step-02-find-worker"},
+            {"id": "step-03-stop-worker"},
+        ],
+    }
+    history = [
+        {"command": "./worker.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "ps aux | grep worker", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "pkill -f worker.sh", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+    ]
+    result = check_lab_progress(lab, history, command_only=True)
+    assert result["completed"] is True
+
+
+def test_lab_05_signals_quest_command_only():
+    lab = {
+        "steps": [
+            {"id": "step-01-start-hang"},
+            {"id": "step-02-sigterm"},
+            {"id": "step-03-verify-gone"},
+        ],
+    }
+    history = [
+        {"command": "./hang.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "kill -15 42", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "ps aux | grep hang", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+    ]
+    result = check_lab_progress(lab, history, command_only=True)
+    assert result["completed"] is True
+

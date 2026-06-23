@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from . import __version__
 from .engine import check_command, next_step_id
 from .lab_checker import check_lab_progress
-from .sandbox import SandboxError, read_shell_cwd, sandbox_manager
+from .sandbox import SANDBOX_LAB_IDS, SandboxError, read_shell_cwd, sandbox_manager
 from .terminal_ws import set_labs, terminal_websocket
 
 LABS_DIR = Path(__file__).parent / "labs"
@@ -110,8 +110,11 @@ def create_app() -> FastAPI:
         lab = labs.get(req.labId)
         if lab is None:
             raise HTTPException(status_code=404, detail="lab not found")
-        if req.labId != "lab-01":
-            raise HTTPException(status_code=400, detail="sandbox is only available for lab-01")
+        if req.labId not in SANDBOX_LAB_IDS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"sandbox is not available for {req.labId!r}",
+            )
 
         try:
             session = sandbox_manager.create_session(

@@ -20,7 +20,7 @@ def test_list_labs():
     res = client.get("/api/labs")
     assert res.status_code == 200
     ids = [lab["id"] for lab in res.json()]
-    assert "lab-01" in ids and "lab-02" in ids
+    assert ids == ["lab-01", "lab-02", "lab-03", "lab-04", "lab-05"]
 
 
 def test_get_lab_and_404():
