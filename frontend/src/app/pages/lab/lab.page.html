@@ -1,55 +1,110 @@
 <section class="sc-screen sc-lab-workbench" aria-label="Lab screen">
   <aside class="sc-task-panel">
-    <span class="sc-chip sc-chip-orange">{{ lab().title }}</span>
+    <div class="sc-chip-row">
+      <span class="sc-chip sc-chip-orange">{{ lab().title }}</span>
+      @if (usesDocker()) {
+        <span class="sc-chip sc-chip-green">Real Linux</span>
+      }
+    </div>
     <h2>{{ lab().title }}</h2>
     <p>{{ lab().summary }}</p>
 
-    <div class="sc-current-task">
-      <small>Current task</small>
-      @if (engine.completed()) {
-        <strong>All steps cleared</strong>
-        <p>You finished every task in this lab.</p>
-      } @else {
-        <strong>{{ engine.currentStep()?.prompt }}</strong>
-        @if (hintVisible()) {
-          <p>{{ engine.currentStep()?.hint }}</p>
+    @if (usesDocker()) {
+      <div class="sc-step-checklist" aria-label="Lab tasks">
+        <small class="sc-step-checklist-label">Tasks</small>
+        <ol>
+          @for (step of dockerStepStatuses(); track step.id; let index = $index) {
+            <li
+              [class.is-done]="step.completed"
+              [class.is-pending]="dockerChecked() && !step.completed"
+            >
+              <span class="sc-step-marker" aria-hidden="true">
+                @if (step.completed) {
+                  ✓
+                } @else {
+                  {{ index + 1 }}
+                }
+              </span>
+              <div class="sc-step-copy">
+                <strong>{{ step.prompt }}</strong>
+                @if (dockerChecked() && !step.completed && step.reason) {
+                  <p class="sc-step-reason">{{ step.reason }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      </div>
+    } @else {
+      <div class="sc-current-task">
+        <small>Current task</small>
+        @if (labCompleted()) {
+          <strong>All steps cleared</strong>
+          <p>You finished every task in this lab.</p>
+        } @else {
+          <strong>{{ currentTaskPrompt() }}</strong>
+          @if (hintVisible()) {
+            <p>{{ engine.currentStep()?.hint }}</p>
+          }
         }
-      }
-    </div>
+      </div>
+    }
 
     <div class="sc-progress" aria-label="Lab progress">
       <i [style.width.%]="progressPercent()"></i>
     </div>
     <div class="sc-progress-meta">
-      <small>{{ completedStepCount() }}/{{ engine.totalSteps() }} steps cleared</small>
+      <small>{{ completedStepCount() }}/{{ totalSteps() }} steps cleared</small>
       <small>{{ progressPercent() }}% complete</small>
     </div>
 
     <div class="sc-actions stacked">
-      <button class="sc-btn sc-btn-ghost" type="button" (click)="toggleHint()">
-        {{ hintVisible() ? 'Hide hint' : 'Hint' }}
-      </button>
+      @if (usesDocker()) {
+        <button class="sc-btn sc-btn-primary" type="button" [disabled]="busy()" (click)="checkWork()">
+          Check my work
+        </button>
+      } @else {
+        <button class="sc-btn sc-btn-ghost" type="button" (click)="toggleHint()">
+          {{ hintVisible() ? 'Hide hint' : 'Hint' }}
+        </button>
+      }
       <button class="sc-btn sc-btn-ghost" type="button" (click)="reset()">Reset</button>
     </div>
+
+    @if (usesDocker()) {
+      <p class="sc-docker-note">
+        Commands run in a lightweight Alpine container. Click <strong>Check my work</strong> when
+        you think you are done — each task is graded and incomplete steps show what is missing.
+      </p>
+    }
   </aside>
 
-  <sc-terminal
-    class="sc-lab-terminal"
-    [labTitle]="lab().title"
-    [prompt]="prompt()"
-    [history]="engine.history()"
-    [acceptedCommands]="engine.acceptedCommands()"
-    [busy]="busy()"
-    [completed]="engine.completed()"
-    (commandSubmit)="submitCommand($event)"
-  />
+  @if (usesDocker() && sandboxSessionId(); as sessionId) {
+    <sc-pty-terminal
+      class="sc-lab-terminal"
+      [sessionId]="sessionId"
+      [labTitle]="lab().title"
+      (cwdChange)="onSandboxCwd($event)"
+    />
+  } @else {
+    <sc-terminal
+      class="sc-lab-terminal"
+      [labTitle]="lab().title"
+      [prompt]="terminalPrompt()"
+      [history]="terminalHistory()"
+      [acceptedCommands]="engine.acceptedCommands()"
+      [busy]="busy()"
+      [completed]="labCompleted()"
+      (commandSubmit)="submitCommand($event)"
+    />
+  }
 
   <aside class="sc-inspector">
     @if (showFilesystemMap()) {
       <div class="sc-panel">
         <span class="sc-chip sc-chip-blue">Filesystem map</span>
-        <h3>{{ engine.state()?.cwd ?? 'workspace' }}</h3>
-        <sc-filesystem-map [state]="engine.state()" [targetPath]="visualTargetPath()" />
+        <h3>{{ filesystemCwd() }}</h3>
+        <sc-filesystem-map [state]="filesystemState()" [targetPath]="visualTargetPath()" />
       </div>
     } @else {
       <div class="sc-panel">
@@ -66,18 +121,18 @@
       </div>
     }
 
-    @if (lastResult()) {
-      <div class="sc-panel">
-        <span class="sc-chip sc-chip-purple">Explanation</span>
-        <p>{{ explanation() }}</p>
+    @if (explanation()) {
+      <div class="sc-panel" [class.sc-panel-success]="labCompleted()">
+        <span class="sc-chip sc-chip-purple">Feedback</span>
+        <p class="sc-feedback-text">{{ explanation() }}</p>
       </div>
     }
 
     <button
       class="sc-btn sc-btn-primary wide"
       type="button"
-      [disabled]="!engine.completed()"
-      [class.sc-btn-disabled]="!engine.completed()"
+      [disabled]="!labCompleted()"
+      [class.sc-btn-disabled]="!labCompleted()"
       (click)="completeLab()"
     >
       Complete lab

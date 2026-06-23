@@ -222,6 +222,30 @@ button {
   border: 1px solid rgba(244, 166, 42, 0.32);
 }
 
+.sc-chip-green {
+  color: #d8ffe9;
+  background: rgba(50, 239, 143, 0.12);
+  border: 1px solid rgba(50, 239, 143, 0.28);
+}
+
+.sc-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sc-task-panel h2 {
+  margin-top: 0;
+}
+
+.sc-docker-note {
+  margin-top: 16px;
+  color: var(--sc-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
 .sc-hero-copy h1,
 .sc-complete-card h1 {
   margin: 18px 0 0;
@@ -561,7 +585,30 @@ button {
 }
 
 .sc-lab-workbench {
-  grid-template-columns: 280px minmax(360px, 1fr) 280px;
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) minmax(0, 1fr) minmax(200px, 260px);
+  grid-template-areas: "tasks terminal inspector";
+  gap: 16px;
+  overflow-x: auto;
+}
+
+.sc-task-panel {
+  grid-area: tasks;
+}
+
+.sc-lab-terminal {
+  grid-area: terminal;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sc-inspector {
+  grid-area: inspector;
+  min-width: 0;
+}
+
+.sc-panel-success {
+  border-color: rgba(50, 239, 143, 0.28);
 }
 
 .sc-current-task {
@@ -573,6 +620,90 @@ button {
   display: block;
   margin-top: 8px;
   color: var(--sc-green);
+}
+
+.sc-step-checklist {
+  margin-top: 22px;
+}
+
+.sc-step-checklist-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--sc-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+.sc-step-checklist ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.sc-step-checklist li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--sc-line-soft);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sc-step-checklist li.is-done {
+  border-color: rgba(50, 239, 143, 0.28);
+  background: rgba(50, 239, 143, 0.06);
+}
+
+.sc-step-checklist li.is-pending {
+  border-color: rgba(255, 166, 77, 0.35);
+  background: rgba(255, 166, 77, 0.05);
+}
+
+.sc-step-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #9eb0c7;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sc-step-checklist li.is-done .sc-step-marker {
+  color: #06111d;
+  background: var(--sc-green);
+}
+
+.sc-step-copy strong {
+  display: block;
+  color: #e8f1ff;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.sc-step-checklist li.is-done .sc-step-copy strong {
+  color: var(--sc-green);
+}
+
+.sc-step-reason,
+.sc-feedback-text {
+  margin: 8px 0 0;
+  color: #ffb36b;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.sc-panel-success .sc-feedback-text {
+  color: #b8f5d4;
 }
 
 .sc-lab-terminal {
@@ -618,6 +749,8 @@ button {
 
 .sc-panel h3 {
   margin-top: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .sc-permission-grid {
@@ -762,9 +895,16 @@ button {
 @media (max-width: 1080px) {
   .sc-topbar,
   .sc-landing,
-  .sc-path,
+  .sc-path {
+    grid-template-columns: 1fr;
+  }
+
   .sc-lab-workbench {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "tasks"
+      "terminal"
+      "inspector";
   }
 
   .sc-session,

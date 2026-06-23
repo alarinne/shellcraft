@@ -1,4 +1,13 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { TerminalEntry } from '../../core/execution/lab-engine';
 
 @Component({
@@ -6,7 +15,7 @@ import { TerminalEntry } from '../../core/execution/lab-engine';
   templateUrl: './terminal.component.html',
   styleUrl: './terminal.component.scss',
 })
-export class TerminalComponent {
+export class TerminalComponent implements AfterViewInit {
   readonly labTitle = input('');
   readonly prompt = input('guest@shellcraft:~$');
   readonly history = input<readonly TerminalEntry[]>([]);
@@ -16,16 +25,39 @@ export class TerminalComponent {
 
   readonly commandSubmit = output<string>();
 
+  private readonly cmdInput = viewChild<ElementRef<HTMLInputElement>>('cmdInput');
+  private readonly terminalBody = viewChild<ElementRef<HTMLElement>>('terminalBody');
+
   protected readonly command = signal('');
   private readonly enteredCommands = signal<string[]>([]);
   private recallIndex = -1;
 
-  protected readonly canSubmit = computed(
-    () => this.command().trim().length > 0 && !this.busy() && !this.completed(),
-  );
+  constructor() {
+    effect(() => {
+      this.history();
+      this.busy();
+      queueMicrotask(() => {
+        this.scrollToBottom();
+        if (!this.busy() && !this.completed()) {
+          this.focusInput();
+        }
+      });
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.focusInput();
+  }
 
   protected setCommand(value: string): void {
     this.command.set(value);
+  }
+
+  protected focusInput(): void {
+    const input = this.cmdInput()?.nativeElement;
+    if (input && !this.completed()) {
+      input.focus();
+    }
   }
 
   protected runCommand(): void {
@@ -36,7 +68,7 @@ export class TerminalComponent {
 
     this.enteredCommands.update((commands) => [...commands, command]);
     this.recallIndex = -1;
-    this.command.set('');
+    this.syncInputValue('');
     this.commandSubmit.emit(command);
   }
 
@@ -52,7 +84,7 @@ export class TerminalComponent {
       this.recallIndex = Math.min(commands.length - 1, Math.max(-1, this.recallIndex + direction));
     }
 
-    this.command.set(this.recallIndex === -1 ? '' : commands[this.recallIndex]);
+    this.syncInputValue(this.recallIndex === -1 ? '' : commands[this.recallIndex]);
   }
 
   protected autocomplete(): void {
@@ -66,7 +98,22 @@ export class TerminalComponent {
       return;
     }
 
-    this.command.set(candidates.length === 1 ? candidates[0] : commonPrefix(candidates));
+    this.syncInputValue(candidates.length === 1 ? candidates[0] : commonPrefix(candidates));
+  }
+
+  private syncInputValue(value: string): void {
+    this.command.set(value);
+    const input = this.cmdInput()?.nativeElement;
+    if (input) {
+      input.value = value;
+    }
+  }
+
+  private scrollToBottom(): void {
+    const body = this.terminalBody()?.nativeElement;
+    if (body) {
+      body.scrollTop = body.scrollHeight;
+    }
   }
 }
 

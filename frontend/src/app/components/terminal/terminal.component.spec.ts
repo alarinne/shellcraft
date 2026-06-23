@@ -24,7 +24,7 @@ describe('TerminalComponent', () => {
 
     setCommand(fixture.nativeElement, '  ls -l  ');
     fixture.detectChanges();
-    clickRun(fixture.nativeElement);
+    pressEnter(fixture.nativeElement);
     fixture.detectChanges();
 
     expect(submitted).toEqual(['ls -l']);
@@ -73,8 +73,7 @@ function setCommand(compiled: HTMLElement, command: string): void {
   input.dispatchEvent(new Event('input'));
 }
 
-function clickRun(compiled: HTMLElement): void {
-  const button = compiled.querySelector<HTMLButtonElement>('button[aria-label="Run command"]');
-  expect(button).toBeTruthy();
-  button?.click();
+function pressEnter(compiled: HTMLElement): void {
+  const input = commandInput(compiled);
+  input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 }

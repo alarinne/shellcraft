@@ -1,11 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { EXECUTION_BACKEND } from '../../core/execution/execution-backend';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { SimulatedBackend } from '../../core/execution/simulated-backend';
 import { LabProgress } from '../../core/progress/lab-progress';
+import { DockerLabSession } from '../../core/sandbox/docker-lab-session';
 import { LabPage } from './lab.page';
+
+function dockerSessionStub() {
+  return {
+    start: vi.fn().mockResolvedValue(false),
+    stop: vi.fn().mockResolvedValue(undefined),
+    reset: vi.fn().mockResolvedValue(undefined),
+    applyCheckResult: vi.fn(),
+    setCwd: vi.fn(),
+    checkWork: vi.fn().mockResolvedValue(null),
+    active: signal(false).asReadonly(),
+    sessionId: signal(null).asReadonly(),
+    progress: signal(0).asReadonly(),
+    stepsCompleted: signal(0).asReadonly(),
+    totalSteps: signal(5).asReadonly(),
+    completed: signal(false).asReadonly(),
+    currentTaskPrompt: signal('').asReadonly(),
+    cwd: signal('/home/guest/projects').asReadonly(),
+    error: signal(null).asReadonly(),
+    checkResult: signal(null).asReadonly(),
+    stepStatuses: signal([]).asReadonly(),
+  };
+}
 
 describe('LabPage', () => {
   beforeEach(async () => {
@@ -14,6 +38,7 @@ describe('LabPage', () => {
       providers: [
         provideRouter([]),
         { provide: EXECUTION_BACKEND, useClass: SimulatedBackend },
+        { provide: DockerLabSession, useFactory: dockerSessionStub },
       ],
     }).compileComponents();
   });
@@ -28,7 +53,7 @@ describe('LabPage', () => {
     expect(compiled.querySelector('sc-terminal')).toBeTruthy();
     expect(compiled.textContent).toContain('0% complete');
     expect(compiled.textContent).toContain('0/5 steps cleared');
-    expect(compiled.textContent).not.toContain('Explanation');
+    expect(compiled.textContent).not.toContain('Feedback');
   });
 
   it('loads Lab 01 as a filesystem quest with the filesystem map', () => {
@@ -116,7 +141,7 @@ describe('LabPage', () => {
     fixture.detectChanges();
 
     await submitCommand(fixture, 'pwd');
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Explanation');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Feedback');
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
       'pwd prints the current working directory',
     );
@@ -150,9 +175,7 @@ async function submitCommand(fixture: ComponentFixture<LabPage>, command: string
   input!.dispatchEvent(new Event('input'));
   fixture.detectChanges();
 
-  const button = compiled.querySelector<HTMLButtonElement>('button[aria-label="Run command"]');
-  expect(button).toBeTruthy();
-  button!.click();
+  input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
   await fixture.whenStable();
   fixture.detectChanges();

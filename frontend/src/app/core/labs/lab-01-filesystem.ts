@@ -31,7 +31,7 @@ export const LAB_01_FILESYSTEM: Lab = {
     {
       id: 'step-02-scan-projects',
       prompt: 'List this directory and spot the labs folder.',
-      acceptedCommands: ['ls -la', 'ls -al'],
+      acceptedCommands: ['ls', 'ls -l', 'ls -la', 'ls -al', 'ls labs', 'ls labs/', 'ls ./labs'],
       expectedOutput: [
         'drwxr-xr-x 3 guest guest 4096 .',
         'drwxr-xr-x 3 guest guest 4096 ..',
@@ -48,7 +48,7 @@ export const LAB_01_FILESYSTEM: Lab = {
     {
       id: 'step-03-enter-labs',
       prompt: 'Move into the labs directory.',
-      acceptedCommands: ['cd labs', 'cd ./labs'],
+      acceptedCommands: ['cd labs', 'cd labs/', 'cd ./labs', 'cd ./labs/'],
       expectedOutput: [],
       explanation: 'cd changes the working directory. The prompt and map now follow you into labs.',
       hint: 'Use cd followed by the directory name.',
@@ -61,7 +61,16 @@ export const LAB_01_FILESYSTEM: Lab = {
     {
       id: 'step-04-find-mission',
       prompt: 'List the lab directory and find the mission file.',
-      acceptedCommands: ['ls -la', 'ls -al'],
+      acceptedCommands: [
+        'ls',
+        'ls -l',
+        'ls -la',
+        'ls -al',
+        'ls mission.txt',
+        'ls ./mission.txt',
+        'ls labs',
+        'ls labs/',
+      ],
       expectedOutput: [
         'drwxr-xr-x 2 guest guest 4096 .',
         'drwxr-xr-x 3 guest guest 4096 ..',
