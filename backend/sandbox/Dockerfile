@@ -57,7 +57,7 @@ RUN printf '%s\n' \
     'trap '"'"'__shellcraft_log_cmd'"'"' DEBUG' \
     'export PROMPT_COMMAND="pwd > /tmp/.shellcraft-cwd 2>/dev/null"' \
     >> /home/guest/.bashrc \
-  && chown -R learner:learner /home/guest
+  && chown -R learner:learner /home/guest /opt/shellcraft-seeds
 
 USER learner
 WORKDIR /home/guest
