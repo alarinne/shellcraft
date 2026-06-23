@@ -47,17 +47,17 @@ def _append_pty_history(session_id: str, command: str, output_text: str) -> dict
 
     session.last_used_at = time.time()
     cleaned_output = _ANSI_ESCAPE_RE.sub("", output_text)
-    lowered = cleaned_output.lower()
-    if "command not found" in lowered:
+    lines = [line.strip() for line in cleaned_output.splitlines() if line.strip()]
+    tail = "\n".join(lines[-5:]).lower() if lines else cleaned_output.lower()
+    if "command not found" in tail:
         exit_code = 127
     elif any(
-        phrase in lowered
+        phrase in tail
         for phrase in ("no such file", "read-only file system", "permission denied")
     ):
         exit_code = 1
     else:
         exit_code = 0
-    lines = [line.strip() for line in cleaned_output.splitlines() if line.strip()]
 
     normalized = normalize_command(command)
     if normalized.startswith("cd ") and exit_code == 0:

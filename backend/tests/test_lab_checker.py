@@ -356,6 +356,39 @@ def test_lab_02_inspects_with_ls_lh_output():
     assert result["stepsCompleted"] == 1
 
 
+def test_lab_02_chmod_via_live_state():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-02"},
+        "steps": [{"id": "step-02-chmod"}],
+    }
+    result = check_lab_progress(lab, [], live_state={"deployExecutable": True})
+    assert result["completed"] is True
+
+
+def test_lab_04_stop_when_worker_gone():
+    lab = {
+        "steps": [
+            {"id": "step-02-find-worker"},
+            {"id": "step-03-stop-worker"},
+        ],
+    }
+    history = [
+        {
+            "command": "ps aux",
+            "stdout": ["learner 37 /bin/sh ./worker.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-04",
+        },
+    ]
+    result = check_lab_progress(
+        lab,
+        history,
+        live_state={"workerRunning": False},
+    )
+    assert result["stepsCompleted"] == 2
+
+
 def test_lab_03_pipes_quest():
     lab = {
         "initialState": {"cwd": "/home/guest/lab-03/logs"},

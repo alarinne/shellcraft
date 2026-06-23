@@ -15,7 +15,18 @@
     {
       "id": "step-01-view-log",
       "prompt": "Open the access log and skim the lines.",
-      "acceptedCommands": ["cat access.log", "cat ./access.log", "head access.log", "head -n 5 access.log"],
+      "acceptedCommands": [
+        "ls",
+        "ls -l",
+        "ls -la",
+        "ls -al",
+        "ls access.log",
+        "ls ./access.log",
+        "cat access.log",
+        "cat ./access.log",
+        "head access.log",
+        "head -n 5 access.log"
+      ],
       "expectedOutput": [],
       "explanation": "cat and head print file contents so you can see what you will filter.",
       "hint": "Use cat or head on access.log."

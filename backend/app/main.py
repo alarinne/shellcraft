@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from . import __version__
 from .engine import check_command, next_step_id
 from .lab_checker import check_lab_progress
-from .sandbox import SANDBOX_LAB_IDS, SandboxError, read_shell_cwd, sandbox_manager
+from .sandbox import SANDBOX_LAB_IDS, SandboxError, read_live_lab_state, read_shell_cwd, sandbox_manager
 from .terminal_ws import set_labs, terminal_websocket
 
 LABS_DIR = Path(__file__).parent / "labs"
@@ -162,10 +162,12 @@ def create_app() -> FastAPI:
         history, command_only = sandbox_manager.history_for_check(session)
         live_cwd = read_shell_cwd(session.container_name) or session.cwd
         session.cwd = live_cwd
+        live_state = read_live_lab_state(session.container_name, session.lab_id)
         result = check_lab_progress(
             lab,
             history,
             live_cwd=live_cwd,
+            live_state=live_state,
             command_only=command_only,
         )
         result["labId"] = session.lab_id

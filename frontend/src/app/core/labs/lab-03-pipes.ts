@@ -17,7 +17,18 @@ export const LAB_03_PIPES: Lab = {
     {
       id: 'step-01-view-log',
       prompt: 'Open the access log and skim the lines.',
-      acceptedCommands: ['cat access.log', 'cat ./access.log', 'head access.log', 'head -n 5 access.log'],
+      acceptedCommands: [
+        'ls',
+        'ls -l',
+        'ls -la',
+        'ls -al',
+        'ls access.log',
+        'ls ./access.log',
+        'cat access.log',
+        'cat ./access.log',
+        'head access.log',
+        'head -n 5 access.log',
+      ],
       expectedOutput: [
         '2026-06-01 INFO user login ok',
         '2026-06-01 ERROR disk full on /var',
