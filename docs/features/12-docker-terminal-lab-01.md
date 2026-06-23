@@ -1,7 +1,7 @@
 # Feature: Docker terminal for Lab 01
 
 - **Issue:** (branch `feat/docker-terminal-lab-01`)
-- **PR:** (pending)
+- **PR:** https://github.com/alarinne/shellcraft/pull/41
 - **Status:** Shipped on branch
 - **Area:** frontend | backend | infra
 
