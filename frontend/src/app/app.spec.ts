@@ -1,14 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from './app';
 import { routes } from './app.routes';
 import { AUTH_STORAGE, createMemoryAuthStorage } from './core/auth/auth-storage';
 import { AuthService } from './core/auth/auth.service';
 import { EXECUTION_BACKEND } from './core/execution/execution-backend';
 import { SimulatedBackend } from './core/execution/simulated-backend';
+import { installApiMock } from './core/testing/api-mock';
+
+const member = {
+  id: 'u-ada',
+  name: 'Ada Lovelace',
+  email: 'ada@shellcraft.dev',
+  xp: 0,
+  level: 1,
+  createdAt: '2026-01-01T00:00:00Z',
+};
 
 describe('App shell', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
@@ -42,7 +55,13 @@ describe('App shell', () => {
   });
 
   it('should route between landing, path, and lab screens', async () => {
-    TestBed.inject(AuthService).register('Ada Lovelace', 'ada@shellcraft.dev', 'secret1');
+    installApiMock({
+      'GET /api/auth/me': { status: 200, body: member },
+      'GET /api/progress': { status: 200, body: [] },
+      'GET /api/settings': { status: 404, body: { detail: 'no settings' } },
+      'GET /api/health': { status: 200, body: { sandbox: { enabled: false } } },
+    });
+    await TestBed.inject(AuthService).restoreSession();
 
     const harness = await RouterTestingHarness.create('/');
     expect(harness.routeNativeElement?.textContent).toContain('Learn Linux');

@@ -29,5 +29,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/complete/complete.page').then((m) => m.CompletePage),
     title: 'ShellCraft - Lab Completed',
   },
+  {
+    path: 'settings',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/settings/settings.page').then((m) => m.SettingsPage),
+    title: 'ShellCraft - Settings',
+  },
   { path: '**', redirectTo: '' },
 ];

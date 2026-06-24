@@ -134,6 +134,7 @@ describe('LabPage', () => {
     await submitCommand(fixture, 'ls -l');
     await submitCommand(fixture, 'chmod 755 deploy.sh');
     completeButton(fixture.nativeElement).click();
+    await fixture.whenStable();
 
     expect(TestBed.inject(LabProgress).isCompleted('lab-02')).toBe(true);
     expect(navigate).toHaveBeenCalledWith(['/complete']);

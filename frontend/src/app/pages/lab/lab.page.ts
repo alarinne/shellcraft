@@ -258,12 +258,12 @@ export class LabPage {
     return file.path.split('/').pop() ?? file.path;
   }
 
-  protected completeLab(): void {
+  protected async completeLab(): Promise<void> {
     if (!this.labCompleted()) {
       return;
     }
 
-    this.progress.complete(this.lab());
+    await this.progress.complete(this.lab());
     void this.router.navigate(['/complete']);
   }
 

@@ -72,20 +72,30 @@ export class AuthPage {
     });
   }
 
-  protected submit(event: SubmitEvent): void {
+  protected readonly submitting = signal(false);
+
+  protected async submit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
-
-    const result = this.isRegister()
-      ? this.auth.register(this.name(), this.email(), this.password())
-      : this.auth.login(this.email(), this.password());
-
-    if (!result.ok) {
-      this.error.set(result.error ?? 'Authentication failed.');
+    if (this.submitting()) {
       return;
     }
 
-    this.error.set(null);
-    void this.router.navigateByUrl(this.returnUrl());
+    this.submitting.set(true);
+    try {
+      const result = this.isRegister()
+        ? await this.auth.register(this.name(), this.email(), this.password())
+        : await this.auth.login(this.email(), this.password());
+
+      if (!result.ok) {
+        this.error.set(result.error ?? 'Authentication failed.');
+        return;
+      }
+
+      this.error.set(null);
+      await this.router.navigateByUrl(this.returnUrl());
+    } finally {
+      this.submitting.set(false);
+    }
   }
 
   private returnUrl(): string {
