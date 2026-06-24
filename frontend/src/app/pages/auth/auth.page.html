@@ -1,0 +1,66 @@
+<section class="sc-screen sc-auth" aria-label="ShellCraft authentication">
+  <div class="sc-auth-panel">
+    <span class="sc-chip sc-chip-green">ShellCraft ID</span>
+    <h1>{{ title() }}</h1>
+    <p class="sc-auth-note">{{ returnNotice() }}</p>
+
+    <form class="sc-auth-form" (submit)="submit($event)">
+      @if (isRegister()) {
+        <label>
+          <span>Name</span>
+          <input
+            type="text"
+            autocomplete="name"
+            [value]="name()"
+            (input)="setName($any($event.target).value)"
+          />
+        </label>
+      }
+
+      <label>
+        <span>Name or email</span>
+        <input
+          type="text"
+          autocomplete="username"
+          [value]="email()"
+          (input)="setEmail($any($event.target).value)"
+        />
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input
+          type="password"
+          autocomplete="current-password"
+          [value]="password()"
+          (input)="setPassword($any($event.target).value)"
+        />
+      </label>
+
+      @if (error(); as message) {
+        <p class="sc-form-error" role="alert">{{ message }}</p>
+      }
+
+      <button class="sc-btn sc-btn-primary" type="submit">{{ submitLabel() }}</button>
+    </form>
+
+    <button class="sc-auth-switch" type="button" (click)="toggleMode()">
+      {{ switchLabel() }}
+    </button>
+  </div>
+
+  <aside class="sc-terminal-card sc-auth-terminal" aria-label="ShellCraft terminal session">
+    <div class="sc-window-bar">
+      <span class="dot red"></span>
+      <span class="dot amber"></span>
+      <span class="dot green"></span>
+      <small>session</small>
+    </div>
+    <div class="sc-terminal-body">
+      <p class="prompt">guest@shellcraft:~$ whoami</p>
+      <p>{{ email() || 'guest_student' }}</p>
+      <p class="prompt">guest@shellcraft:~$ ls progress</p>
+      <p>labs xp badges</p>
+    </div>
+  </aside>
+</section>

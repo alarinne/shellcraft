@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#070b0f"/>
+  <rect x="7.5" y="7.5" width="49" height="49" rx="8" fill="#0b1518" stroke="#14915e"/>
+  <text
+    x="21"
+    y="39"
+    fill="#32ef8f"
+    font-family="Cascadia Code, Consolas, monospace"
+    font-size="23"
+    font-weight="700"
+  >$</text>
+  <rect x="36" y="40" width="12" height="3" rx="1.5" fill="#32ef8f"/>
+</svg>

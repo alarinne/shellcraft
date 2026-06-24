@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ViewportScroller } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
+import { AuthService } from './core/auth/auth.service';
 import { DEFAULT_LAB_ID } from './core/shellcraft-data';
 
 interface ShellNavItem {
@@ -23,12 +25,20 @@ interface ShellNavItem {
 })
 export class App {
   private readonly router = inject(Router);
+  private readonly viewportScroller = inject(ViewportScroller);
+  private readonly auth = inject(AuthService);
 
-  protected readonly nav: ShellNavItem[] = [
-    { label: 'Landing', path: '/', match: '/' },
-    { label: 'Learning Path', path: '/path', match: '/path' },
+  private readonly guestNav: ShellNavItem[] = [
+    { label: 'Explore', path: '/', match: '/' },
+    { label: 'Labs', path: '/path', match: '/path' },
+    { label: 'About', path: '/#about', match: '/#about' },
+  ];
+  private readonly memberNav: ShellNavItem[] = [
+    { label: 'Explore', path: '/', match: '/' },
+    { label: 'Labs', path: '/path', match: '/path' },
     { label: 'Lab Screen', path: `/lab/${DEFAULT_LAB_ID}`, match: '/lab' },
     { label: 'Completed', path: '/complete', match: '/complete' },
+    { label: 'About', path: '/#about', match: '/#about' },
   ];
 
   protected readonly currentUrl = toSignal(
@@ -39,6 +49,10 @@ export class App {
     ),
     { initialValue: this.router.url },
   );
+  protected readonly currentUser = this.auth.currentUser;
+  protected readonly nav = computed(() => (this.currentUser() ? this.memberNav : this.guestNav));
+  protected readonly sessionTitle = computed(() => this.currentUser()?.name ?? 'Guest');
+  protected readonly sessionMeta = computed(() => this.currentUser()?.email ?? 'Not signed in');
 
   protected isActive(item: ShellNavItem): boolean {
     const url = this.currentUrl();
@@ -46,6 +60,26 @@ export class App {
   }
 
   protected go(path: string): void {
-    void this.router.navigateByUrl(path);
+    const [route, fragment] = path.split('#');
+    void this.router.navigateByUrl(path).then(() => {
+      if (fragment) {
+        this.viewportScroller.scrollToAnchor(fragment);
+      } else if (route === '/') {
+        this.viewportScroller.scrollToPosition([0, 0]);
+      }
+    });
+  }
+
+  protected signIn(): void {
+    void this.router.navigate(['/auth']);
+  }
+
+  protected signUp(): void {
+    void this.router.navigate(['/auth'], { queryParams: { mode: 'register' } });
+  }
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/auth']);
   }
 }
