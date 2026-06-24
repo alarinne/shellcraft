@@ -1,0 +1,52 @@
+---
+description: Pull request and git authorship workflow — no AI contributor attribution
+alwaysApply: true
+---
+
+# Pull requests & git authorship
+
+## Authorship (non-negotiable)
+
+- **Never** run `git config` or change `user.name` / `user.email`.
+- **Never** add `Co-authored-by`, Cursor, Composer, or other AI attribution to commits or PR bodies unless the user explicitly asks.
+- **Never** add yourself to `CONTRIBUTORS`, `package.json` authors, or docs as a contributor.
+- Commits use the repository owner's existing git identity only.
+- Not write in Summary of pr a message: "Made with Cursor"
+
+## When to commit
+
+- Create commits **only when the user explicitly asks** (e.g. "commit", "create a PR").
+- Before committing: `git status`, `git diff`, `git log -1` for message style.
+- Pass commit messages via HEREDOC. Do not use `git commit --amend` unless the user requests it and amend rules are met.
+
+## Creating a PR
+
+Use `gh` for all GitHub tasks. Before opening a PR, in parallel:
+
+- `git status`
+- `git diff` (staged + unstaged)
+- branch tracking / sync with remote
+- `git log` and `git diff [base]...HEAD` for **all** commits in the PR
+
+Then:
+
+1. Push with `git push -u origin HEAD` if needed.
+2. `gh pr create` with title + body via HEREDOC:
+
+```markdown
+## Summary
+- …
+
+## Test plan
+- [ ] …
+```
+
+3. Return the PR URL to the user.
+
+## ShellCraft PR checklist
+
+- Branch naming: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`, `docs/<slug>`.
+- Conventional commit subjects: `feat(frontend): …`, `fix(backend): …`, `docs: …`.
+- Feature PRs include `docs/features/<n>-<slug>.md` (link PR number when known).
+- Reference issues with `Closes #N` when applicable.
+- Do **not** push to remote unless the user asks.

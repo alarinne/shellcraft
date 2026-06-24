@@ -54,7 +54,7 @@ Start the frontend clean-run stack:
 ```bash
 git clone https://github.com/alarinne/shellcraft.git
 cd shellcraft
-docker compose up --build
+docker compose --profile full up --build
 ```
 
 Open:
