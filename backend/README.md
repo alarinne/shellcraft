@@ -21,7 +21,9 @@ user-entered commands** on the host (see the safety model in
 | GET    | `/api/auth/me`                  | Current user (session required)      |
 | GET    | `/api/users/me`                 | Current user profile                 |
 | GET    | `/api/progress`                 | The user's per-lab progress          |
-| POST   | `/api/progress/{labId}/complete`| Mark a lab complete, award XP        |
+| POST   | `/api/progress/{labId}/complete`| Mark a lab complete, award XP (gated) |
+| GET    | `/api/certificates/me`          | Current user's completion certificate |
+| GET    | `/api/certificates/verify`      | Public certificate verification (`c`, `s`) |
 | GET    | `/api/settings`                 | The user's settings                  |
 | PUT    | `/api/settings`                 | Update settings                      |
 
@@ -34,7 +36,7 @@ session state lives in Redis. See `docs/adr/ADR-0003` for the architecture.
 app/
   core/         config (pydantic-settings) + security (argon2, session ids)
   db/           async engine + get_db, redis client + get_redis, Base
-  models/       User, LabProgress, UserSettings
+  models/       User, LabProgress, UserSettings, Certificate
   schemas/      camelCase Pydantic request/response models
   repositories/ pure CRUD over the ORM
   services/     auth_service (register/login, XP), session_service (Redis)
@@ -63,7 +65,7 @@ uvicorn app.main:app --reload       # http://localhost:8000
 Environment variables (see `.env.example`): `DATABASE_URL` (async, e.g.
 `postgresql+asyncpg://...`), `REDIS_URL`, `SESSION_COOKIE_NAME`,
 `SESSION_TTL_SECONDS`, `SESSION_COOKIE_SECURE`, `SESSION_COOKIE_SAMESITE`,
-`XP_PER_LEVEL`.
+`XP_PER_LEVEL`, `SHELLCRAFT_CERTIFICATE_SECRET`, `SHELLCRAFT_PUBLIC_APP_URL`.
 
 ### Database migrations
 

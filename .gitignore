@@ -64,3 +64,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Local Docker persistence (Postgres / Redis bind mounts)
+.docker/

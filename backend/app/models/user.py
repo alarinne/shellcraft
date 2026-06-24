@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db.base import Base
 
 if TYPE_CHECKING:
+    from .certificate import Certificate
     from .progress import LabProgress
     from .settings import UserSettings
 
@@ -40,6 +41,11 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     settings: Mapped["UserSettings | None"] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+    certificate: Mapped["Certificate | None"] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         uselist=False,

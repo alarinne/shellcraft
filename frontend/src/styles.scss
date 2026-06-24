@@ -2127,3 +2127,158 @@ button {
     display: grid;
   }
 }
+
+.sc-path-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  color: #dbe7f5;
+  border: 1px solid rgba(244, 166, 42, 0.35);
+  border-radius: 12px;
+  background: rgba(244, 166, 42, 0.08);
+}
+
+.sc-path-banner-success {
+  border-color: rgba(82, 168, 255, 0.35);
+  background: rgba(82, 168, 255, 0.08);
+}
+
+.sc-certificate {
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.sc-certificate-wrap {
+  width: min(760px, 100%);
+  text-align: center;
+}
+
+.sc-certificate-hero h1 {
+  margin-top: 12px;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.sc-certificate-hero p {
+  margin-top: 12px;
+  color: var(--sc-muted);
+}
+
+.sc-certificate-card {
+  margin-top: 28px;
+  padding: 2px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(82, 168, 255, 0.55), rgba(139, 92, 246, 0.45));
+}
+
+.sc-certificate-card-inner {
+  position: relative;
+  padding: 36px 32px 120px;
+  text-align: left;
+  border-radius: 16px;
+  background:
+    linear-gradient(140deg, rgba(82, 168, 255, 0.08), rgba(244, 166, 42, 0.06)),
+    rgba(10, 15, 21, 0.96);
+}
+
+.sc-certificate-brand {
+  color: var(--sc-blue);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sc-certificate-card-inner h2 {
+  margin-top: 10px;
+  font-size: 2rem;
+}
+
+.sc-certificate-subtitle {
+  margin-top: 8px;
+  color: var(--sc-muted);
+}
+
+.sc-certificate-name {
+  margin-top: 24px;
+  color: var(--sc-orange);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.sc-certificate-meta {
+  margin-top: 8px;
+  color: #c8d4e0;
+}
+
+.sc-certificate-qr {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+
+.sc-certificate-qr img {
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sc-certificate-qr small {
+  color: var(--sc-purple);
+}
+
+.sc-certificate-badges {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.sc-certificate-actions {
+  margin-top: 28px;
+}
+
+.sc-verify {
+  display: grid;
+  place-items: center;
+}
+
+.sc-verify-card {
+  width: min(560px, 100%);
+  padding: 38px;
+  text-align: center;
+  background:
+    linear-gradient(140deg, rgba(82, 168, 255, 0.08), rgba(139, 92, 246, 0.06)),
+    rgba(10, 15, 21, 0.94);
+}
+
+.sc-verify-valid {
+  color: #6ee7a0;
+}
+
+.sc-verify-invalid {
+  color: #f87171;
+}
+
+.sc-verify-details {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  text-align: left;
+}
+
+.sc-verify-details dt {
+  color: var(--sc-muted);
+  font-size: 0.85rem;
+}
+
+.sc-verify-details dd {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}

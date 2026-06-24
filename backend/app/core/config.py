@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +29,16 @@ class Settings(BaseSettings):
 
     # Gameplay
     xp_per_level: int = 500
+
+    # Completion certificates
+    certificate_signing_secret: str = Field(
+        default="dev-certificate-secret-change-me",
+        validation_alias="SHELLCRAFT_CERTIFICATE_SECRET",
+    )
+    public_app_url: str = Field(
+        default="http://localhost:4200",
+        validation_alias="SHELLCRAFT_PUBLIC_APP_URL",
+    )
 
     # CORS
     allowed_origins: list[str] = [

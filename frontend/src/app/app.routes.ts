@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
+import { certificateGuard } from './core/progress/certificate.guard';
+import { labUnlockGuard } from './core/progress/lab-unlock.guard';
 
 export const routes: Routes = [
   {
@@ -19,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'lab/:id',
-    canActivate: [authGuard],
+    canActivate: [authGuard, labUnlockGuard],
     loadComponent: () => import('./pages/lab/lab.page').then((m) => m.LabPage),
     title: 'ShellCraft - Lab',
   },
@@ -28,6 +30,17 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/complete/complete.page').then((m) => m.CompletePage),
     title: 'ShellCraft - Lab Completed',
+  },
+  {
+    path: 'certificate',
+    canActivate: [authGuard, certificateGuard],
+    loadComponent: () => import('./pages/certificate/certificate.page').then((m) => m.CertificatePage),
+    title: 'ShellCraft - Mission Complete',
+  },
+  {
+    path: 'verify',
+    loadComponent: () => import('./pages/verify/verify.page').then((m) => m.VerifyPage),
+    title: 'ShellCraft - Verify Certificate',
   },
   {
     path: 'settings',

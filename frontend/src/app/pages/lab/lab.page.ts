@@ -16,6 +16,7 @@ import { CommandResult, Lab, LabFile, LabState } from '../../core/execution/type
 import { LabEngine } from '../../core/execution/lab-engine';
 import { getLab, DOCKER_LAB_IDS } from '../../core/labs';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
+import { AuthService } from '../../core/auth/auth.service';
 import { LabProgress } from '../../core/progress/lab-progress';
 import { DockerLabSession } from '../../core/sandbox/docker-lab-session';
 import { permissionsFromStatMode, SandboxLiveState } from '../../core/sandbox/live-state';
@@ -39,6 +40,7 @@ export class LabPage {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly engine = inject(LabEngine);
   private readonly progress = inject(LabProgress);
+  private readonly auth = inject(AuthService);
   protected readonly dockerSession = inject(DockerLabSession);
 
   readonly id = input<string>();
@@ -186,6 +188,20 @@ export class LabPage {
       void this.dockerSession.stop();
       this.dockerMode.set(false);
     });
+
+    effect(() => {
+      const labId = this.id();
+      if (!labId || !this.auth.isAuthenticated()) {
+        return;
+      }
+      void this.progress.ensureLoaded().then(() => {
+        if (!this.progress.isLabUnlocked(labId)) {
+          void this.router.navigate(['/path'], {
+            queryParams: { locked: labId },
+          });
+        }
+      });
+    });
   }
 
   protected async submitCommand(command: string): Promise<void> {
@@ -263,7 +279,14 @@ export class LabPage {
       return;
     }
 
-    await this.progress.complete(this.lab());
+    const lab = this.lab();
+    await this.progress.complete(lab);
+
+    if (lab.id === 'lab-05' && this.progress.allLabsCompleted()) {
+      void this.router.navigate(['/certificate']);
+      return;
+    }
+
     void this.router.navigate(['/complete']);
   }
 

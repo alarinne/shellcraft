@@ -15,6 +15,19 @@
     </aside>
 
     <div class="sc-path-main">
+      @if (lockedNotice(); as notice) {
+        <div class="sc-path-banner" role="status">{{ notice }}</div>
+      }
+
+      @if (allLabsCompleted()) {
+        <div class="sc-path-banner sc-path-banner-success">
+          <span>Mission complete — all labs finished.</span>
+          <button class="sc-btn sc-btn-primary" type="button" (click)="viewCertificate()">
+            View certificate
+          </button>
+        </div>
+      }
+
       <div class="sc-section-heading">
         <span>Recommended route</span>
         <h2>Pro Developer Track</h2>
