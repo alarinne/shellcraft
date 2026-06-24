@@ -59,10 +59,10 @@ describe('CompletePage', () => {
 
     expect(compiled.textContent).toContain('Filesystem Scout');
     expect(compiled.textContent).toContain('Mission Finder');
-    expect(compiled.textContent).toContain('+120 XP');
+    expect(compiled.textContent).toContain('120 XP');
   });
 
-  it('renders the latest completed lab reward summary', async () => {
+  it('renders the latest completed lab reward summary with cumulative XP', async () => {
     await claimLabOne();
     TestBed.inject(LabProgress).complete(LAB_02_PERMISSIONS);
 
@@ -72,7 +72,7 @@ describe('CompletePage', () => {
 
     expect(compiled.textContent).toContain('Permission Scout');
     expect(compiled.textContent).toContain('Permission Keeper');
-    expect(compiled.textContent).toContain('+150 XP');
+    expect(compiled.textContent).toContain('270 XP');
     expect(compiled.textContent).toContain('chmod');
     expect(compiled.textContent).not.toContain('Filesystem Scout');
     expect(compiled.querySelectorAll('.sc-complete-badge-dot.is-unlocked').length).toBe(2);

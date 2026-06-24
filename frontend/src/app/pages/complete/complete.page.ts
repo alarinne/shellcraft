@@ -14,6 +14,7 @@ interface CompletionSummary {
   lab: LabCard;
   reward: CompletionReward;
   nextLab: LabCard | null;
+  totalXp: number;
   badges: readonly CompletionBadge[];
 }
 
@@ -82,6 +83,7 @@ export class CompletePage {
         icon: 'shield',
       },
       nextLab: this.progress.nextLab(),
+      totalXp: this.progress.totalXp(),
       badges: this.progress.labs().map((item) => ({
         labId: item.id,
         label: REWARDS[item.id]?.badge ?? item.title,

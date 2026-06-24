@@ -64,13 +64,16 @@ export class LabProgress {
     });
   }
 
+  readonly totalXp = computed(() => {
+    const user = this.auth.currentUser();
+    return user ? user.xp : xpFor(this.completedLabIds());
+  });
+
   readonly stats = computed<readonly StatItem[]>(() => {
     const completedIds = this.completedLabIds();
-    const user = this.auth.currentUser();
-    const xp = user ? user.xp : xpFor(completedIds);
     return [
       { label: 'Completed', value: String(completedIds.size) },
-      { label: 'XP earned', value: String(xp) },
+      { label: 'XP earned', value: String(this.totalXp()) },
       { label: 'Streak', value: String(completedIds.size) },
     ];
   });
