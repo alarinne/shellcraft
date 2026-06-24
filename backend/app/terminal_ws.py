@@ -18,7 +18,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 from .engine import normalize_command
 from .lab_checker import resolve_path
-from .sandbox import ExecRecord, SandboxError, read_shell_cwd, sandbox_manager
+from .sandbox import ExecRecord, SandboxError, read_live_lab_state, read_shell_cwd, sandbox_manager
 
 _LABS: dict[str, dict[str, Any]] | None = None
 _ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\].*?(?:\x07|\x1b\\)|\x1b[PX^_][\x20-\x7e]*\x1b\\")
@@ -123,13 +123,16 @@ async def terminal_websocket(websocket: WebSocket, session_id: str) -> None:
     log_lock = asyncio.Lock()
 
     async def log_command(command: str) -> None:
-        await asyncio.sleep(0.4)
+        await asyncio.sleep(0.55)
         async with log_lock:
             output_text = bytes(capture_buffer).decode("utf-8", errors="replace")
             capture_buffer.clear()
         result = _append_pty_history(session_id, command, output_text)
         if result is not None and result.get("cwd"):
             await websocket.send_json({"type": "cwd", "cwd": result["cwd"]})
+        live_state = read_live_lab_state(session.container_name, session.lab_id)
+        if live_state:
+            await websocket.send_json({"type": "liveState", "liveState": live_state})
 
     async def read_pty() -> None:
         while not stop.is_set():

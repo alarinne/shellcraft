@@ -1,6 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { API_BASE } from '../api/api-base';
 import { TerminalEntry } from '../execution/lab-engine';
+import { SandboxLiveState } from './live-state';
+
+export type { SandboxLiveState } from './live-state';
 
 export interface SandboxStatus {
   enabled: boolean;
@@ -26,6 +29,7 @@ export interface SandboxCheckResult {
   message: string;
   labId: string;
   cwd?: string;
+  liveState?: SandboxLiveState;
   stepStatuses: SandboxStepStatus[];
 }
 

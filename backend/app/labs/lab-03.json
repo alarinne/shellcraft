@@ -38,11 +38,14 @@
         "grep ERROR access.log",
         "grep -i error access.log",
         "grep ERROR ./access.log",
-        "grep 'ERROR' access.log"
+        "grep 'ERROR' access.log",
+        "cat access.log | grep ERROR",
+        "cat access.log | grep -i error",
+        "cat ./access.log | grep ERROR"
       ],
       "expectedOutput": [],
       "explanation": "grep scans each line and prints matches — perfect for finding errors in a log.",
-      "hint": "Use grep with the word ERROR and the log file name."
+      "hint": "Use grep on access.log, or pipe cat into grep."
     },
     {
       "id": "step-03-count-errors",
@@ -50,11 +53,13 @@
       "acceptedCommands": [
         "grep ERROR access.log | wc -l",
         "grep -c ERROR access.log",
-        "grep -i error access.log | wc -l"
+        "grep -i error access.log | wc -l",
+        "cat access.log | grep ERROR | wc -l",
+        "cat access.log | grep -i error | wc -l"
       ],
       "expectedOutput": [],
       "explanation": "Piping grep into wc -l counts matching lines; grep -c does it in one command.",
-      "hint": "Pipe grep output into wc -l, or use grep -c."
+      "hint": "Pipe grep into wc -l, use grep -c, or cat access.log | grep ERROR | wc -l."
     }
   ]
 }

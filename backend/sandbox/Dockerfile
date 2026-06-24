@@ -46,7 +46,11 @@ RUN mkdir -p /opt/shellcraft-seeds/lab-05 \
   && chmod 755 /opt/shellcraft-seeds/lab-05/hang.sh
 
 # Interactive shell logging for PTY grading (all labs).
+# Login shells (`bash -li` in the PTY) read ~/.bash_profile, not ~/.bashrc — source it explicitly.
 RUN printf '%s\n' \
+    '[[ -f ~/.bashrc ]] && . ~/.bashrc' \
+    > /home/guest/.bash_profile \
+  && printf '%s\n' \
     '__shellcraft_log_cmd() {' \
     '  local current="$BASH_COMMAND"' \
     '  [[ "$current" == "$PROMPT_COMMAND" ]] && return' \

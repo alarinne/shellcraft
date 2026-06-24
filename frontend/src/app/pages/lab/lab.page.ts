@@ -18,6 +18,7 @@ import { getLab, DOCKER_LAB_IDS } from '../../core/labs';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
 import { LabProgress } from '../../core/progress/lab-progress';
 import { DockerLabSession } from '../../core/sandbox/docker-lab-session';
+import { permissionsFromStatMode, SandboxLiveState } from '../../core/sandbox/live-state';
 import { SandboxCheckResult, SandboxStepStatus } from '../../core/sandbox/sandbox.service';
 
 interface PermissionRow {
@@ -101,9 +102,16 @@ export class LabPage {
   protected readonly filesystemState = computed((): LabState | null => {
     if (this.usesDocker()) {
       const lab = this.lab();
+      const liveState = this.dockerSession.liveState();
       return {
         cwd: this.dockerSession.cwd(),
-        files: lab.initialState.files.map((file) => ({ ...file })),
+        files: lab.initialState.files.map((file) => {
+          const copy = { ...file };
+          if (file.path.endsWith('/deploy.sh') && liveState?.deployMode) {
+            copy.permissions = permissionsFromStatMode(liveState.deployMode);
+          }
+          return copy;
+        }),
       };
     }
     return this.engine.state();
@@ -199,6 +207,10 @@ export class LabPage {
 
   protected onSandboxCwd(cwd: string): void {
     this.dockerSession.setCwd(cwd);
+  }
+
+  protected onSandboxLiveState(state: SandboxLiveState): void {
+    this.dockerSession.setLiveState(state);
   }
 
   protected async checkWork(): Promise<void> {

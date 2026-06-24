@@ -15,19 +15,21 @@ the frontend and backend record history and validate progress.
 
 - **`backend/sandbox/Dockerfile`** — minimal Alpine image with Lab 01 tree at `/home/guest/lab-01/labs/mission.txt`.
 - **`backend/app/sandbox.py`** — session manager: start/stop containers, track cwd + history.
-- **`backend/app/terminal_ws.py`** — WebSocket PTY bridge for real shell I/O (Tab, Ctrl+C, history).
+- **`backend/app/terminal_ws.py`** — WebSocket PTY bridge (`docker exec -it`, login bash); logs commands, pushes cwd + live state over WS.
 - **`backend/app/lab_checker.py`** — flexible per-step history scan; accepts plain `ls`, `ls labs/`, trailing slashes on `cd`, and extra whitespace in flags.
 - **API** — `POST /api/sandbox/sessions`, `…/exec`, `…/check`, `WS …/terminal`, `DELETE …`.
 - **Frontend** — `PtyTerminalComponent` (xterm.js), `DockerLabSession`; Lab 01 uses Real Linux mode.
-- **UX** — auto-check after each command, **Check my work** button, no Run button, layout polish.
+- **UX** — **Check my work** button grades progress; PTY pushes cwd/filesystem sync; no Run button, layout polish.
+
+See also [14-docker-sandbox-grading-hardening.md](./14-docker-sandbox-grading-hardening.md) for PTY cwd tracking and grading fixes shipped after the initial Lab 01 release.
 
 ## How it works
 
 1. Backend starts with `SHELLCRAFT_SANDBOX=1` and the sandbox image built.
 2. Lab 01 probes `/api/health`; if sandbox is ready, it creates a session (one container per learner).
-3. Browser opens a WebSocket PTY to `…/terminal` — xterm.js sends/receives raw terminal bytes.
-4. After each Enter, the backend logs the command, runs auto-check, and pushes progress over WS.
-5. **Check my work** re-runs grading manually; **Complete lab** unlocks when all steps pass.
+3. Browser opens a WebSocket PTY to `…/terminal` — xterm.js sends/receives raw terminal bytes (Tab, Ctrl+C, arrow history when the sandbox image includes readline).
+4. After each Enter, the backend logs the command, reads shell cwd via `PROMPT_COMMAND`, and pushes cwd + live state over WS.
+5. **Check my work** runs grading; **Complete lab** unlocks when all steps pass.
 6. Reset or leaving the page destroys the container.
 
 ## Accepted command variants (Lab 01)

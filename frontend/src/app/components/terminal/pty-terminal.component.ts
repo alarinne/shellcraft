@@ -11,6 +11,7 @@ import {
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { sandboxTerminalWsUrl } from '../../core/api/api-base';
+import { SandboxLiveState } from '../../core/sandbox/live-state';
 
 @Component({
   selector: 'sc-pty-terminal',
@@ -22,6 +23,7 @@ export class PtyTerminalComponent implements AfterViewInit, OnDestroy {
   readonly labTitle = input('');
 
   readonly cwdChange = output<string>();
+  readonly liveStateChange = output<SandboxLiveState>();
 
   private readonly host = viewChild.required<ElementRef<HTMLDivElement>>('terminalHost');
 
@@ -72,9 +74,16 @@ export class PtyTerminalComponent implements AfterViewInit, OnDestroy {
     socket.onmessage = (event) => {
       if (typeof event.data === 'string') {
         try {
-          const message = JSON.parse(event.data) as { type?: string; cwd?: string };
+          const message = JSON.parse(event.data) as {
+            type?: string;
+            cwd?: string;
+            liveState?: SandboxLiveState;
+          };
           if (message.type === 'cwd' && message.cwd) {
             this.cwdChange.emit(message.cwd);
+          }
+          if (message.type === 'liveState' && message.liveState) {
+            this.liveStateChange.emit(message.liveState);
           }
         } catch {
           term.write(event.data);

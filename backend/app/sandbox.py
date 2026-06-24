@@ -378,27 +378,40 @@ def merge_command_histories(
     shell_log: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """Combine DEBUG-trap commands with PTY stdout/exit codes."""
-    merged: dict[str, dict[str, Any]] = {}
-    order: list[str] = []
+    if not shell_log:
+        return [dict(entry) for entry in pty_history]
 
-    def _key(entry: dict[str, Any]) -> str:
-        return f"{entry.get('cwd', '')}|{normalize_command(entry.get('command', ''))}"
+    merged: list[dict[str, Any]] = []
+    pty_by_cmd: dict[str, list[dict[str, Any]]] = {}
+    for entry in pty_history:
+        key = normalize_command(entry.get("command", ""))
+        pty_by_cmd.setdefault(key, []).append(dict(entry))
 
-    for entry in shell_log + pty_history:
-        key = _key(entry)
-        if key not in merged:
-            order.append(key)
-            merged[key] = dict(entry)
-            continue
-        existing = merged[key]
-        if entry.get("stdout"):
-            existing["stdout"] = entry["stdout"]
-        if "exitCode" in entry:
-            existing["exitCode"] = entry["exitCode"]
-        if entry.get("cwd"):
-            existing["cwd"] = entry["cwd"]
+    for entry in shell_log:
+        fixed = dict(entry)
+        key = normalize_command(entry.get("command", ""))
+        candidates = pty_by_cmd.get(key, [])
+        if candidates:
+            pty_match = candidates.pop(0)
+            if pty_match.get("stdout"):
+                fixed["stdout"] = pty_match["stdout"]
+            if pty_match.get("exitCode") == 0:
+                fixed["exitCode"] = 0
+            if pty_match.get("cwd"):
+                fixed["cwd"] = pty_match["cwd"]
+        merged.append(fixed)
 
-    return [merged[key] for key in order]
+    for remaining in pty_by_cmd.values():
+        merged.extend(remaining)
+    return merged
+
+
+def resolve_live_cwd(session_cwd: str, shell_cwd: str | None) -> str:
+    """Pick the best cwd for grading: PTY-tracked path vs PROMPT_COMMAND file."""
+    candidates = [path for path in (session_cwd, shell_cwd) if path]
+    if not candidates:
+        return session_cwd
+    return max(candidates, key=lambda path: path.count("/"))
 
 
 def read_live_lab_state(container_name: str, lab_id: str) -> dict[str, Any]:

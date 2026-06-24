@@ -94,3 +94,27 @@ def test_history_for_check_falls_back_to_shell_log(monkeypatch):
     history, command_only = sandbox_manager.history_for_check(session)
     assert command_only is True
     assert history[0]["command"] == "pwd"
+
+
+def test_merge_command_histories_keeps_ls_in_different_directories():
+    shell = [
+        {"command": "ls", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "cd labs/", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "ls", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-01/labs"},
+    ]
+    pty = [
+        {"command": "ls", "stdout": ["labs"], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "cd labs/", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-01/labs"},
+        {"command": "ls", "stdout": ["mission.txt"], "exitCode": 0, "cwd": "/home/guest/lab-01/labs"},
+    ]
+    merged = merge_command_histories(pty, shell)
+    assert len(merged) == 3
+    assert merged[0]["stdout"] == ["labs"]
+    assert merged[2]["stdout"] == ["mission.txt"]
+
+
+def test_resolve_live_cwd_prefers_deeper_path():
+    from app.sandbox import resolve_live_cwd
+
+    assert resolve_live_cwd("/home/guest/lab-01/labs", "/home/guest/lab-01") == "/home/guest/lab-01/labs"
+    assert resolve_live_cwd("/home/guest/lab-01", None) == "/home/guest/lab-01"

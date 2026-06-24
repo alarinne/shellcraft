@@ -120,4 +120,29 @@ describe('DockerLabSession', () => {
     expect(session.stepsCompleted()).toBe(2);
     expect(session.cwd()).toBe('/home/guest/lab-01/labs');
   });
+
+  it('stores live state from check results and terminal updates', async () => {
+    await TestBed.configureTestingModule({
+      providers: [{ provide: SandboxService, useValue: { available: signal(false).asReadonly() } }],
+    }).compileComponents();
+
+    const session = TestBed.inject(DockerLabSession);
+    session.applyCheckResult({
+      completed: true,
+      stepsCompleted: 2,
+      totalSteps: 2,
+      completedStepIds: ['step-01-inspect', 'step-02-chmod'],
+      nextStepId: null,
+      nextStepPrompt: null,
+      message: 'All lab steps are complete. Nice work!',
+      labId: 'lab-02',
+      liveState: { deployMode: '-rwxr-xr-x', deployExecutable: true },
+      stepStatuses: [],
+    });
+
+    expect(session.liveState()?.deployMode).toBe('-rwxr-xr-x');
+
+    session.setLiveState({ deployMode: '-rw-r--r--', deployExecutable: false });
+    expect(session.liveState()?.deployExecutable).toBe(false);
+  });
 });

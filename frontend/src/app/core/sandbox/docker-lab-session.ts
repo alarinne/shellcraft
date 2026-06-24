@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { SandboxCheckResult, SandboxService } from './sandbox.service';
+import { SandboxCheckResult, SandboxLiveState, SandboxService } from './sandbox.service';
 
 /** Manages a real Linux sandbox session for Docker-enabled labs (PTY via WebSocket). */
 @Injectable({ providedIn: 'root' })
@@ -9,6 +9,7 @@ export class DockerLabSession {
   private readonly _sessionId = signal<string | null>(null);
   private readonly _cwd = signal('/home/guest/lab-01');
   private readonly _checkResult = signal<SandboxCheckResult | null>(null);
+  private readonly _liveState = signal<SandboxLiveState | null>(null);
   private readonly _error = signal<string | null>(null);
   private readonly _active = signal(false);
 
@@ -18,6 +19,7 @@ export class DockerLabSession {
   readonly active = this._active.asReadonly();
   readonly sessionId = this._sessionId.asReadonly();
   readonly cwd = this._cwd.asReadonly();
+  readonly liveState = this._liveState.asReadonly();
   readonly checkResult = this._checkResult.asReadonly();
   readonly error = this._error.asReadonly();
   readonly stepStatuses = computed(() => this._checkResult()?.stepStatuses ?? []);
@@ -69,6 +71,7 @@ export class DockerLabSession {
       this._cwd.set(session.cwd);
       this._labId.set(labId);
       this._checkResult.set(null);
+      this._liveState.set(null);
       this._error.set(null);
       this._active.set(true);
       return true;
@@ -85,7 +88,14 @@ export class DockerLabSession {
     if (result.cwd) {
       this._cwd.set(result.cwd);
     }
+    if (result.liveState) {
+      this._liveState.set(result.liveState);
+    }
     this._error.set(null);
+  }
+
+  setLiveState(state: SandboxLiveState): void {
+    this._liveState.set(state);
   }
 
   async checkWork(): Promise<SandboxCheckResult | null> {
@@ -121,6 +131,7 @@ export class DockerLabSession {
     this._sessionId.set(null);
     this._labId.set(null);
     this._checkResult.set(null);
+    this._liveState.set(null);
     this._active.set(false);
   }
 }

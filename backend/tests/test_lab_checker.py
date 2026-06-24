@@ -425,6 +425,50 @@ def test_lab_03_pipes_quest():
     assert result["completed"] is True
 
 
+def test_lab_03_accepts_cat_pipe_grep():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-03/logs"},
+        "steps": [
+            {"id": "step-01-view-log"},
+            {"id": "step-02-grep-errors"},
+            {"id": "step-03-count-errors"},
+        ],
+    }
+    history = [
+        {
+            "command": "cat access.log",
+            "stdout": ["2026-06-01 ERROR disk full"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": "cat access.log | grep ERROR",
+            "stdout": [
+                "linux-lab:~/lab-03/logs$ cat access.log | grep ERROR",
+                "2026-06-01 ERROR disk full on /var",
+                "2026-06-02 ERROR connection timeout",
+            ],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": "cat access.log | grep ERROR | wc -l",
+            "stdout": [
+                "linux-lab:~/lab-03/logs$ cat access.log | grep ERROR | wc -l",
+                "2",
+                "linux-lab:~/lab-03/logs$",
+            ],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["completed"] is True
+
+
 def test_lab_04_process_quest_command_only():
     lab = {
         "steps": [
@@ -457,4 +501,29 @@ def test_lab_05_signals_quest_command_only():
     ]
     result = check_lab_progress(lab, history, command_only=True)
     assert result["completed"] is True
+
+
+def test_step_04_accepts_ls_in_labs_without_captured_output():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-01"},
+        "steps": [{"id": "step-04-find-mission"}],
+    }
+    history = [
+        {
+            "command": "cd labs/",
+            "stdout": [],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-01",
+        },
+        {
+            "command": "ls",
+            "stdout": [],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-01/labs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["stepsCompleted"] == 1
 

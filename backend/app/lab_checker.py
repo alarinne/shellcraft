@@ -24,8 +24,11 @@ _STEP_FAILURE_HINTS: dict[str, str] = {
     "step-01-inspect": "Run `ls -l deploy.sh` or `stat deploy.sh` to read the current mode.",
     "step-02-chmod": "Run `chmod 755 deploy.sh` to make the script executable.",
     "step-01-view-log": "Run `cat access.log` or `head access.log` in the logs directory.",
-    "step-02-grep-errors": "Run `grep ERROR access.log` to filter error lines.",
-    "step-03-count-errors": "Run `grep ERROR access.log | wc -l` or `grep -c ERROR access.log`.",
+    "step-02-grep-errors": "Run `grep ERROR access.log` or `cat access.log | grep ERROR`.",
+    "step-03-count-errors": (
+        "Run `grep ERROR access.log | wc -l`, `grep -c ERROR access.log`, "
+        "or `cat access.log | grep ERROR | wc -l`."
+    ),
     "step-01-start-worker": "Run `./worker.sh &` to start the worker in the background.",
     "step-02-find-worker": "Run `ps aux` or `pgrep -f worker` to locate the worker process.",
     "step-03-stop-worker": "Run `pkill -f worker.sh` or `kill` with the worker PID.",
@@ -83,6 +86,42 @@ def _stdout_text(entry: dict[str, Any]) -> str:
     return "\n".join(entry.get("stdout", [])).strip()
 
 
+def _output_has_error_lines(out: str) -> bool:
+    return bool(re.search(r"\bERROR\b", out))
+
+
+def _output_shows_count(out: str, count: str = "2") -> bool:
+    for line in out.splitlines():
+        stripped = line.strip()
+        if stripped == count:
+            return True
+        if re.fullmatch(r"\d+", stripped) and stripped == count:
+            return True
+    return out.strip() == count
+
+
+def _grep_filters_access_log(cmd: str) -> bool:
+    lower = normalize_command(cmd).lower()
+    if "access.log" not in lower:
+        return False
+    if "grep" not in lower:
+        return False
+    if "wc" in lower or "grep -c" in lower:
+        return False
+    return True
+
+
+def _counts_access_log_errors(cmd: str) -> bool:
+    lower = normalize_command(cmd).lower()
+    if "access.log" not in lower and "access.log" not in cmd:
+        return False
+    if lower.startswith("grep -c ") and "access.log" in lower:
+        return True
+    if "|" in cmd and "grep" in lower and "wc" in lower:
+        return True
+    return False
+
+
 def _is_listing_command(cmd: str) -> bool:
     normalized = normalize_command(cmd)
     return normalized == "ls" or normalized.startswith("ls ")
@@ -126,7 +165,8 @@ def _find_mission_listing(cmd: str, entry_cwd: str, out: str, *, command_only: b
     lists_labs = _listing_resolves_to(cmd, entry_cwd, _LAB01_MISSION_DIR)
     if command_only:
         return in_labs or lists_labs
-    if in_labs and "mission.txt" in out:
+    # mission.txt is always present in labs; PTY capture may miss short ls output.
+    if in_labs:
         return True
     if lists_labs and "mission.txt" in out:
         return True
@@ -190,25 +230,22 @@ def _view_access_log(cmd: str, entry_cwd: str, out: str, *, command_only: bool) 
 
 
 def _grep_errors(cmd: str, out: str, *, command_only: bool) -> bool:
+    if not _grep_filters_access_log(cmd):
+        return False
     normalized = normalize_command(cmd)
-    if not normalized.startswith("grep"):
-        return False
-    if "access.log" not in normalized and "access.log" not in cmd:
-        return False
-    if "|" in cmd:
+    if "|" not in cmd and not normalized.startswith("grep"):
         return False
     if command_only:
         return "error" in normalized.lower()
-    return "ERROR" in out
+    return _output_has_error_lines(out)
 
 
 def _count_errors(cmd: str, out: str, *, command_only: bool) -> bool:
-    normalized = normalize_command(cmd)
-    if normalized.startswith("grep -c ") and "access.log" in normalized:
-        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
-    if "|" in cmd and "grep" in cmd and "wc" in cmd:
-        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
-    return False
+    if not _counts_access_log_errors(cmd):
+        return False
+    if command_only:
+        return True
+    return _output_shows_count(out, "2")
 
 
 def _starts_background(cmd: str, script: str) -> bool:

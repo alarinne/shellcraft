@@ -17,7 +17,14 @@ from pydantic import BaseModel
 from . import __version__
 from .engine import check_command, next_step_id
 from .lab_checker import check_lab_progress
-from .sandbox import SANDBOX_LAB_IDS, SandboxError, read_live_lab_state, read_shell_cwd, sandbox_manager
+from .sandbox import (
+    SANDBOX_LAB_IDS,
+    SandboxError,
+    read_live_lab_state,
+    read_shell_cwd,
+    resolve_live_cwd,
+    sandbox_manager,
+)
 from .terminal_ws import set_labs, terminal_websocket
 
 LABS_DIR = Path(__file__).parent / "labs"
@@ -160,7 +167,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="lab not found")
 
         history, command_only = sandbox_manager.history_for_check(session)
-        live_cwd = read_shell_cwd(session.container_name) or session.cwd
+        live_cwd = resolve_live_cwd(session.cwd, read_shell_cwd(session.container_name))
         session.cwd = live_cwd
         live_state = read_live_lab_state(session.container_name, session.lab_id)
         result = check_lab_progress(
@@ -172,6 +179,7 @@ def create_app() -> FastAPI:
         )
         result["labId"] = session.lab_id
         result["cwd"] = live_cwd
+        result["liveState"] = live_state
         return result
 
     @app.delete("/api/sandbox/sessions/{session_id}")
