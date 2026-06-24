@@ -61,11 +61,11 @@ export class App {
   }
 
   protected go(path: string): void {
-    const [route, fragment] = path.split('#');
+    const [, fragment] = path.split('#');
     void this.router.navigateByUrl(path).then(() => {
       if (fragment) {
         this.viewportScroller.scrollToAnchor(fragment);
-      } else if (route === '/') {
+      } else {
         this.viewportScroller.scrollToPosition([0, 0]);
       }
     });
