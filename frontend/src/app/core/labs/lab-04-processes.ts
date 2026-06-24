@@ -20,7 +20,7 @@ export const LAB_04_PROCESSES: Lab = {
       acceptedCommands: ['./worker.sh &', 'bash worker.sh &', 'sh worker.sh &', './worker.sh & disown'],
       expectedOutput: [],
       explanation: 'Appending & runs a command in the background so your shell stays free.',
-      hint: 'Run ./worker.sh with & at the end.',
+      hint: 'Run ./worker.sh, bash worker.sh, or sh worker.sh with & at the end.',
       visual: { focus: 'permissions', labels: ['background', 'worker.sh'], targetPath: '/home/guest/lab-04/worker.sh' },
     },
     {

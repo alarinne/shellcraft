@@ -123,7 +123,7 @@ async def terminal_websocket(websocket: WebSocket, session_id: str) -> None:
     log_lock = asyncio.Lock()
 
     async def log_command(command: str) -> None:
-        await asyncio.sleep(0.55)
+        await asyncio.sleep(0.75)
         async with log_lock:
             output_text = bytes(capture_buffer).decode("utf-8", errors="replace")
             capture_buffer.clear()
