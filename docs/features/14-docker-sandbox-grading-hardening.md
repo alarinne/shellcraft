@@ -1,7 +1,7 @@
 # Feature: Docker sandbox grading hardening
 
 - **Issue:** (branch `fix/docker-sandbox-grading`)
-- **PR:** (pending)
+- **PR:** https://github.com/alarinne/shellcraft/pull/44
 - **Status:** Shipped on branch
 - **Area:** frontend | backend | infra
 
