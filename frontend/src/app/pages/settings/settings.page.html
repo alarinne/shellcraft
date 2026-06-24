@@ -1,0 +1,60 @@
+<section class="sc-screen sc-settings">
+  <header class="sc-settings-head">
+    <span>Preferences</span>
+    <h1>Settings</h1>
+    <p>Personalize your ShellCraft workspace. Changes are saved to your account.</p>
+  </header>
+
+  <form class="sc-settings-form" (submit)="$event.preventDefault(); save()">
+    <label class="sc-setting-row">
+      <span>Theme</span>
+      <select [value]="theme()" (change)="setTheme($any($event.target).value)">
+        @for (option of themes; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="sc-setting-row">
+      <span>Terminal font size: {{ terminalFontSize() }}px</span>
+      <input
+        type="range"
+        min="10"
+        max="24"
+        step="1"
+        [value]="terminalFontSize()"
+        (input)="setFontSize($any($event.target).value)"
+      />
+    </label>
+
+    <label class="sc-setting-toggle">
+      <input
+        type="checkbox"
+        [checked]="soundEnabled()"
+        (change)="setSound($any($event.target).checked)"
+      />
+      <span>Sound effects</span>
+    </label>
+
+    <label class="sc-setting-toggle">
+      <input
+        type="checkbox"
+        [checked]="reducedMotion()"
+        (change)="setReducedMotion($any($event.target).checked)"
+      />
+      <span>Reduce motion</span>
+    </label>
+
+    <div class="sc-settings-actions">
+      <button class="sc-btn sc-btn-primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save settings' }}
+      </button>
+      @if (status() === 'saved') {
+        <p class="sc-settings-status is-ok" role="status">Settings saved.</p>
+      }
+      @if (status() === 'error') {
+        <p class="sc-settings-status is-error" role="alert">Could not save settings.</p>
+      }
+    </div>
+  </form>
+</section>

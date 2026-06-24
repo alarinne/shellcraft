@@ -33,6 +33,38 @@ body {
   --sc-radius: 8px;
 }
 
+/* Light theme override (Settings -> Theme). */
+:root[data-theme='light'] {
+  --sc-bg: #eef2f7;
+  --sc-bg-2: #e4eaf2;
+  --sc-panel: #ffffff;
+  --sc-panel-2: #f4f7fb;
+  --sc-line: #c7d3e0;
+  --sc-line-soft: rgba(70, 95, 125, 0.22);
+  --sc-text: #0c1620;
+  --sc-muted: #4b5d70;
+  --sc-blue: #1f78d8;
+  --sc-blue-strong: #1565c0;
+  --sc-purple: #6d3fd6;
+  --sc-orange: #c97a10;
+  --sc-green: #0f9d58;
+  --sc-red: #d83a48;
+}
+
+/* Reduce motion (Settings -> Reduce motion). */
+:root[data-reduced-motion='true'] {
+  scroll-behavior: auto;
+}
+
+:root[data-reduced-motion='true'] *,
+:root[data-reduced-motion='true'] *::before,
+:root[data-reduced-motion='true'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
 button,
 input,
 textarea,
@@ -586,7 +618,7 @@ button {
   padding: 24px;
   color: #dceaff;
   background: #030608;
-  font-size: 0.92rem;
+  font-size: var(--sc-terminal-font-size, 0.92rem);
 }
 
 .sc-terminal-body p {

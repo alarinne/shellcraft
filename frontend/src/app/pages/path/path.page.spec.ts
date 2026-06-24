@@ -1,12 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AUTH_STORAGE, createMemoryAuthStorage } from '../../core/auth/auth-storage';
 import { AuthService } from '../../core/auth/auth.service';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
-import { LabProgress } from '../../core/progress/lab-progress';
+import { installApiMock, settle } from '../../core/testing/api-mock';
 import { PathPage } from './path.page';
 
+const member = {
+  id: 'u-ada',
+  name: 'Ada Lovelace',
+  email: 'ada@shellcraft.dev',
+  xp: 120,
+  level: 1,
+  createdAt: '2026-01-01T00:00:00Z',
+};
+
 describe('PathPage', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PathPage],
@@ -31,11 +43,20 @@ describe('PathPage', () => {
     expect(compiled.querySelectorAll('.sc-roadmap-card').length).toBe(5);
   });
 
-  it('updates stats and lab status after Lab 01 is claimed', () => {
-    TestBed.inject(AuthService).register('Ada Lovelace', 'ada@shellcraft.dev', 'secret1');
-    TestBed.inject(LabProgress).complete(LAB_01_FILESYSTEM);
+  it('shows progress-driven lab status for a signed-in member', async () => {
+    installApiMock({
+      'GET /api/auth/me': { status: 200, body: member },
+      'GET /api/progress': {
+        status: 200,
+        body: [{ labId: LAB_01_FILESYSTEM.id, status: 'completed' }],
+      },
+      'GET /api/settings': { status: 404, body: { detail: 'none' } },
+    });
+    await TestBed.inject(AuthService).restoreSession();
 
     const fixture = TestBed.createComponent(PathPage);
+    fixture.detectChanges();
+    await settle();
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 

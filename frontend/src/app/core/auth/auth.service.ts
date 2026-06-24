@@ -1,13 +1,12 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { AUTH_STORAGE } from './auth-storage';
-
-const USERS_KEY = 'shellcraft.auth.users.v1';
-const SESSION_KEY = 'shellcraft.auth.session.v1';
+import { computed, Injectable, signal } from '@angular/core';
+import { apiFetch } from '../api/http';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  xp: number;
+  level: number;
 }
 
 export interface AuthResult {
@@ -16,145 +15,89 @@ export interface AuthResult {
   error?: string;
 }
 
-interface StoredUser extends AuthUser {
-  salt: string;
-  passwordDigest: string;
+/** Backend `UserPublic` payload (camelCase). */
+interface UserPayload {
+  id: string;
+  name: string;
+  email: string;
+  xp: number;
+  level: number;
   createdAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly storage = inject(AUTH_STORAGE);
-  private readonly users = signal<readonly StoredUser[]>(readJson<StoredUser[]>(this.storage, USERS_KEY, []));
-  private readonly sessionUserId = signal<string | null>(this.storage.getItem(SESSION_KEY));
+  private readonly _currentUser = signal<AuthUser | null>(null);
 
-  readonly currentUser = computed<AuthUser | null>(() => {
-    const userId = this.sessionUserId();
-    const user = this.users().find((candidate) => candidate.id === userId);
-    return user ? publicUser(user) : null;
-  });
+  readonly currentUser = this._currentUser.asReadonly();
+  readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
-  readonly isAuthenticated = computed(() => this.currentUser() !== null);
+  /**
+   * Hydrate the session from the httpOnly cookie on app start. Resolves to the
+   * user when a valid session exists, otherwise `null`. Never rejects.
+   */
+  async restoreSession(): Promise<AuthUser | null> {
+    const result = await apiFetch<UserPayload>('/api/auth/me');
+    const user = result.ok && result.data ? toAuthUser(result.data) : null;
+    this._currentUser.set(user);
+    return user;
+  }
 
-  register(name: string, email: string, password: string): AuthResult {
-    const normalizedName = normalizeName(name);
-    const normalizedEmail = normalizeEmail(email);
-    const validationError = validateCredentials(normalizedName, normalizedEmail, password);
-    if (validationError) {
-      return { ok: false, error: validationError };
+  async register(name: string, email: string, password: string): Promise<AuthResult> {
+    const result = await apiFetch<UserPayload>('/api/auth/register', {
+      method: 'POST',
+      json: { name: name.trim(), email: email.trim(), password },
+    });
+    if (!result.ok || !result.data) {
+      return { ok: false, error: registerError(result.status, result.error) };
     }
+    const user = toAuthUser(result.data);
+    this._currentUser.set(user);
+    return { ok: true, user };
+  }
 
-    if (this.users().some((user) => user.email === normalizedEmail)) {
-      return { ok: false, error: 'This email is already registered.' };
+  async login(identifier: string, password: string): Promise<AuthResult> {
+    const result = await apiFetch<UserPayload>('/api/auth/login', {
+      method: 'POST',
+      json: { identifier: identifier.trim(), password },
+    });
+    if (!result.ok || !result.data) {
+      return { ok: false, error: loginError(result.status, result.error) };
     }
-
-    const salt = createSalt();
-    const user: StoredUser = {
-      id: createUserId(),
-      name: normalizedName,
-      email: normalizedEmail,
-      salt,
-      // Demo-only client digest. Production auth must hash on the backend.
-      passwordDigest: digestPassword(password, salt),
-      createdAt: new Date().toISOString(),
-    };
-
-    const nextUsers = [...this.users(), user];
-    this.users.set(nextUsers);
-    this.persistUsers(nextUsers);
-    this.setSession(user.id);
-    return { ok: true, user: publicUser(user) };
+    const user = toAuthUser(result.data);
+    this._currentUser.set(user);
+    return { ok: true, user };
   }
 
-  login(identifier: string, password: string): AuthResult {
-    const normalizedIdentifier = normalizeLoginIdentifier(identifier);
-    const user = this.users().find(
-      (candidate) =>
-        candidate.email === normalizedIdentifier ||
-        candidate.name.toLowerCase() === normalizedIdentifier,
-    );
-    if (!user || user.passwordDigest !== digestPassword(password, user.salt)) {
-      return { ok: false, error: 'Name, email, or password is incorrect.' };
-    }
-
-    this.setSession(user.id);
-    return { ok: true, user: publicUser(user) };
-  }
-
-  logout(): void {
-    this.sessionUserId.set(null);
-    this.storage.removeItem(SESSION_KEY);
-  }
-
-  private setSession(userId: string): void {
-    this.sessionUserId.set(userId);
-    this.storage.setItem(SESSION_KEY, userId);
-  }
-
-  private persistUsers(users: readonly StoredUser[]): void {
-    this.storage.setItem(USERS_KEY, JSON.stringify(users));
+  async logout(): Promise<void> {
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+    this._currentUser.set(null);
   }
 }
 
-function publicUser(user: StoredUser): AuthUser {
+function toAuthUser(payload: UserPayload): AuthUser {
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
+    id: payload.id,
+    name: payload.name,
+    email: payload.email,
+    xp: payload.xp,
+    level: payload.level,
   };
 }
 
-function normalizeName(name: string): string {
-  return name.trim().replace(/\s+/g, ' ').slice(0, 48);
-}
-
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
-
-function normalizeLoginIdentifier(identifier: string): string {
-  return identifier.trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
-function validateCredentials(name: string, email: string, password: string): string | null {
-  if (name.length < 2) {
-    return 'Enter your name.';
+function registerError(status: number, error?: string): string {
+  if (status === 409) {
+    return 'This email is already registered.';
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return 'Enter a valid email.';
+  if (status === 422) {
+    return error ?? 'Enter a valid name, email, and a password of at least 8 characters.';
   }
-  if (password.length < 6) {
-    return 'Password must be at least 6 characters.';
-  }
-  return null;
+  return error ?? 'Could not create your account.';
 }
 
-function createUserId(): string {
-  return `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function createSalt(): string {
-  return Math.random().toString(36).slice(2, 12);
-}
-
-function digestPassword(password: string, salt: string): string {
-  let hash = 2166136261;
-  const input = `${salt}:${password}`;
-  for (let index = 0; index < input.length; index += 1) {
-    hash ^= input.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+function loginError(status: number, error?: string): string {
+  if (status === 401) {
+    return 'Name, email, or password is incorrect.';
   }
-  return (hash >>> 0).toString(16).padStart(8, '0');
-}
-
-function readJson<T>(storage: { getItem(key: string): string | null }, key: string, fallback: T): T {
-  const raw = storage.getItem(key);
-  if (!raw) {
-    return fallback;
-  }
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
+  return error ?? 'Could not sign you in.';
 }

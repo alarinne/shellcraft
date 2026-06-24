@@ -38,6 +38,7 @@ export class App {
     { label: 'Labs', path: '/path', match: '/path' },
     { label: 'Lab Screen', path: `/lab/${DEFAULT_LAB_ID}`, match: '/lab' },
     { label: 'Completed', path: '/complete', match: '/complete' },
+    { label: 'Settings', path: '/settings', match: '/settings' },
     { label: 'About', path: '/#about', match: '/#about' },
   ];
 
@@ -78,8 +79,8 @@ export class App {
     void this.router.navigate(['/auth'], { queryParams: { mode: 'register' } });
   }
 
-  protected logout(): void {
-    this.auth.logout();
+  protected async logout(): Promise<void> {
+    await this.auth.logout();
     void this.router.navigate(['/auth']);
   }
 }
