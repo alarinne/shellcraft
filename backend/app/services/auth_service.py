@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.config import get_settings
@@ -38,7 +39,11 @@ async def register(
         email=email,
         password_hash=hash_password(password),
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise EmailAlreadyRegistered(email) from exc
     await db.refresh(user)
     return user
 

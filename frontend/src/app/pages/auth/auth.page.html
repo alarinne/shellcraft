@@ -31,17 +31,22 @@
         <span>Password</span>
         <input
           type="password"
-          autocomplete="current-password"
+          [attr.autocomplete]="isRegister() ? 'new-password' : 'current-password'"
           [value]="password()"
           (input)="setPassword($any($event.target).value)"
         />
+        @if (isRegister()) {
+          <small class="sc-form-hint">{{ passwordRequirements }}</small>
+        }
       </label>
 
       @if (error(); as message) {
         <p class="sc-form-error" role="alert">{{ message }}</p>
       }
 
-      <button class="sc-btn sc-btn-primary" type="submit">{{ submitLabel() }}</button>
+      <button class="sc-btn sc-btn-primary" type="submit" [disabled]="submitting()">
+        {{ submitLabel() }}
+      </button>
     </form>
 
     <button class="sc-auth-switch" type="button" (click)="toggleMode()">
@@ -58,7 +63,9 @@
     </div>
     <div class="sc-terminal-body">
       <p class="prompt">guest@shellcraft:~$ whoami</p>
-      <p>{{ email() || 'guest_student' }}</p>
+      <p>{{ whoamiLine() }}</p>
+      <p class="prompt">guest@shellcraft:~$ echo $SHELLCRAFT_PASS</p>
+      <p>{{ passwordPreview() }}</p>
       <p class="prompt">guest@shellcraft:~$ ls progress</p>
       <p>labs xp badges</p>
     </div>

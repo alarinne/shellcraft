@@ -90,7 +90,10 @@ function registerError(status: number, error?: string): string {
     return 'This email is already registered.';
   }
   if (status === 422) {
-    return error ?? 'Enter a valid name, email, and a password of at least 8 characters.';
+    return error ?? 'Enter a valid name, email, and password that meets the requirements.';
+  }
+  if (status === 503) {
+    return error ?? 'Service temporarily unavailable. Try again in a moment.';
   }
   return error ?? 'Could not create your account.';
 }
@@ -98,6 +101,9 @@ function registerError(status: number, error?: string): string {
 function loginError(status: number, error?: string): string {
   if (status === 401) {
     return 'Name, email, or password is incorrect.';
+  }
+  if (status === 503) {
+    return error ?? 'Service temporarily unavailable. Try again in a moment.';
   }
   return error ?? 'Could not sign you in.';
 }

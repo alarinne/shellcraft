@@ -1844,6 +1844,18 @@ button {
   line-height: 1.35;
 }
 
+.sc-form-hint {
+  display: block;
+  margin-top: 6px;
+  color: #8aa0b8;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.sc-auth-terminal .sc-terminal-body p:not(.prompt) {
+  color: #dceaff;
+}
+
 .sc-auth-switch {
   margin-top: 14px;
   color: var(--sc-blue);

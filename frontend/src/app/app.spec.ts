@@ -54,7 +54,7 @@ describe('App shell', () => {
     expect(compiled.textContent).toContain('aspandyar@gmail.com');
   });
 
-  it('omits Settings from the footer navigation for signed-in members', async () => {
+  it('omits Settings from navigation for signed-in members', async () => {
     installApiMock({
       'GET /api/auth/me': { status: 200, body: member },
       'GET /api/progress': { status: 200, body: [] },
@@ -64,9 +64,10 @@ describe('App shell', () => {
 
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
+    const topNav = fixture.nativeElement.querySelector('.sc-nav') as HTMLElement;
     const footerNav = fixture.nativeElement.querySelector('.sc-footer-nav') as HTMLElement;
 
-    expect(fixture.nativeElement.textContent).toContain('Settings');
+    expect(topNav.textContent).not.toContain('Settings');
     expect(footerNav.textContent).not.toContain('Settings');
   });
 
