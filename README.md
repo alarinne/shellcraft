@@ -1,54 +1,102 @@
 # ShellCraft
 
-ShellCraft is an interactive visual trainer for learning Linux commands.
+ShellCraft is an interactive Linux learning lab. It helps beginners practice shell commands through guided missions, visual feedback, XP, badges, and a terminal-style interface.
 
-It helps beginners practice command-line tasks in a safe simulated terminal. Users choose short labs, type commands, inspect output, and watch visual explanations of what changed in the filesystem or permissions model.
+The project is designed for a clean run: reviewers can start the UI with Docker Compose or run the Angular frontend locally.
 
-## What It Does
+## Project Idea
 
-ShellCraft turns Linux practice into short hands-on labs:
+Learning Linux from static notes is hard because beginners do not always see what a command changed. ShellCraft turns command-line practice into short missions:
 
-* teaches basic shell navigation, files, and permissions
-* shows simulated terminal output for each command
-* visualizes command effects instead of only printing text
-* tracks lab progress, XP, and badges
-* keeps command execution inside a safe learning simulator
+- explore filesystem and permission tasks step by step
+- type commands in a terminal-style lab screen
+- see visual explanations of command effects
+- follow a roadmap of labs with XP and badge rewards
+- practice safely without risking the learner's own machine
 
-## Current MVP
-
-The current frontend prototype has four connected screens:
-
-* Landing Page
-* Learning Path
-* Lab Screen
-* Lab Completed
-
-Available now:
-
-* Dark developer UI with blue, purple, orange, and terminal-green accents
-* Angular Signals for screen navigation
-* Simulated terminal command output
-* Lab cards, progress stats, XP, and badge preview
-* Permission-focused lab workbench
-* Completion screen with learned commands recap
+The latest UI includes guest exploration pages, frontend-only sign in/sign up, local progress, a lab roadmap, and completed-lab reward screens.
 
 ## Tech Stack
 
-Current:
+- Frontend: Angular 21, TypeScript, SCSS
+- Frontend state: Angular Signals
+- Backend: FastAPI, Uvicorn
+- Sandbox: Docker-based Linux lab image for real command sessions
+- Packaging: Docker Compose
+- Tests: Angular/Vitest frontend tests, pytest backend tests
+- CI: GitHub Actions
 
-* Frontend: Angular 21
-* State: Angular Signals
-* Styling: SCSS
-* Data: frontend mock data for the MVP
+## Screenshots
 
-Planned:
+### Explore Page
 
-* Backend: FastAPI
-* Lab content: JSON files
-* Packaging: Docker Compose
-* CI: GitHub Actions
+![ShellCraft explore page](screenshots/explore-page.jpg)
 
-## How To Run
+### Authentication Page
+
+![ShellCraft authentication page](screenshots/auth-page.jpg)
+
+### Real Linux Containers Section
+
+![ShellCraft real Linux containers section](screenshots/real-linux-containers.jpg)
+
+## Quick Start With Docker
+
+Requirements:
+
+- Git
+- Docker Desktop or Docker Engine with Docker Compose
+
+Start the frontend clean-run stack:
+
+```bash
+git clone https://github.com/alarinne/shellcraft.git
+cd shellcraft
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:4200
+```
+
+Stop the stack:
+
+```bash
+docker compose down
+```
+
+## Full Stack With Backend And Sandbox
+
+The full profile starts the frontend, FastAPI backend, and sandbox image used for real Linux lab sessions.
+
+```bash
+docker compose --profile full up --build
+```
+
+Open:
+
+```text
+Frontend: http://localhost:4200
+Backend API: http://localhost:8000
+Backend docs: http://localhost:8000/docs
+```
+
+Notes:
+
+- Docker must be running before starting the full profile.
+- Real Linux lab sessions require access to the Docker socket from the backend container.
+- On Docker Desktop, use Linux containers mode.
+
+## Local Frontend Development
+
+Requirements:
+
+- Node.js 22+
+- npm
+
+Run:
 
 ```bash
 cd frontend
@@ -62,7 +110,38 @@ Open:
 http://localhost:4200
 ```
 
+## Local Backend Development
+
+Requirements:
+
+- Python 3.12+
+- Docker, only if sandbox mode is enabled
+
+Run:
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Open:
+
+```text
+http://localhost:8000/docs
+```
+
+For macOS/Linux, activate the virtual environment with:
+
+```bash
+source .venv/bin/activate
+```
+
 ## Build And Test
+
+Frontend:
 
 ```bash
 cd frontend
@@ -70,56 +149,32 @@ npm run build
 npm test -- --watch=false
 ```
 
-Current verification:
+Backend:
 
-* `npm run build` passes
-* `npm test -- --watch=false` passes
-* Local browser flow works across Landing, Learning Path, Lab Screen, and Lab Completed
+```bash
+cd backend
+pytest -q
+```
 
 ## Project Structure
 
 ```text
 shellcraft/
-  frontend/        Angular application
-  backend/         Planned FastAPI backend notes
-  docs/            API contract, lab schema, and ADRs
-  screenshots/     Future README screenshots and GIFs
-  README.md        Main project documentation
+  frontend/        Angular application and UI
+  backend/         FastAPI backend and sandbox integration
+  docs/            API contracts, ADRs, and feature notes
+  screenshots/     README screenshots
+  docker-compose.yml
+  README.md
 ```
 
-## Safety Model
+## Current MVP
 
-ShellCraft is a learning simulator. User-entered commands must not be executed directly on the host machine or server.
-
-For the MVP, terminal behavior is mocked in the frontend. Later backend command validation should parse and evaluate commands against a controlled lab state instead of invoking a real shell.
-
-## Planned Backend API
-
-```text
-GET  /api/health
-GET  /api/labs
-GET  /api/labs/{id}
-POST /api/commands/check
-```
-
-More details are documented in `docs/api-contract.md` and `docs/lab-json-schema.md`.
-
-## Roadmap
-
-Next product steps:
-
-* Extract large frontend sections into standalone presentational components
-* Add a real Lab 01 step-by-step command flow
-* Persist local progress in `localStorage`
-* Add screenshots or a GIF to this README
-* Implement the FastAPI lab API
-
-## Git Workflow
-
-Recommended branches:
-
-* `main`: stable public branch
-* `develop`: active integration branch
-* `feature/<name>`: individual tasks
-
+- Explore page with ShellCraft overview and real Linux containers section
+- Guest roadmap for the lab path
+- Frontend-only sign in/sign up flow
+- Local progress tracking for labs, XP, and badges
+- Lab screen with terminal workflow and visual command feedback
+- Completed screen with reward/badge presentation
+- Docker clean-run setup for reviewers
 
