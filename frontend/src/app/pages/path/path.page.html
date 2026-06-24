@@ -54,7 +54,12 @@
           <span class="dot green"></span>
           <small>guest@shellcraft</small>
         </div>
-        <code>$ whoami<br />guest_student<br />$ ls learning_path<br />lab_01_filesystem lab_02_permissions lab_03_pipes</code>
+        <code>
+          $ whoami<br />{{ whoamiLine() }}<br />$ ls learning_path<br />
+          @for (entry of learningPathEntries(); track entry.slug) {
+            <span class="sc-path-lab" [attr.data-status]="entry.status">{{ entry.slug }}</span>
+          }
+        </code>
       </div>
     </div>
   </section>

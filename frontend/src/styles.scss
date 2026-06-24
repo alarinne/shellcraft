@@ -1037,6 +1037,46 @@ button {
   line-height: 1.7;
 }
 
+.sc-path-terminal .sc-path-lab::after {
+  content: ' ';
+}
+
+.sc-path-terminal .sc-path-lab[data-status='done'] {
+  color: var(--sc-green);
+}
+
+.sc-path-terminal .sc-path-lab[data-status='done']::before {
+  content: '[';
+  color: #8aa0b8;
+}
+
+.sc-path-terminal .sc-path-lab[data-status='done']::after {
+  content: '✓] ';
+  color: var(--sc-green);
+}
+
+.sc-path-terminal .sc-path-lab[data-status='current'] {
+  color: #f4f8ff;
+}
+
+.sc-path-terminal .sc-path-lab[data-status='current']::after {
+  content: '* ';
+  color: var(--sc-orange);
+}
+
+.sc-path-terminal .sc-path-lab[data-status='next']::after {
+  content: '→ ';
+  color: #8aa0b8;
+}
+
+.sc-path-terminal .sc-path-lab[data-status='locked'] {
+  color: #5f738a;
+}
+
+.sc-path-terminal .sc-path-lab[data-status='locked']::after {
+  content: ' ';
+}
+
 .sc-path-overview {
   position: relative;
   overflow: hidden;

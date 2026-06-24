@@ -54,6 +54,22 @@ describe('App shell', () => {
     expect(compiled.textContent).toContain('aspandyar@gmail.com');
   });
 
+  it('omits Settings from the footer navigation for signed-in members', async () => {
+    installApiMock({
+      'GET /api/auth/me': { status: 200, body: member },
+      'GET /api/progress': { status: 200, body: [] },
+      'GET /api/settings': { status: 404, body: { detail: 'no settings' } },
+    });
+    await TestBed.inject(AuthService).restoreSession();
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const footerNav = fixture.nativeElement.querySelector('.sc-footer-nav') as HTMLElement;
+
+    expect(fixture.nativeElement.textContent).toContain('Settings');
+    expect(footerNav.textContent).not.toContain('Settings');
+  });
+
   it('should route between landing, path, and lab screens', async () => {
     installApiMock({
       'GET /api/auth/me': { status: 200, body: member },

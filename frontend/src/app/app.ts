@@ -11,6 +11,8 @@ interface ShellNavItem {
   path: string;
   /** Route prefix used to highlight the active link. */
   match: string;
+  /** When false, link stays in the top bar but is omitted from the footer nav. */
+  footer?: boolean;
 }
 
 /**
@@ -38,7 +40,7 @@ export class App {
     { label: 'Labs', path: '/path', match: '/path' },
     { label: 'Lab Screen', path: `/lab/${DEFAULT_LAB_ID}`, match: '/lab' },
     { label: 'Completed', path: '/complete', match: '/complete' },
-    { label: 'Settings', path: '/settings', match: '/settings' },
+    { label: 'Settings', path: '/settings', match: '/settings', footer: false },
     { label: 'About', path: '/#about', match: '/#about' },
   ];
 
@@ -52,6 +54,7 @@ export class App {
   );
   protected readonly currentUser = this.auth.currentUser;
   protected readonly nav = computed(() => (this.currentUser() ? this.memberNav : this.guestNav));
+  protected readonly footerNav = computed(() => this.nav().filter((item) => item.footer !== false));
   protected readonly sessionTitle = computed(() => this.currentUser()?.name ?? 'Guest');
   protected readonly sessionMeta = computed(() => this.currentUser()?.email ?? 'Not signed in');
 
