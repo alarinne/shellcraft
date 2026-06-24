@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AUTH_STORAGE, createMemoryAuthStorage } from '../../core/auth/auth-storage';
 import { EXECUTION_BACKEND } from '../../core/execution/execution-backend';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { SimulatedBackend } from '../../core/execution/simulated-backend';
@@ -20,6 +21,7 @@ describe('CompletePage', () => {
       imports: [CompletePage, EmptyRouteComponent],
       providers: [
         provideRouter([{ path: 'lab/:id', component: EmptyRouteComponent }]),
+        { provide: AUTH_STORAGE, useFactory: createMemoryAuthStorage },
         { provide: EXECUTION_BACKEND, useClass: SimulatedBackend },
       ],
     }).compileComponents();

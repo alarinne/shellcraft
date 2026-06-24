@@ -9,7 +9,7 @@
     </button>
 
     <nav class="sc-nav" aria-label="ShellCraft screens">
-      @for (item of nav; track item.path) {
+      @for (item of nav(); track item.path) {
         <button
           type="button"
           [class.is-active]="isActive(item)"
@@ -21,10 +21,55 @@
     </nav>
 
     <div class="sc-session">
-      <span>ShellCraft</span>
-      <strong>Pro Developer</strong>
+      @if (currentUser()) {
+        <span>{{ sessionMeta() }}</span>
+        <strong>{{ sessionTitle() }}</strong>
+        <button class="sc-session-action" type="button" (click)="logout()">Logout</button>
+      } @else {
+        <button class="sc-session-action is-primary" type="button" (click)="signUp()">Sign up</button>
+        <button class="sc-session-action" type="button" (click)="signIn()">Sign in</button>
+      }
     </div>
   </header>
 
   <router-outlet />
+
+  <footer class="sc-footer" aria-label="ShellCraft footer">
+    <section class="sc-footer-brand">
+      <strong>ShellCraft</strong>
+      <p>
+        Interactive Linux Lab for learning commands through guided missions. Master the shell
+        through real-time visual feedback.
+      </p>
+    </section>
+
+    <nav class="sc-footer-nav" aria-label="Footer navigation">
+      <span>Navigation</span>
+      @for (item of nav(); track item.path) {
+        <button type="button" (click)="go(item.path)">{{ item.label }}</button>
+      }
+      @if (currentUser()) {
+        <button type="button" (click)="logout()">Logout</button>
+      } @else {
+        <button type="button" (click)="signIn()">Sign in</button>
+      }
+    </nav>
+
+    <section class="sc-footer-contact" aria-label="Contact the team">
+      <span>Contact the team</span>
+      <a href="mailto:aruzhan.zharkenova.m@gmail.com">
+        <small aria-hidden="true">@</small>
+        aruzhan.zharkenova.m@gmail.com
+      </a>
+      <a href="mailto:aspandyar@gmail.com">
+        <small aria-hidden="true">@</small>
+        aspandyar@gmail.com
+      </a>
+    </section>
+
+    <div class="sc-footer-bottom">
+      <span>Built for Linux learning</span>
+      <span>&copy; 2026 ShellCraft</span>
+    </div>
+  </footer>
 </main>

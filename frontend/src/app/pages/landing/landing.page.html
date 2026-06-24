@@ -1,7 +1,7 @@
 <section class="sc-screen sc-landing" aria-label="ShellCraft landing page">
   <div class="sc-hero-copy">
     <span class="sc-chip sc-chip-blue">v0.1.4 Live Lab</span>
-    <h1>Learn Linux by seeing what commands actually do.</h1>
+    <h1>Learn Linux by seeing what <span class="sc-title-accent">commands</span> actually do.</h1>
     <p>
       A visual lab experience for developers. Interact with a simulated terminal, watch file
       structures shift in real time, and level up through focused shell missions.
@@ -38,29 +38,49 @@
     </div>
   </aside>
 
-  <div class="sc-feature-row">
+  <div id="about" class="sc-feature-row">
     <article class="sc-card">
-      <span class="sc-card-icon blue">01</span>
+      <span class="sc-card-icon blue">▹</span>
       <h3>Interactive Terminal</h3>
-      <p>A sandboxed environment that responds exactly like a real Linux terminal.</p>
+      <p>A sandboxed environment that responds exactly like a real Linux kernel. No simulations, just pure shell.</p>
     </article>
     <article class="sc-card">
-      <span class="sc-card-icon purple">02</span>
+      <span class="sc-card-icon purple">⌁</span>
       <h3>Visual Command Engine</h3>
-      <p>Watch filesystem and permission diagrams update as commands run.</p>
+      <p>Watch the filesystem and permissions update in real-time with high-fidelity visual diagrams and status badges.</p>
     </article>
     <article class="sc-card">
-      <span class="sc-card-icon orange">03</span>
+      <span class="sc-card-icon orange">⌬</span>
       <h3>Gamified Labs</h3>
-      <p>Challenge yourself with structured paths, XP, and badge unlocks.</p>
+      <p>Challenge yourself with structured paths. Earn badges as you level up from a script-kiddie to a kernel master.</p>
     </article>
   </div>
 
+  <section class="sc-real-linux" aria-label="Real Linux sandbox">
+    <div class="sc-real-linux-media" aria-label="Linux container illustration">
+      <img src="/real-linux-containers.png" alt="Shielded Linux containers running isolated lab sessions" />
+      <span class="sc-real-linux-media-label">LIVE_SANDBOX</span>
+    </div>
+
+    <div class="sc-real-linux-copy">
+      <h2>Practice in isolated Linux containers.</h2>
+      <p>
+        ShellCraft labs run guided missions in real Linux sessions, so learners type real
+        commands, inspect real output, and build confidence without risking their own machine.
+      </p>
+      <ul>
+        <li>Real command execution inside a Linux environment</li>
+        <li>Isolated Docker sessions for every lab attempt</li>
+        <li>Step-by-step validation that checks what the learner actually did</li>
+      </ul>
+    </div>
+  </section>
+
   <section class="sc-cta-panel">
     <h2>Ready to start your first Linux lab?</h2>
-    <p>Start by finding a mission file through simple filesystem navigation.</p>
+    <p>Join developers mastering the terminal. Start with permissions, navigation, or basic shell scripts today.</p>
     <button class="sc-btn sc-btn-primary" type="button" (click)="viewLabs()">
-      Start Lab 01
+      Start Lab 01 <span aria-hidden="true">›</span>
     </button>
   </section>
 </section>

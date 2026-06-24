@@ -1,10 +1,23 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { AUTH_STORAGE } from '../auth/auth-storage';
+import { AuthService } from '../auth/auth.service';
 import { LABS, LabCard, StatItem } from '../shellcraft-data';
 import { Lab } from '../execution/types';
 
+const PROGRESS_KEY = 'shellcraft.progress.by-user.v1';
+const GUEST_PROGRESS_KEY = 'guest';
+
 @Injectable({ providedIn: 'root' })
 export class LabProgress {
-  private readonly completedLabIds = signal<ReadonlySet<string>>(new Set());
+  private readonly auth = inject(AuthService);
+  private readonly storage = inject(AUTH_STORAGE);
+  private readonly completedByUser = signal<Record<string, readonly string[]>>(
+    readProgress(this.storage),
+  );
+  private readonly activeProgressKey = computed(() => this.auth.currentUser()?.id ?? GUEST_PROGRESS_KEY);
+  private readonly completedLabIds = computed<ReadonlySet<string>>(
+    () => new Set(this.completedByUser()[this.activeProgressKey()] ?? []),
+  );
 
   readonly stats = computed<readonly StatItem[]>(() => {
     const completedIds = this.completedLabIds();
@@ -42,18 +55,40 @@ export class LabProgress {
   }
 
   complete(lab: Lab | LabCard): void {
-    this.completedLabIds.update((ids) => new Set(ids).add(lab.id));
+    this.updateActiveProgress((ids) => ids.add(lab.id));
   }
 
   resetLab(labId: string): void {
-    this.completedLabIds.update((ids) => {
-      const nextIds = new Set(ids);
-      nextIds.delete(labId);
-      return nextIds;
+    this.updateActiveProgress((ids) => {
+      ids.delete(labId);
+      return ids;
     });
+  }
+
+  private updateActiveProgress(update: (ids: Set<string>) => Set<string>): void {
+    const key = this.activeProgressKey();
+    const nextIds = Array.from(update(new Set(this.completedByUser()[key] ?? [])));
+    const nextProgress = {
+      ...this.completedByUser(),
+      [key]: nextIds,
+    };
+    this.completedByUser.set(nextProgress);
+    this.storage.setItem(PROGRESS_KEY, JSON.stringify(nextProgress));
   }
 }
 
 function xpFor(completedIds: ReadonlySet<string>): number {
   return LABS.reduce((total, lab) => (completedIds.has(lab.id) ? total + lab.xp : total), 0);
+}
+
+function readProgress(storage: { getItem(key: string): string | null }): Record<string, readonly string[]> {
+  const raw = storage.getItem(PROGRESS_KEY);
+  if (!raw) {
+    return {};
+  }
+  try {
+    return JSON.parse(raw) as Record<string, readonly string[]>;
+  } catch {
+    return {};
+  }
 }

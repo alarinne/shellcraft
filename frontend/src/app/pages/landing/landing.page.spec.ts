@@ -17,6 +17,8 @@ describe('LandingPage', () => {
 
     expect(compiled.querySelector('h1')?.textContent).toContain('Learn Linux');
     expect(compiled.textContent).toContain('Interactive Terminal');
+    expect(compiled.textContent).toContain('Practice in isolated Linux containers');
+    expect(compiled.textContent).toContain('Isolated Docker sessions');
     expect(compiled.textContent).toContain('Start Lab 01');
   });
 });

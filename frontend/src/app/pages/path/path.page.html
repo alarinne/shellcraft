@@ -1,59 +1,119 @@
-<section class="sc-screen sc-path" aria-label="Learning path">
-  <aside class="sc-sidebar">
-    <span class="sc-chip sc-chip-purple">Learning Path</span>
-    <h2>Master the art of the terminal.</h2>
-    <p>Build shell confidence through interactive missions and visual command feedback.</p>
-    <div class="sc-stat-list">
-      @for (item of stats(); track item.label) {
-        <div>
-          <strong>{{ item.value }}</strong>
-          <span>{{ item.label }}</span>
-        </div>
-      }
-    </div>
-  </aside>
-
-  <div class="sc-path-main">
-    <div class="sc-section-heading">
-      <span>Recommended route</span>
-      <h2>Pro Developer Track</h2>
-    </div>
-
-    <div class="sc-lab-grid">
-      @for (lab of labs(); track lab.id) {
-        <article class="sc-lab-card" [class.is-locked]="lab.locked" [class]="'accent-' + lab.accent">
+@if (authenticated()) {
+  <section class="sc-screen sc-path" aria-label="Learning path">
+    <aside class="sc-sidebar">
+      <span class="sc-chip sc-chip-purple">Learning Path</span>
+      <h2>Master the art of the terminal.</h2>
+      <p>Build shell confidence through interactive missions and visual command feedback.</p>
+      <div class="sc-stat-list">
+        @for (item of stats(); track item.label) {
           <div>
-            <span>{{ lab.tag }}</span>
-            <strong>{{ lab.status }}</strong>
+            <strong>{{ item.value }}</strong>
+            <span>{{ item.label }}</span>
           </div>
-          <h3>{{ lab.title }}</h3>
-          <p>{{ lab.description }}</p>
-          <div class="sc-command-tags">
-            @for (command of lab.commands; track command) {
-              <small>{{ command }}</small>
+        }
+      </div>
+    </aside>
+
+    <div class="sc-path-main">
+      <div class="sc-section-heading">
+        <span>Recommended route</span>
+        <h2>Pro Developer Track</h2>
+      </div>
+
+      <div class="sc-lab-grid">
+        @for (lab of labs(); track lab.id) {
+          <article class="sc-lab-card" [class.is-locked]="lab.locked" [class]="'accent-' + lab.accent">
+            <div>
+              <span>{{ lab.tag }}</span>
+              <strong>{{ lab.status }}</strong>
+            </div>
+            <h3>{{ lab.title }}</h3>
+            <p>{{ lab.description }}</p>
+            <div class="sc-command-tags">
+              @for (command of lab.commands; track command) {
+                <small>{{ command }}</small>
+              }
+            </div>
+            <button
+              class="sc-btn"
+              type="button"
+              [class.sc-btn-primary]="!lab.locked"
+              [class.sc-btn-disabled]="lab.locked"
+              (click)="startLab(lab)"
+            >
+              {{ lab.actionLabel }}
+            </button>
+          </article>
+        }
+      </div>
+
+      <div class="sc-path-terminal">
+        <div class="sc-window-bar">
+          <span class="dot red"></span>
+          <span class="dot amber"></span>
+          <span class="dot green"></span>
+          <small>guest@shellcraft</small>
+        </div>
+        <code>$ whoami<br />guest_student<br />$ ls learning_path<br />lab_01_filesystem lab_02_permissions lab_03_pipes</code>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="sc-screen sc-path-overview" aria-label="ShellCraft learning paths overview">
+    <div class="sc-roadmap-heading">
+      <span class="sc-chip sc-chip-blue">Terminal Career Path</span>
+      <h1>Master the Linux Path</h1>
+      <p>
+        Navigate from first filesystem commands to confident terminal workflows. Each lab is
+        a mission node with XP toward your first ShellCraft tier.
+      </p>
+    </div>
+
+    <div class="sc-roadmap">
+      @for (lab of roadmapLabs; track lab.id) {
+        <article
+          class="sc-roadmap-card"
+          [class.is-right]="lab.side === 'right'"
+          [class.is-primary]="lab.primary"
+          [class]="'accent-' + lab.accent"
+        >
+          <div class="sc-roadmap-node">{{ lab.node }}</div>
+          <div class="sc-roadmap-card-inner">
+            <div class="sc-roadmap-card-head">
+              <h2>{{ lab.tag }} {{ lab.title }}</h2>
+              <strong>{{ lab.xp }} XP</strong>
+            </div>
+            <p>{{ lab.description }}</p>
+            <div class="sc-command-tags">
+              @for (command of lab.commands; track command) {
+                <small>{{ command }}</small>
+              }
+            </div>
+            @if (lab.primary) {
+              <button class="sc-btn sc-btn-primary" type="button" (click)="startGuestLab()">
+                Start Mission
+              </button>
+            } @else {
+              <span class="sc-roadmap-lock">Requires Lab {{ lab.requiresNode }} progress</span>
             }
           </div>
-          <button
-            class="sc-btn"
-            type="button"
-            [class.sc-btn-primary]="!lab.locked"
-            [class.sc-btn-disabled]="lab.locked"
-            (click)="startLab(lab)"
-          >
-            {{ lab.actionLabel }}
-          </button>
         </article>
       }
     </div>
 
-    <div class="sc-path-terminal">
-      <div class="sc-window-bar">
-        <span class="dot red"></span>
-        <span class="dot amber"></span>
-        <span class="dot green"></span>
-        <small>guest@shellcraft</small>
+    <section class="sc-tier-card">
+      <div class="sc-tier-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="img">
+          <path d="M7.5 3.5h9v10.2l-4.5 3-4.5-3V3.5Zm3.3 3v5.7l1.2.8 1.2-.8V6.5h-2.4Z" />
+          <path d="m12 14.8 1.35 2.75 3.05.44-2.2 2.15.52 3.03L12 21.74l-2.72 1.43.52-3.03-2.2-2.15 3.05-.44L12 14.8Z" />
+        </svg>
       </div>
-      <code>$ whoami<br />guest_student<br />$ ls learning_path<br />lab_01_filesystem lab_02_permissions lab_03_pipes</code>
-    </div>
-  </div>
-</section>
+      <span>Unlock reward</span>
+      <h2>Terminal Scout - Tier 1</h2>
+      <p>Complete all 5 labs and collect {{ totalRoadmapXp }} XP to earn the scout badge.</p>
+      <button class="sc-btn sc-btn-primary" type="button" (click)="startGuestLab()">
+        Sign up to start Lab 01
+      </button>
+    </section>
+  </section>
+}
