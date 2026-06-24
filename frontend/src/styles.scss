@@ -304,7 +304,7 @@ button {
   align-items: center;
   gap: 8px;
   min-height: 26px;
-  padding: 0 12px;
+  padding: 0 22px 0 14px;
   border-radius: 999px;
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.76rem;
@@ -867,6 +867,10 @@ button {
 .sc-panel h3 {
   margin: 0;
   color: var(--sc-text);
+}
+
+.sc-sidebar h2 {
+  margin-top: 16px;
 }
 
 .sc-cta-panel {
