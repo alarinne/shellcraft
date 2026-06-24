@@ -18,7 +18,7 @@
       }
 
       <label>
-        <span>Name or email</span>
+        <span>{{ isRegister() ? 'Email' : 'Name or email' }}</span>
         <input
           type="text"
           autocomplete="username"
