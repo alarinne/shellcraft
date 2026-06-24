@@ -7,6 +7,39 @@ export const LAB_05_SIGNALS: Lab = {
   durationMinutes: 15,
   xp: 220,
   summary: 'Launch a long-running script and stop it with SIGTERM.',
+  commandGuide: [
+    {
+      command: '&',
+      pattern: '<script> &',
+      summary: 'Start a long-running script in the background.',
+      detail: [
+        'Background jobs let you keep using the shell while a script runs. Example: ./hang.sh &',
+        'The shell prints a job number and PID. You need the PID (or name) to send signals with kill.',
+      ],
+    },
+    {
+      command: 'kill',
+      pattern: 'kill -<signal> <pid>',
+      summary: 'Send a signal to a process.',
+      detail: [
+        'kill does not only “force quit” — it delivers a signal. Replace <pid> with the process id from ps.',
+        'Common signals:',
+        '• -15 or -TERM (SIGTERM) — polite request to exit; processes can clean up',
+        '• -9 or -KILL (SIGKILL) — immediate stop; cannot be ignored',
+        'This lab practices graceful shutdown with SIGTERM before harder signals.',
+      ],
+    },
+    {
+      command: 'ps',
+      pattern: 'ps aux | grep <name>',
+      summary: 'Verify whether a process is still running.',
+      detail: [
+        'After kill, run ps again to confirm the process disappeared from the list.',
+        'If grep only shows the grep process itself, the target is no longer running.',
+        'ps aux lists all processes; piping to grep filters by the script or command name.',
+      ],
+    },
+  ],
   initialState: {
     cwd: '/home/guest/lab-05',
     files: [

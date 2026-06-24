@@ -122,6 +122,25 @@
       </div>
     }
 
+    <div class="sc-panel">
+      <span class="sc-chip sc-chip-green">Command reference</span>
+      <ul class="sc-command-guide" aria-label="Commands for this lab">
+        @for (entry of commandGuide(); track entry.command) {
+          <li>
+            <button type="button" class="sc-command-guide-item" (click)="openGuide(entry)">
+              <code>{{ entry.pattern }}</code>
+              <p>{{ entry.summary }}</p>
+              <span class="sc-command-guide-more">Learn more</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    @if (selectedGuide(); as guide) {
+      <sc-command-guide-dialog [entry]="guide" (close)="closeGuide()" />
+    }
+
     @if (explanation()) {
       <div class="sc-panel" [class.sc-panel-success]="labCompleted()">
         <span class="sc-chip sc-chip-purple">Feedback</span>

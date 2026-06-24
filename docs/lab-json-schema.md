@@ -37,6 +37,26 @@ Labs describe a safe simulated Linux environment. The frontend can load these st
         "labels": ["home", "guest", "projects"]
       }
     }
+  ],
+  "commandGuide": [
+    {
+      "command": "pwd",
+      "pattern": "pwd",
+      "summary": "Show your current folder in the filesystem.",
+      "detail": [
+        "pwd means print working directory."
+      ]
+    },
+    {
+      "command": "ls",
+      "pattern": "ls [flags]",
+      "summary": "List files and folders in the current directory.",
+      "detail": [
+        "ls prints names in the directory you are in.",
+        "Common flags:",
+        "• -l (long) — extra columns"
+      ]
+    }
   ]
 }
 ```
@@ -51,6 +71,7 @@ Labs describe a safe simulated Linux environment. The frontend can load these st
 - `summary`: short description.
 - `initialState`: simulated filesystem/session state.
 - `steps`: ordered lab tasks.
+- `commandGuide`: learner-facing command cheat sheet shown in the lab inspector (see below).
 
 ## Step Fields
 
@@ -60,6 +81,15 @@ Labs describe a safe simulated Linux environment. The frontend can load these st
 - `expectedOutput`: simulated terminal output.
 - `explanation`: visual explanation text.
 - `visual`: UI hints for filesystem, permissions, or pipe diagrams.
+
+## Command guide fields
+
+Each entry in `commandGuide` powers the **Command reference** panel on the lab workbench:
+
+- `command`: short command name used as a stable key.
+- `pattern`: abstract syntax shown in the sidebar (e.g. `cat <filename>`, `ls [flags]`).
+- `summary`: one-line description for the sidebar.
+- `detail`: array of paragraphs for the learn-more dialog (flag lists can use `•` bullet lines).
 
 ## Security Rules
 

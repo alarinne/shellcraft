@@ -20,6 +20,17 @@ export interface LabState {
   env?: Record<string, string>;
 }
 
+export interface LabCommandGuide {
+  /** Short command name for tracking and dialog title. */
+  command: string;
+  /** Abstract syntax shown in the sidebar, e.g. `cat <filename>`. */
+  pattern: string;
+  /** One-line summary for the sidebar. */
+  summary: string;
+  /** Deeper explanation paragraphs shown in the learn-more dialog. */
+  detail: string[];
+}
+
 export interface LabStep {
   id: string;
   prompt: string;
@@ -45,6 +56,7 @@ export interface Lab {
   summary: string;
   initialState: LabState;
   steps: LabStep[];
+  commandGuide: LabCommandGuide[];
 }
 
 /** Result of evaluating a single command against the active step + state. */

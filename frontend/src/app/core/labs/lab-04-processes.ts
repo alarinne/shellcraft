@@ -7,6 +7,37 @@ export const LAB_04_PROCESSES: Lab = {
   durationMinutes: 15,
   xp: 200,
   summary: 'Start a background worker, find it with ps, and stop it cleanly.',
+  commandGuide: [
+    {
+      command: '&',
+      pattern: '<command> &',
+      summary: 'Run a command in the background.',
+      detail: [
+        'Appending & to a command starts it as a background job. Your shell prompt returns immediately while the process keeps running.',
+        'Example: ./worker.sh & launches the script without blocking the terminal. Use jobs to list background tasks in this shell.',
+      ],
+    },
+    {
+      command: 'ps',
+      pattern: 'ps [options]',
+      summary: 'List processes that are currently running.',
+      detail: [
+        'ps shows process information. Plain ps lists processes tied to your terminal; ps aux shows all processes with user-oriented columns.',
+        'Combine with grep to find a name: ps aux | grep worker filters the list to lines containing “worker”.',
+        'Columns often include PID (process id), which you need for kill.',
+      ],
+    },
+    {
+      command: 'pkill',
+      pattern: 'pkill <name>',
+      summary: 'Stop processes by name instead of PID.',
+      detail: [
+        'pkill sends a signal to processes whose name matches. pkill -f worker.sh matches the full command line.',
+        'Default signal is SIGTERM (graceful shutdown). Without -f, only the process name field is matched.',
+        'Use when you know the script name but not the PID from ps.',
+      ],
+    },
+  ],
   initialState: {
     cwd: '/home/guest/lab-04',
     files: [
