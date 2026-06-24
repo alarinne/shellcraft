@@ -121,4 +121,23 @@ describe('AuthPage', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Sign in to ShellCraft');
   });
+
+  it('labels the registration identifier field as email only', async () => {
+    const fixture = TestBed.createComponent(AuthPage);
+    const router = TestBed.inject(Router);
+    fixture.detectChanges();
+
+    expect(getFieldLabels(fixture.nativeElement)).toEqual(['Name or email', 'Password']);
+
+    await router.navigate([], { queryParams: { mode: 'register' } });
+    fixture.detectChanges();
+
+    expect(getFieldLabels(fixture.nativeElement)).toEqual(['Name', 'Email', 'Password']);
+  });
 });
+
+function getFieldLabels(element: HTMLElement): string[] {
+  return Array.from(element.querySelectorAll('label span')).map((label) =>
+    label.textContent?.trim() ?? '',
+  );
+}
