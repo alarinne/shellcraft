@@ -23,7 +23,10 @@ SANDBOX_IMAGE = os.environ.get("SHELLCRAFT_SANDBOX_IMAGE", "shellcraft-sandbox-l
 SANDBOX_LAB_IDS = frozenset({"lab-01", "lab-02", "lab-03", "lab-04", "lab-05"})
 EXEC_TIMEOUT_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_EXEC_TIMEOUT", "5"))
 SESSION_TTL_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_SESSION_TTL", "600"))
-CONTAINER_NAME_PREFIX = "shellcraft-"
+# Sandbox-specific prefix. Must NOT be a prefix of docker-compose service
+# container names (e.g. "shellcraft-backend-1"), or orphan cleanup would
+# force-remove the app's own infrastructure containers on startup.
+CONTAINER_NAME_PREFIX = "shellcraft-sbx-"
 
 
 def lab_root(lab_id: str) -> str:
@@ -79,12 +82,15 @@ class SandboxManager:
     def image_ready(self) -> bool:
         if not self._docker_available():
             return False
-        result = subprocess.run(
-            ["docker", "image", "inspect", SANDBOX_IMAGE],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "image", "inspect", SANDBOX_IMAGE],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        except (FileNotFoundError, OSError, subprocess.SubprocessError):
+            return False
         return result.returncode == 0
 
     def status(self) -> dict[str, Any]:
@@ -345,12 +351,18 @@ class SandboxManager:
         return ExecRecord(command=command, stdout=[], stderr=[], exit_code=0, cwd=session.cwd)
 
     def _docker_available(self) -> bool:
-        result = subprocess.run(
-            ["docker", "version"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        # Degrade gracefully (ADR-0002): when the docker CLI is missing or the
+        # daemon is unreachable, the sandbox is simply unavailable — the API
+        # must still boot and serve the simulator and persistence routes.
+        try:
+            result = subprocess.run(
+                ["docker", "version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        except (FileNotFoundError, OSError, subprocess.SubprocessError):
+            return False
         return result.returncode == 0
 
     def _start_cleanup_thread(self) -> None:
