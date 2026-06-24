@@ -6,10 +6,10 @@
   "xp": 120,
   "summary": "Find the hidden mission file by navigating a tiny Linux workspace.",
   "initialState": {
-    "cwd": "/home/guest/projects",
+    "cwd": "/home/guest/lab-01",
     "files": [
-      { "path": "/home/guest/projects/labs", "type": "dir", "permissions": "rwxr-xr-x", "owner": "guest" },
-      { "path": "/home/guest/projects/labs/mission.txt", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
+      { "path": "/home/guest/lab-01/labs", "type": "dir", "permissions": "rwxr-xr-x", "owner": "guest" },
+      { "path": "/home/guest/lab-01/labs/mission.txt", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
     ]
   },
   "steps": [
@@ -17,7 +17,7 @@
       "id": "step-01-orient",
       "prompt": "Check where this terminal session starts.",
       "acceptedCommands": ["pwd"],
-      "expectedOutput": ["/home/guest/projects"],
+      "expectedOutput": ["/home/guest/lab-01"],
       "explanation": "pwd prints the current working directory so you know where the hunt begins.",
       "hint": "Use the three-letter command for print working directory."
     },

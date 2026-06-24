@@ -16,6 +16,7 @@ function dockerSessionStub() {
     reset: vi.fn().mockResolvedValue(undefined),
     applyCheckResult: vi.fn(),
     setCwd: vi.fn(),
+    setLiveState: vi.fn(),
     checkWork: vi.fn().mockResolvedValue(null),
     active: signal(false).asReadonly(),
     sessionId: signal(null).asReadonly(),
@@ -24,7 +25,8 @@ function dockerSessionStub() {
     totalSteps: signal(5).asReadonly(),
     completed: signal(false).asReadonly(),
     currentTaskPrompt: signal('').asReadonly(),
-    cwd: signal('/home/guest/projects').asReadonly(),
+    cwd: signal('/home/guest/lab-01').asReadonly(),
+    liveState: signal(null).asReadonly(),
     error: signal(null).asReadonly(),
     checkResult: signal(null).asReadonly(),
     stepStatuses: signal([]).asReadonly(),
@@ -151,7 +153,7 @@ describe('LabPage', () => {
     expect(TestBed.inject(LabEngine).currentStep()?.id).toBe('step-03-enter-labs');
 
     await submitCommand(fixture, 'cd labs');
-    expect(TestBed.inject(LabEngine).state()?.cwd).toBe('/home/guest/projects/labs');
+    expect(TestBed.inject(LabEngine).state()?.cwd).toBe('/home/guest/lab-01/labs');
     expect(TestBed.inject(LabEngine).currentStep()?.id).toBe('step-04-find-mission');
 
     await submitCommand(fixture, 'ls -la');

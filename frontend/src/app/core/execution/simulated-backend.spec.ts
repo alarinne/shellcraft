@@ -17,9 +17,9 @@ const step: LabStep = {
 };
 
 const state: LabState = {
-  cwd: '/home/guest/projects',
+  cwd: '/home/guest/lab-02',
   files: [
-    { path: '/home/guest/projects/deploy.sh', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
+    { path: '/home/guest/lab-02/deploy.sh', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
   ],
 };
 
@@ -35,8 +35,8 @@ describe('command helpers', () => {
   });
 
   it('resolves cd paths', () => {
-    expect(resolvePath('/home/guest', 'projects')).toBe('/home/guest/projects');
-    expect(resolvePath('/home/guest/projects', '..')).toBe('/home/guest');
+    expect(resolvePath('/home/guest', 'lab-02')).toBe('/home/guest/lab-02');
+    expect(resolvePath('/home/guest/lab-02', '..')).toBe('/home/guest');
     expect(resolvePath('/home/guest', '/etc')).toBe('/etc');
   });
 

@@ -13,8 +13,7 @@ the ShellCraft learning path.
 
 ## What changed
 
-- **Unified sandbox image** (`backend/sandbox/Dockerfile`) — seeds filesystem
-  assets for all five labs (deploy.sh, access.log, worker.sh, hang.sh).
+- **Unified sandbox image** (`backend/sandbox/Dockerfile`) — isolated trees per lab under `/home/guest/lab-01` … `lab-05`, seeded from `/opt/shellcraft-seeds` onto a **writable tmpfs** so `chmod` works.
 - **`lab_checker.py`** — flexible graders for labs 02–05 (chmod, grep pipes,
   background jobs, pkill, SIGTERM).
 - **Lab JSON + frontend TS** — `lab-03.json` … `lab-05.json` and matching
@@ -29,7 +28,7 @@ the ShellCraft learning path.
 | Lab | Topic | Key commands |
 |-----|-------|--------------|
 | 02 | Permissions | `ls -l`, `stat`, `chmod 755` |
-| 03 | Pipes & Grep | `cat`, `grep ERROR`, `\| wc -l` |
+| 03 | Pipes & Grep | `cat`, `grep ERROR access.log`, `cat access.log \| grep ERROR`, `\| wc -l` |
 | 04 | Process Watch | `./worker.sh &`, `ps`, `pkill` |
 | 05 | Signals | `./hang.sh &`, `kill -15`, `ps` verify |
 
@@ -51,8 +50,20 @@ cd backend && pytest -q
 cd frontend && npx ng test --watch=false
 ```
 
+## Grading notes (Lab 03)
+
+Docker grading accepts **both** direct and piped forms:
+
+| Step | Direct | Piped |
+|------|--------|-------|
+| Filter errors | `grep ERROR access.log` | `cat access.log \| grep ERROR` |
+| Count errors | `grep -c ERROR access.log` | `cat access.log \| grep ERROR \| wc -l` |
+
+Simulated mode whitelists the same variants in `lab-03-pipes.ts`.
+
+See [14-docker-sandbox-grading-hardening.md](./14-docker-sandbox-grading-hardening.md) for PTY cwd tracking, history merge, and live-state grading used across labs 01–05.
+
 ## Follow-ups
 
 - Per-lab sandbox images if unified image grows too large.
-- Live output capture for richer grading (beyond command-only PTY log).
 - Unlock progressive path gating (complete lab N before lab N+1).

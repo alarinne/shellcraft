@@ -6,9 +6,9 @@
   "xp": 200,
   "summary": "Start a background worker, find it with ps, and stop it cleanly.",
   "initialState": {
-    "cwd": "/home/guest/projects",
+    "cwd": "/home/guest/lab-04",
     "files": [
-      { "path": "/home/guest/projects/worker.sh", "type": "file", "permissions": "rwxr-xr-x", "owner": "guest" }
+      { "path": "/home/guest/lab-04/worker.sh", "type": "file", "permissions": "rwxr-xr-x", "owner": "guest" }
     ]
   },
   "steps": [

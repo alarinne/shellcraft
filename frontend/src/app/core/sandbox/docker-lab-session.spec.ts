@@ -12,8 +12,8 @@ describe('DockerLabSession', () => {
       available,
       createSession: vi.fn().mockResolvedValue({
         sessionId: 'abc',
-        cwd: '/home/guest/projects',
-        prompt: 'guest@shellcraft:/home/guest/projects$',
+        cwd: '/home/guest/lab-01',
+        prompt: 'guest@shellcraft:/home/guest/lab-01$',
       }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -41,13 +41,13 @@ describe('DockerLabSession', () => {
         .fn()
         .mockResolvedValueOnce({
           sessionId: 'abc',
-          cwd: '/home/guest/projects',
-          prompt: 'guest@shellcraft:/home/guest/projects$',
+          cwd: '/home/guest/lab-01',
+          prompt: 'guest@shellcraft:/home/guest/lab-01$',
         })
         .mockResolvedValueOnce({
           sessionId: 'def',
-          cwd: '/home/guest/projects',
-          prompt: 'guest@shellcraft:/home/guest/projects$',
+          cwd: '/home/guest/lab-01',
+          prompt: 'guest@shellcraft:/home/guest/lab-01$',
         }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -72,8 +72,8 @@ describe('DockerLabSession', () => {
       available,
       createSession: vi.fn().mockResolvedValue({
         sessionId: 'abc',
-        cwd: '/home/guest/projects',
-        prompt: 'guest@shellcraft:/home/guest/projects$',
+        cwd: '/home/guest/lab-01',
+        prompt: 'guest@shellcraft:/home/guest/lab-01$',
       }),
       check: vi.fn(),
       destroy: vi.fn(),
@@ -88,7 +88,7 @@ describe('DockerLabSession', () => {
 
     expect(started).toBe(true);
     expect(session.active()).toBe(true);
-    expect(session.cwd()).toBe('/home/guest/projects');
+    expect(session.cwd()).toBe('/home/guest/lab-01');
     expect(session.sessionId()).toBe('abc');
   });
 
@@ -107,7 +107,7 @@ describe('DockerLabSession', () => {
       nextStepPrompt: 'Move into the labs directory.',
       message: 'Not complete yet:\n• Run `cd labs` to move into the labs directory.',
       labId: 'lab-01',
-      cwd: '/home/guest/projects/labs',
+      cwd: '/home/guest/lab-01/labs',
       stepStatuses: [
         { id: 'step-01-orient', prompt: 'Check where this terminal session starts.', completed: true, reason: null },
         { id: 'step-02-scan-projects', prompt: 'List this directory and spot the labs folder.', completed: true, reason: null },
@@ -118,6 +118,31 @@ describe('DockerLabSession', () => {
     });
 
     expect(session.stepsCompleted()).toBe(2);
-    expect(session.cwd()).toBe('/home/guest/projects/labs');
+    expect(session.cwd()).toBe('/home/guest/lab-01/labs');
+  });
+
+  it('stores live state from check results and terminal updates', async () => {
+    await TestBed.configureTestingModule({
+      providers: [{ provide: SandboxService, useValue: { available: signal(false).asReadonly() } }],
+    }).compileComponents();
+
+    const session = TestBed.inject(DockerLabSession);
+    session.applyCheckResult({
+      completed: true,
+      stepsCompleted: 2,
+      totalSteps: 2,
+      completedStepIds: ['step-01-inspect', 'step-02-chmod'],
+      nextStepId: null,
+      nextStepPrompt: null,
+      message: 'All lab steps are complete. Nice work!',
+      labId: 'lab-02',
+      liveState: { deployMode: '-rwxr-xr-x', deployExecutable: true },
+      stepStatuses: [],
+    });
+
+    expect(session.liveState()?.deployMode).toBe('-rwxr-xr-x');
+
+    session.setLiveState({ deployMode: '-rw-r--r--', deployExecutable: false });
+    expect(session.liveState()?.deployExecutable).toBe(false);
   });
 });

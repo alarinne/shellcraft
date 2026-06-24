@@ -8,10 +8,10 @@ export const LAB_01_FILESYSTEM: Lab = {
   xp: 120,
   summary: 'Find the hidden mission file by navigating a tiny Linux workspace.',
   initialState: {
-    cwd: '/home/guest/projects',
+    cwd: '/home/guest/lab-01',
     files: [
-      { path: '/home/guest/projects/labs', type: 'dir', permissions: 'rwxr-xr-x', owner: 'guest' },
-      { path: '/home/guest/projects/labs/mission.txt', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
+      { path: '/home/guest/lab-01/labs', type: 'dir', permissions: 'rwxr-xr-x', owner: 'guest' },
+      { path: '/home/guest/lab-01/labs/mission.txt', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
     ],
   },
   steps: [
@@ -19,13 +19,13 @@ export const LAB_01_FILESYSTEM: Lab = {
       id: 'step-01-orient',
       prompt: 'Check where this terminal session starts.',
       acceptedCommands: ['pwd'],
-      expectedOutput: ['/home/guest/projects'],
+      expectedOutput: ['/home/guest/lab-01'],
       explanation: 'pwd prints the current working directory so you know where the hunt begins.',
       hint: 'Use the three-letter command for print working directory.',
       visual: {
         focus: 'filesystem',
         labels: ['current path', 'workspace'],
-        targetPath: '/home/guest/projects',
+        targetPath: '/home/guest/lab-01',
       },
     },
     {
@@ -42,7 +42,7 @@ export const LAB_01_FILESYSTEM: Lab = {
       visual: {
         focus: 'filesystem',
         labels: ['list', 'labs'],
-        targetPath: '/home/guest/projects/labs',
+        targetPath: '/home/guest/lab-01/labs',
       },
     },
     {
@@ -55,7 +55,7 @@ export const LAB_01_FILESYSTEM: Lab = {
       visual: {
         focus: 'filesystem',
         labels: ['change directory', 'labs'],
-        targetPath: '/home/guest/projects/labs',
+        targetPath: '/home/guest/lab-01/labs',
       },
     },
     {
@@ -81,7 +81,7 @@ export const LAB_01_FILESYSTEM: Lab = {
       visual: {
         focus: 'filesystem',
         labels: ['mission.txt', 'target file'],
-        targetPath: '/home/guest/projects/labs/mission.txt',
+        targetPath: '/home/guest/lab-01/labs/mission.txt',
       },
     },
     {
@@ -97,7 +97,7 @@ export const LAB_01_FILESYSTEM: Lab = {
       visual: {
         focus: 'filesystem',
         labels: ['cat', 'mission complete'],
-        targetPath: '/home/guest/projects/labs/mission.txt',
+        targetPath: '/home/guest/lab-01/labs/mission.txt',
       },
     },
   ],

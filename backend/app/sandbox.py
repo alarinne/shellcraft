@@ -26,6 +26,10 @@ SESSION_TTL_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_SESSION_TTL", "600"))
 CONTAINER_NAME_PREFIX = "shellcraft-"
 
 
+def lab_root(lab_id: str) -> str:
+    return f"/home/guest/{lab_id}"
+
+
 @dataclass
 class ExecRecord:
     command: str
@@ -105,7 +109,8 @@ class SandboxManager:
 
         session_id = uuid.uuid4().hex
         container_name = f"{CONTAINER_NAME_PREFIX}{session_id[:12]}"
-        self._run_container(container_name, initial_cwd)
+        self._run_container(container_name, lab_id)
+        self._seed_workspace(container_name, lab_id)
 
         session = SandboxSession(
             session_id=session_id,
@@ -142,11 +147,12 @@ class SandboxManager:
         return self._get_session(session_id)
 
     def history_for_check(self, session: SandboxSession) -> tuple[list[dict[str, Any]], bool]:
-        """Prefer the live shell command log; fall back to API-recorded PTY history."""
+        """Merge PTY output with the shell DEBUG log so no commands are missed."""
+        pty_history = [entry.as_dict() for entry in session.history]
         shell_log = read_container_command_log(session.container_name)
-        if shell_log:
-            return shell_log, True
-        return [entry.as_dict() for entry in session.history], False
+        merged = merge_command_histories(pty_history, shell_log)
+        command_only = not any(entry.get("stdout") for entry in merged)
+        return merged, command_only
 
     def destroy_session(self, session_id: str) -> None:
         with self._lock:
@@ -209,7 +215,8 @@ class SandboxManager:
             if name.startswith(CONTAINER_NAME_PREFIX) and name not in tracked:
                 self._remove_container(name)
 
-    def _run_container(self, name: str, workdir: str = "/home/guest/projects") -> None:
+    def _run_container(self, name: str, lab_id: str) -> None:
+        root = lab_root(lab_id)
         result = subprocess.run(
             [
                 "docker",
@@ -233,6 +240,8 @@ class SandboxManager:
                 "--read-only",
                 "--tmpfs",
                 "/tmp:exec,size=8m",
+                "--tmpfs",
+                f"{root}:exec,size=8m,mode=1777",
                 "--security-opt",
                 "no-new-privileges",
                 "--cap-drop",
@@ -240,7 +249,7 @@ class SandboxManager:
                 "--user",
                 "learner",
                 "--workdir",
-                workdir,
+                root,
                 SANDBOX_IMAGE,
                 "sleep",
                 "infinity",
@@ -252,6 +261,33 @@ class SandboxManager:
         if result.returncode != 0:
             raise SandboxError(
                 f"Failed to start sandbox container: {result.stderr.strip() or result.stdout.strip()}",
+                503,
+            )
+
+    def _seed_workspace(self, container_name: str, lab_id: str) -> None:
+        """Copy read-only seeds into the per-lab tmpfs workspace."""
+        root = lab_root(lab_id)
+        seed = f"/opt/shellcraft-seeds/{lab_id}"
+        result = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-u",
+                "learner",
+                container_name,
+                "cp",
+                "-r",
+                f"{seed}/.",
+                f"{root}/",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if result.returncode != 0:
+            self._remove_container(container_name)
+            raise SandboxError(
+                f"Failed to seed lab workspace: {result.stderr.strip() or result.stdout.strip()}",
                 503,
             )
 
@@ -335,6 +371,110 @@ class SandboxManager:
                     stale.append(session_id)
         for session_id in stale:
             self.destroy_session(session_id)
+
+
+def merge_command_histories(
+    pty_history: list[dict[str, Any]],
+    shell_log: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Combine DEBUG-trap commands with PTY stdout/exit codes."""
+    if not shell_log:
+        return [dict(entry) for entry in pty_history]
+
+    merged: list[dict[str, Any]] = []
+    pty_by_cmd: dict[str, list[dict[str, Any]]] = {}
+    for entry in pty_history:
+        key = normalize_command(entry.get("command", ""))
+        pty_by_cmd.setdefault(key, []).append(dict(entry))
+
+    for entry in shell_log:
+        fixed = dict(entry)
+        key = normalize_command(entry.get("command", ""))
+        candidates = pty_by_cmd.get(key, [])
+        if candidates:
+            pty_match = candidates.pop(0)
+            if pty_match.get("stdout"):
+                fixed["stdout"] = pty_match["stdout"]
+            if pty_match.get("exitCode") == 0:
+                fixed["exitCode"] = 0
+            if pty_match.get("cwd"):
+                fixed["cwd"] = pty_match["cwd"]
+        merged.append(fixed)
+
+    for remaining in pty_by_cmd.values():
+        merged.extend(remaining)
+    return merged
+
+
+def resolve_live_cwd(session_cwd: str, shell_cwd: str | None) -> str:
+    """Pick the best cwd for grading: PTY-tracked path vs PROMPT_COMMAND file."""
+    candidates = [path for path in (session_cwd, shell_cwd) if path]
+    if not candidates:
+        return session_cwd
+    return max(candidates, key=lambda path: path.count("/"))
+
+
+def read_live_lab_state(container_name: str, lab_id: str) -> dict[str, Any]:
+    """Inspect the container filesystem/process table for grading fallbacks."""
+    state: dict[str, Any] = {}
+
+    if lab_id == "lab-01":
+        state["missionExists"] = _container_test(
+            container_name, "-f", f"{lab_root(lab_id)}/labs/mission.txt"
+        )
+    elif lab_id == "lab-02":
+        mode = _container_exec_output(
+            container_name,
+            "stat",
+            "-c",
+            "%A",
+            f"{lab_root(lab_id)}/deploy.sh",
+        )
+        if mode:
+            state["deployMode"] = mode
+            state["deployExecutable"] = mode.startswith("-rwx")
+    elif lab_id == "lab-03":
+        state["logExists"] = _container_test(
+            container_name, "-f", f"{lab_root(lab_id)}/logs/access.log"
+        )
+    elif lab_id == "lab-04":
+        state["workerRunning"] = _container_pgrep(container_name, "worker.sh")
+    elif lab_id == "lab-05":
+        state["hangRunning"] = _container_pgrep(container_name, "hang.sh")
+
+    return state
+
+
+def _container_exec_output(container_name: str, *args: str) -> str | None:
+    result = subprocess.run(
+        ["docker", "exec", container_name, *args],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
+def _container_test(container_name: str, flag: str, path: str) -> bool:
+    result = subprocess.run(
+        ["docker", "exec", container_name, "test", flag, path],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    return result.returncode == 0
+
+
+def _container_pgrep(container_name: str, pattern: str) -> bool:
+    result = subprocess.run(
+        ["docker", "exec", container_name, "pgrep", "-f", pattern],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    return result.returncode == 0
 
 
 def read_shell_cwd(container_name: str) -> str | None:

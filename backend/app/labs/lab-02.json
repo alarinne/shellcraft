@@ -6,9 +6,9 @@
   "xp": 150,
   "summary": "Read and change the owner/group/others permission model with chmod.",
   "initialState": {
-    "cwd": "/home/guest/projects",
+    "cwd": "/home/guest/lab-02",
     "files": [
-      { "path": "/home/guest/projects/deploy.sh", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
+      { "path": "/home/guest/lab-02/deploy.sh", "type": "file", "permissions": "rw-r--r--", "owner": "guest" }
     ]
   },
   "steps": [

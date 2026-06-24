@@ -85,6 +85,7 @@
       [sessionId]="sessionId"
       [labTitle]="lab().title"
       (cwdChange)="onSandboxCwd($event)"
+      (liveStateChange)="onSandboxLiveState($event)"
     />
   } @else {
     <sc-terminal

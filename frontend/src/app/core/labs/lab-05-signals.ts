@@ -8,9 +8,9 @@ export const LAB_05_SIGNALS: Lab = {
   xp: 220,
   summary: 'Launch a long-running script and stop it with SIGTERM.',
   initialState: {
-    cwd: '/home/guest/projects',
+    cwd: '/home/guest/lab-05',
     files: [
-      { path: '/home/guest/projects/hang.sh', type: 'file', permissions: 'rwxr-xr-x', owner: 'guest' },
+      { path: '/home/guest/lab-05/hang.sh', type: 'file', permissions: 'rwxr-xr-x', owner: 'guest' },
     ],
   },
   steps: [
@@ -21,7 +21,7 @@ export const LAB_05_SIGNALS: Lab = {
       expectedOutput: [],
       explanation: 'Background jobs keep running while you return to the shell prompt.',
       hint: 'Run ./hang.sh with & at the end.',
-      visual: { focus: 'permissions', labels: ['background', 'hang.sh'], targetPath: '/home/guest/projects/hang.sh' },
+      visual: { focus: 'permissions', labels: ['background', 'hang.sh'], targetPath: '/home/guest/lab-05/hang.sh' },
     },
     {
       id: 'step-02-sigterm',
@@ -30,7 +30,7 @@ export const LAB_05_SIGNALS: Lab = {
       expectedOutput: [],
       explanation: 'SIGTERM asks a process to shut down gracefully before harder signals.',
       hint: 'Use kill -15 or kill -TERM with the hang.sh PID.',
-      visual: { focus: 'permissions', labels: ['SIGTERM', 'kill -15'], targetPath: '/home/guest/projects/hang.sh' },
+      visual: { focus: 'permissions', labels: ['SIGTERM', 'kill -15'], targetPath: '/home/guest/lab-05/hang.sh' },
     },
     {
       id: 'step-03-verify-gone',
@@ -39,7 +39,7 @@ export const LAB_05_SIGNALS: Lab = {
       expectedOutput: [],
       explanation: 'Re-running ps or pgrep shows whether the process survived the signal.',
       hint: 'Use ps or pgrep — you should not see hang.sh running.',
-      visual: { focus: 'permissions', labels: ['ps', 'verify'], targetPath: '/home/guest/projects/hang.sh' },
+      visual: { focus: 'permissions', labels: ['ps', 'verify'], targetPath: '/home/guest/lab-05/hang.sh' },
     },
   ],
 };

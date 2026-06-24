@@ -2,13 +2,13 @@ from app.lab_checker import check_lab_progress, replay_history, resolve_path
 
 
 def test_resolve_path():
-    assert resolve_path("/home/guest/projects", "labs") == "/home/guest/projects/labs"
-    assert resolve_path("/home/guest/projects/labs", "..") == "/home/guest/projects"
+    assert resolve_path("/home/guest/lab-01", "labs") == "/home/guest/lab-01/labs"
+    assert resolve_path("/home/guest/lab-01/labs", "..") == "/home/guest/lab-01"
 
 
 def test_check_lab_progress_partial():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [
             {"id": "step-01-orient", "acceptedCommands": ["pwd"]},
             {"id": "step-02-scan-projects", "acceptedCommands": ["ls -la"]},
@@ -17,10 +17,10 @@ def test_check_lab_progress_partial():
     history = [
         {
             "command": "pwd",
-            "stdout": ["/home/guest/projects"],
+            "stdout": ["/home/guest/lab-01"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
     ]
     result = check_lab_progress(lab, history)
@@ -31,7 +31,7 @@ def test_check_lab_progress_partial():
 
 def test_check_lab_progress_accepts_ls_with_extra_flags():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [
             {"id": "step-04-find-mission", "acceptedCommands": ["ls -la"]},
         ],
@@ -42,14 +42,14 @@ def test_check_lab_progress_accepts_ls_with_extra_flags():
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
         {
             "command": "ls -lh",
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
     ]
     result = check_lab_progress(lab, history, command_only=True)
@@ -58,7 +58,7 @@ def test_check_lab_progress_accepts_ls_with_extra_flags():
 
 def test_check_lab_progress_command_only_full_quest():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [
             {"id": "step-01-orient", "acceptedCommands": ["pwd"]},
             {"id": "step-02-scan-projects", "acceptedCommands": ["ls -la"]},
@@ -68,16 +68,16 @@ def test_check_lab_progress_command_only_full_quest():
         ],
     }
     history = [
-        {"command": "ls", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "pwd", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "cd labs/", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "ls", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects/labs"},
+        {"command": "ls", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "pwd", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "cd labs/", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01"},
+        {"command": "ls", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-01/labs"},
         {
             "command": "cat mission.txt",
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
     ]
     result = check_lab_progress(lab, history, command_only=True)
@@ -101,21 +101,21 @@ def test_check_lab_progress_accepts_plain_ls():
             "stdout": ["labs"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
         {
             "command": "cd labs",
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
         {
             "command": "ls",
             "stdout": ["mission.txt"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
         {
             "command": "cat mission.txt",
@@ -125,7 +125,7 @@ def test_check_lab_progress_accepts_plain_ls():
             ],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
     ]
     result = check_lab_progress(lab, history)
@@ -140,24 +140,24 @@ def test_replay_history_fixes_stale_cd_cwd():
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
         {
             "command": "ls",
             "stdout": ["mission.txt"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
     ]
-    replayed = replay_history(history, "/home/guest/projects")
-    assert replayed[0]["cwd"] == "/home/guest/projects/labs"
-    assert replayed[1]["cwd"] == "/home/guest/projects/labs"
+    replayed = replay_history(history, "/home/guest/lab-01")
+    assert replayed[0]["cwd"] == "/home/guest/lab-01/labs"
+    assert replayed[1]["cwd"] == "/home/guest/lab-01/labs"
 
 
 def test_check_returns_step_statuses_with_reasons():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [
             {"id": "step-01-orient", "prompt": "Check where this terminal session starts."},
             {"id": "step-02-scan-projects", "prompt": "List this directory and spot the labs folder."},
@@ -183,7 +183,7 @@ def test_step_03_matches_when_cd_entry_still_has_parent_cwd():
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
     ]
     result = check_lab_progress(lab, history)
@@ -202,16 +202,16 @@ def test_step_03_matches_when_shell_cwd_is_labs_despite_partial_command():
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/labs",
+            "cwd": "/home/guest/lab-01/labs",
         },
     ]
-    result = check_lab_progress(lab, history, live_cwd="/home/guest/projects/labs")
+    result = check_lab_progress(lab, history, live_cwd="/home/guest/lab-01/labs")
     assert result["stepsCompleted"] == 1
 
 
 def test_step_02_accepts_ls_labs_path():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [{"id": "step-02-scan-projects"}],
     }
     for command in ("ls labs", "ls labs/", "ls ./labs", "ls  -la", "ls -l  labs"):
@@ -226,7 +226,7 @@ def test_step_02_accepts_ls_labs_path():
                 "stdout": stdout,
                 "stderr": [],
                 "exitCode": 0,
-                "cwd": "/home/guest/projects",
+                "cwd": "/home/guest/lab-01",
             },
         ]
         result = check_lab_progress(lab, history)
@@ -242,7 +242,7 @@ def test_step_03_accepts_cd_labs_slash():
                 "stdout": [],
                 "stderr": [],
                 "exitCode": 0,
-                "cwd": "/home/guest/projects",
+                "cwd": "/home/guest/lab-01",
             },
         ]
         result = check_lab_progress(lab, history)
@@ -251,15 +251,15 @@ def test_step_03_accepts_cd_labs_slash():
 
 def test_step_04_accepts_ls_mission_and_labs_path():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-01"},
         "steps": [{"id": "step-04-find-mission"}],
     }
     cases = [
-        ("ls", "/home/guest/projects/labs", ["mission.txt"]),
-        ("ls -l", "/home/guest/projects/labs", ["-rw-r--r-- 1 guest guest 160 mission.txt"]),
-        ("ls mission.txt", "/home/guest/projects/labs", ["mission.txt"]),
-        ("ls labs/", "/home/guest/projects", ["mission.txt"]),
-        ("ls  -la", "/home/guest/projects/labs", ["drwxr-xr-x 2 guest guest 4096 .", "mission.txt"]),
+        ("ls", "/home/guest/lab-01/labs", ["mission.txt"]),
+        ("ls -l", "/home/guest/lab-01/labs", ["-rw-r--r-- 1 guest guest 160 mission.txt"]),
+        ("ls mission.txt", "/home/guest/lab-01/labs", ["mission.txt"]),
+        ("ls labs/", "/home/guest/lab-01", ["mission.txt"]),
+        ("ls  -la", "/home/guest/lab-01/labs", ["drwxr-xr-x 2 guest guest 4096 .", "mission.txt"]),
     ]
     for command, cwd, stdout in cases:
         history = [
@@ -288,21 +288,21 @@ def test_check_lab_progress_out_of_order_history():
             "stdout": [],
             "stderr": ["bash: line 1: ды: command not found"],
             "exitCode": 127,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
         {
             "command": "ls -la",
             "stdout": ["drwxr-xr-x 2 guest guest 4096 labs"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
         {
             "command": "pwd",
-            "stdout": ["/home/guest/projects"],
+            "stdout": ["/home/guest/lab-01"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-01",
         },
     ]
     result = check_lab_progress(lab, history)
@@ -312,7 +312,7 @@ def test_check_lab_progress_out_of_order_history():
 
 def test_lab_02_permissions_quest():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects"},
+        "initialState": {"cwd": "/home/guest/lab-02"},
         "steps": [
             {"id": "step-01-inspect"},
             {"id": "step-02-chmod"},
@@ -324,23 +324,74 @@ def test_lab_02_permissions_quest():
             "stdout": ["-rw-r--r-- 1 learner learner 28 deploy.sh"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-02",
         },
         {
             "command": "chmod 755 deploy.sh",
             "stdout": [],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects",
+            "cwd": "/home/guest/lab-02",
         },
     ]
     result = check_lab_progress(lab, history, command_only=True)
     assert result["completed"] is True
 
 
+def test_lab_02_inspects_with_ls_lh_output():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-02"},
+        "steps": [{"id": "step-01-inspect"}],
+    }
+    history = [
+        {
+            "command": "ls -lh deploy.sh",
+            "stdout": ["-rw-r--r-- 1 learner learner 28 Jun  1 12:00 deploy.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-02",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["stepsCompleted"] == 1
+
+
+def test_lab_02_chmod_via_live_state():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-02"},
+        "steps": [{"id": "step-02-chmod"}],
+    }
+    result = check_lab_progress(lab, [], live_state={"deployExecutable": True})
+    assert result["completed"] is True
+
+
+def test_lab_04_stop_when_worker_gone():
+    lab = {
+        "steps": [
+            {"id": "step-02-find-worker"},
+            {"id": "step-03-stop-worker"},
+        ],
+    }
+    history = [
+        {
+            "command": "ps aux",
+            "stdout": ["learner 37 /bin/sh ./worker.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-04",
+        },
+    ]
+    result = check_lab_progress(
+        lab,
+        history,
+        live_state={"workerRunning": False},
+    )
+    assert result["stepsCompleted"] == 2
+
+
 def test_lab_03_pipes_quest():
     lab = {
-        "initialState": {"cwd": "/home/guest/projects/logs"},
+        "initialState": {"cwd": "/home/guest/lab-03/logs"},
         "steps": [
             {"id": "step-01-view-log"},
             {"id": "step-02-grep-errors"},
@@ -353,21 +404,65 @@ def test_lab_03_pipes_quest():
             "stdout": ["2026-06-01 ERROR disk full"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/logs",
+            "cwd": "/home/guest/lab-03/logs",
         },
         {
             "command": "grep ERROR access.log",
             "stdout": ["2026-06-01 ERROR disk full", "2026-06-02 ERROR timeout"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/logs",
+            "cwd": "/home/guest/lab-03/logs",
         },
         {
             "command": "grep ERROR access.log | wc -l",
             "stdout": ["2"],
             "stderr": [],
             "exitCode": 0,
-            "cwd": "/home/guest/projects/logs",
+            "cwd": "/home/guest/lab-03/logs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["completed"] is True
+
+
+def test_lab_03_accepts_cat_pipe_grep():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-03/logs"},
+        "steps": [
+            {"id": "step-01-view-log"},
+            {"id": "step-02-grep-errors"},
+            {"id": "step-03-count-errors"},
+        ],
+    }
+    history = [
+        {
+            "command": "cat access.log",
+            "stdout": ["2026-06-01 ERROR disk full"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": "cat access.log | grep ERROR",
+            "stdout": [
+                "linux-lab:~/lab-03/logs$ cat access.log | grep ERROR",
+                "2026-06-01 ERROR disk full on /var",
+                "2026-06-02 ERROR connection timeout",
+            ],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": "cat access.log | grep ERROR | wc -l",
+            "stdout": [
+                "linux-lab:~/lab-03/logs$ cat access.log | grep ERROR | wc -l",
+                "2",
+                "linux-lab:~/lab-03/logs$",
+            ],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
         },
     ]
     result = check_lab_progress(lab, history)
@@ -383,9 +478,9 @@ def test_lab_04_process_quest_command_only():
         ],
     }
     history = [
-        {"command": "./worker.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "ps aux | grep worker", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "pkill -f worker.sh", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "./worker.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-04"},
+        {"command": "ps aux | grep worker", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-04"},
+        {"command": "pkill -f worker.sh", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-04"},
     ]
     result = check_lab_progress(lab, history, command_only=True)
     assert result["completed"] is True
@@ -400,10 +495,35 @@ def test_lab_05_signals_quest_command_only():
         ],
     }
     history = [
-        {"command": "./hang.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "kill -15 42", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
-        {"command": "ps aux | grep hang", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/projects"},
+        {"command": "./hang.sh &", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-05"},
+        {"command": "kill -15 42", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-05"},
+        {"command": "ps aux | grep hang", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-05"},
     ]
     result = check_lab_progress(lab, history, command_only=True)
     assert result["completed"] is True
+
+
+def test_step_04_accepts_ls_in_labs_without_captured_output():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-01"},
+        "steps": [{"id": "step-04-find-mission"}],
+    }
+    history = [
+        {
+            "command": "cd labs/",
+            "stdout": [],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-01",
+        },
+        {
+            "command": "ls",
+            "stdout": [],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-01/labs",
+        },
+    ]
+    result = check_lab_progress(lab, history)
+    assert result["stepsCompleted"] == 1
 

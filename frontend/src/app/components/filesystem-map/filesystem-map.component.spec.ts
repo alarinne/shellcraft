@@ -3,11 +3,11 @@ import { LabState } from '../../core/execution/types';
 import { FilesystemMapComponent } from './filesystem-map.component';
 
 const state: LabState = {
-  cwd: '/home/guest/projects',
+  cwd: '/home/guest/lab-01',
   files: [
-    { path: '/home/guest/projects/README.md', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
-    { path: '/home/guest/projects/labs', type: 'dir', permissions: 'rwxr-xr-x', owner: 'guest' },
-    { path: '/home/guest/projects/labs/mission.txt', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
+    { path: '/home/guest/lab-01/README.md', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
+    { path: '/home/guest/lab-01/labs', type: 'dir', permissions: 'rwxr-xr-x', owner: 'guest' },
+    { path: '/home/guest/lab-01/labs/mission.txt', type: 'file', permissions: 'rw-r--r--', owner: 'guest' },
   ],
 };
 
@@ -21,11 +21,11 @@ describe('FilesystemMapComponent', () => {
   it('renders the current path and visible entries', () => {
     const fixture = TestBed.createComponent(FilesystemMapComponent);
     fixture.componentRef.setInput('state', state);
-    fixture.componentRef.setInput('targetPath', '/home/guest/projects/labs');
+    fixture.componentRef.setInput('targetPath', '/home/guest/lab-01/labs');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('projects');
+    expect(compiled.textContent).toContain('lab-01');
     expect(compiled.textContent).toContain('README.md');
     expect(compiled.textContent).toContain('labs');
     expect(compiled.textContent).not.toContain('mission.txt');
@@ -34,8 +34,8 @@ describe('FilesystemMapComponent', () => {
 
   it('updates entries when cwd changes', () => {
     const fixture = TestBed.createComponent(FilesystemMapComponent);
-    fixture.componentRef.setInput('state', { ...state, cwd: '/home/guest/projects/labs' });
-    fixture.componentRef.setInput('targetPath', '/home/guest/projects/labs/mission.txt');
+    fixture.componentRef.setInput('state', { ...state, cwd: '/home/guest/lab-01/labs' });
+    fixture.componentRef.setInput('targetPath', '/home/guest/lab-01/labs/mission.txt');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;

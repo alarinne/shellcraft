@@ -1,4 +1,6 @@
-# Unified Alpine sandbox for ShellCraft labs 01–05 — real shell, tiny footprint.
+# Unified Alpine sandbox for ShellCraft labs 01–05.
+# Lab files live in /opt/shellcraft-seeds (read-only); each session gets a
+# writable tmpfs copy at /home/guest/lab-NN so chmod and similar labs work.
 FROM alpine:3.21
 
 RUN apk add --no-cache bash coreutils readline bash-completion procps grep \
@@ -6,42 +8,49 @@ RUN apk add --no-cache bash coreutils readline bash-completion procps grep \
   && adduser -S -G learner -h /home/guest learner
 
 # Lab 01 — filesystem quest
-RUN mkdir -p /home/guest/projects/labs \
+RUN mkdir -p /opt/shellcraft-seeds/lab-01/labs \
   && printf '%s\n' \
     'MISSION_READY=filesystem' \
     'You found the mission file. Next stop: permissions.' \
-    > /home/guest/projects/labs/mission.txt
+    > /opt/shellcraft-seeds/lab-01/labs/mission.txt
 
 # Lab 02 — permissions (deploy.sh starts rw-r--r--)
-RUN printf '%s\n' '#!/bin/bash' 'echo "ShellCraft deploy stub"' \
-    > /home/guest/projects/deploy.sh \
-  && chmod 644 /home/guest/projects/deploy.sh
+RUN mkdir -p /opt/shellcraft-seeds/lab-02 \
+  && printf '%s\n' '#!/bin/bash' 'echo "ShellCraft deploy stub"' \
+    > /opt/shellcraft-seeds/lab-02/deploy.sh \
+  && chmod 644 /opt/shellcraft-seeds/lab-02/deploy.sh
 
 # Lab 03 — pipes & grep
-RUN mkdir -p /home/guest/projects/logs \
+RUN mkdir -p /opt/shellcraft-seeds/lab-03/logs \
   && printf '%s\n' \
     '2026-06-01 INFO user login ok' \
     '2026-06-01 ERROR disk full on /var' \
     '2026-06-01 INFO backup finished' \
     '2026-06-02 ERROR connection timeout' \
     '2026-06-02 INFO shutdown complete' \
-    > /home/guest/projects/logs/access.log
+    > /opt/shellcraft-seeds/lab-03/logs/access.log
 
 # Lab 04 — process watch
-RUN printf '%s\n' '#!/bin/sh' 'while true; do sleep 1; done' \
-    > /home/guest/projects/worker.sh \
-  && chmod 755 /home/guest/projects/worker.sh
+RUN mkdir -p /opt/shellcraft-seeds/lab-04 \
+  && printf '%s\n' '#!/bin/sh' 'while true; do sleep 1; done' \
+    > /opt/shellcraft-seeds/lab-04/worker.sh \
+  && chmod 755 /opt/shellcraft-seeds/lab-04/worker.sh
 
-# Lab 05 — signals (trap SIGTERM for graceful exit)
-RUN printf '%s\n' \
+# Lab 05 — signals
+RUN mkdir -p /opt/shellcraft-seeds/lab-05 \
+  && printf '%s\n' \
     '#!/bin/sh' \
     'trap "exit 0" TERM' \
     'while true; do sleep 1; done' \
-    > /home/guest/projects/hang.sh \
-  && chmod 755 /home/guest/projects/hang.sh
+    > /opt/shellcraft-seeds/lab-05/hang.sh \
+  && chmod 755 /opt/shellcraft-seeds/lab-05/hang.sh
 
 # Interactive shell logging for PTY grading (all labs).
+# Login shells (`bash -li` in the PTY) read ~/.bash_profile, not ~/.bashrc — source it explicitly.
 RUN printf '%s\n' \
+    '[[ -f ~/.bashrc ]] && . ~/.bashrc' \
+    > /home/guest/.bash_profile \
+  && printf '%s\n' \
     '__shellcraft_log_cmd() {' \
     '  local current="$BASH_COMMAND"' \
     '  [[ "$current" == "$PROMPT_COMMAND" ]] && return' \
@@ -52,9 +61,9 @@ RUN printf '%s\n' \
     'trap '"'"'__shellcraft_log_cmd'"'"' DEBUG' \
     'export PROMPT_COMMAND="pwd > /tmp/.shellcraft-cwd 2>/dev/null"' \
     >> /home/guest/.bashrc \
-  && chown -R learner:learner /home/guest
+  && chown -R learner:learner /home/guest /opt/shellcraft-seeds
 
 USER learner
-WORKDIR /home/guest/projects
+WORKDIR /home/guest
 
 CMD ["sleep", "infinity"]

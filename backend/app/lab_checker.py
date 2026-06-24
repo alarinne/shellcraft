@@ -11,12 +11,12 @@ from typing import Any
 
 from .engine import normalize_command
 
-_LABS_DIR = "/home/guest/projects/labs"
-_PROJECTS_DIR = "/home/guest/projects"
-_LOGS_DIR = "/home/guest/projects/logs"
+_LAB01_ROOT = "/home/guest/lab-01"
+_LAB01_MISSION_DIR = "/home/guest/lab-01/labs"
+_LAB03_LOGS_DIR = "/home/guest/lab-03/logs"
 
 _STEP_FAILURE_HINTS: dict[str, str] = {
-    "step-01-orient": "Run `pwd` to confirm you start in /home/guest/projects.",
+    "step-01-orient": "Run `pwd` to confirm you start in /home/guest/lab-01.",
     "step-02-scan-projects": "Run `ls` or `ls -la` here and look for the labs folder.",
     "step-03-enter-labs": "Run `cd labs` to move into the labs directory.",
     "step-04-find-mission": "Inside labs, run `ls` to find mission.txt.",
@@ -24,8 +24,11 @@ _STEP_FAILURE_HINTS: dict[str, str] = {
     "step-01-inspect": "Run `ls -l deploy.sh` or `stat deploy.sh` to read the current mode.",
     "step-02-chmod": "Run `chmod 755 deploy.sh` to make the script executable.",
     "step-01-view-log": "Run `cat access.log` or `head access.log` in the logs directory.",
-    "step-02-grep-errors": "Run `grep ERROR access.log` to filter error lines.",
-    "step-03-count-errors": "Run `grep ERROR access.log | wc -l` or `grep -c ERROR access.log`.",
+    "step-02-grep-errors": "Run `grep ERROR access.log` or `cat access.log | grep ERROR`.",
+    "step-03-count-errors": (
+        "Run `grep ERROR access.log | wc -l`, `grep -c ERROR access.log`, "
+        "or `cat access.log | grep ERROR | wc -l`."
+    ),
     "step-01-start-worker": "Run `./worker.sh &` to start the worker in the background.",
     "step-02-find-worker": "Run `ps aux` or `pgrep -f worker` to locate the worker process.",
     "step-03-stop-worker": "Run `pkill -f worker.sh` or `kill` with the worker PID.",
@@ -83,6 +86,42 @@ def _stdout_text(entry: dict[str, Any]) -> str:
     return "\n".join(entry.get("stdout", [])).strip()
 
 
+def _output_has_error_lines(out: str) -> bool:
+    return bool(re.search(r"\bERROR\b", out))
+
+
+def _output_shows_count(out: str, count: str = "2") -> bool:
+    for line in out.splitlines():
+        stripped = line.strip()
+        if stripped == count:
+            return True
+        if re.fullmatch(r"\d+", stripped) and stripped == count:
+            return True
+    return out.strip() == count
+
+
+def _grep_filters_access_log(cmd: str) -> bool:
+    lower = normalize_command(cmd).lower()
+    if "access.log" not in lower:
+        return False
+    if "grep" not in lower:
+        return False
+    if "wc" in lower or "grep -c" in lower:
+        return False
+    return True
+
+
+def _counts_access_log_errors(cmd: str) -> bool:
+    lower = normalize_command(cmd).lower()
+    if "access.log" not in lower and "access.log" not in cmd:
+        return False
+    if lower.startswith("grep -c ") and "access.log" in lower:
+        return True
+    if "|" in cmd and "grep" in lower and "wc" in lower:
+        return True
+    return False
+
+
 def _is_listing_command(cmd: str) -> bool:
     normalized = normalize_command(cmd)
     return normalized == "ls" or normalized.startswith("ls ")
@@ -106,27 +145,28 @@ def _is_cd_to_labs(cmd: str, entry_cwd: str) -> bool:
         return False
     parts = cmd.split(" ", 1)
     target = parts[1] if len(parts) > 1 else "~"
-    return resolve_path(entry_cwd, target) == _LABS_DIR
+    return resolve_path(entry_cwd, target) == _LAB01_MISSION_DIR
 
 
 def _scan_projects_listing(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
-    if entry_cwd != _PROJECTS_DIR or not _is_listing_command(cmd):
+    if entry_cwd != _LAB01_ROOT or not _is_listing_command(cmd):
         return False
     if command_only:
         return True
     if re.search(r"\blabs\b", out):
         return True
-    return _listing_resolves_to(cmd, entry_cwd, _LABS_DIR)
+    return _listing_resolves_to(cmd, entry_cwd, _LAB01_MISSION_DIR)
 
 
 def _find_mission_listing(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
     if not _is_listing_command(cmd):
         return False
-    in_labs = entry_cwd == _LABS_DIR
-    lists_labs = _listing_resolves_to(cmd, entry_cwd, _LABS_DIR)
+    in_labs = entry_cwd == _LAB01_MISSION_DIR
+    lists_labs = _listing_resolves_to(cmd, entry_cwd, _LAB01_MISSION_DIR)
     if command_only:
         return in_labs or lists_labs
-    if in_labs and "mission.txt" in out:
+    # mission.txt is always present in labs; PTY capture may miss short ls output.
+    if in_labs:
         return True
     if lists_labs and "mission.txt" in out:
         return True
@@ -141,21 +181,33 @@ def _mentions_deploy_sh(cmd: str) -> bool:
 def _inspect_deploy_permissions(cmd: str, out: str, *, command_only: bool) -> bool:
     if cmd.startswith("stat ") and _mentions_deploy_sh(cmd):
         return command_only or "rw-r--r--" in out or "644" in out
-    if _is_listing_command(cmd) and (_mentions_deploy_sh(cmd) or cmd in ("ls -l", "ls -la")):
-        return command_only or "rw-r--r--" in out or "deploy.sh" in out
-    return False
+    if not _is_listing_command(cmd):
+        return False
+    if _mentions_deploy_sh(cmd):
+        return command_only or "deploy.sh" in out or "rw-r--r--" in out or "rwx" in out
+    return command_only or (
+        "deploy.sh" in out and ("rw-r--r--" in out or "rwx" in out or "r-x" in out)
+    )
 
 
-def _chmod_deploy_executable(cmd: str, out: str, *, command_only: bool) -> bool:
+def _chmod_deploy_executable(
+    cmd: str,
+    out: str,
+    *,
+    command_only: bool,
+    live_state: dict[str, Any] | None = None,
+) -> bool:
+    live_state = live_state or {}
+    if live_state.get("deployExecutable"):
+        return True
     normalized = normalize_command(cmd)
     if normalized.startswith("chmod ") and "deploy.sh" in normalized:
-        mode = normalized.split()[1] if len(normalized.split()) > 1 else ""
-        if mode in ("755", "0755", "+x", "u+x"):
+        parts = normalized.split()
+        mode = parts[1] if len(parts) > 1 else ""
+        if mode in ("755", "0755", "+x", "u+x", "a+x"):
             return True
-    if command_only:
-        return False
-    if _is_listing_command(cmd) and _mentions_deploy_sh(cmd):
-        return "rwxr-xr-x" in out
+    if _is_listing_command(cmd) and _mentions_deploy_sh(cmd) and "rwxr-xr-x" in out:
+        return True
     return "rwxr-xr-x" in out and "deploy.sh" in out
 
 
@@ -164,8 +216,12 @@ def _mentions_access_log(cmd: str) -> bool:
 
 
 def _view_access_log(cmd: str, entry_cwd: str, out: str, *, command_only: bool) -> bool:
-    if entry_cwd != _LOGS_DIR:
+    if entry_cwd != _LAB03_LOGS_DIR and "/logs" not in entry_cwd:
         return False
+    if _is_listing_command(cmd) and _mentions_access_log(cmd):
+        return command_only or "access.log" in out or bool(out)
+    if _is_listing_command(cmd) and "access.log" in out:
+        return True
     if cmd.startswith("cat ") and _mentions_access_log(cmd):
         return command_only or "INFO" in out or "ERROR" in out
     if cmd.startswith("head") and _mentions_access_log(cmd):
@@ -174,30 +230,28 @@ def _view_access_log(cmd: str, entry_cwd: str, out: str, *, command_only: bool) 
 
 
 def _grep_errors(cmd: str, out: str, *, command_only: bool) -> bool:
+    if not _grep_filters_access_log(cmd):
+        return False
     normalized = normalize_command(cmd)
-    if not normalized.startswith("grep"):
-        return False
-    if "access.log" not in normalized and "access.log" not in cmd:
-        return False
-    if "|" in cmd:
+    if "|" not in cmd and not normalized.startswith("grep"):
         return False
     if command_only:
         return "error" in normalized.lower()
-    return "ERROR" in out
+    return _output_has_error_lines(out)
 
 
 def _count_errors(cmd: str, out: str, *, command_only: bool) -> bool:
-    normalized = normalize_command(cmd)
-    if normalized.startswith("grep -c ") and "access.log" in normalized:
-        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
-    if "|" in cmd and "grep" in cmd and "wc" in cmd:
-        return command_only or out.strip() in ("2", "2\n") or out.strip().startswith("2")
-    return False
+    if not _counts_access_log_errors(cmd):
+        return False
+    if command_only:
+        return True
+    return _output_shows_count(out, "2")
 
 
 def _starts_background(cmd: str, script: str) -> bool:
     normalized = normalize_command(cmd)
-    return script in normalized and "&" in normalized
+    base = script.lstrip("./")
+    return base in normalized and "&" in normalized
 
 
 def _find_process(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
@@ -205,21 +259,22 @@ def _find_process(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
     if normalized.startswith("pgrep"):
         return command_only or name in out or name in normalized
     if normalized == "ps" or normalized.startswith("ps "):
-        return command_only or name in out or name in normalized
-    if "|" in cmd and "grep" in cmd:
-        return command_only or name in out or name in cmd
+        return name in out or name in normalized
+    if "grep" in normalized or "|" in cmd:
+        return name in out or name in cmd
     return False
 
 
 def _stop_process(cmd: str, name: str, *, command_only: bool) -> bool:
     normalized = normalize_command(cmd)
+    base = name.split(".")[0]
     if normalized.startswith("pkill") or normalized.startswith("killall"):
-        return name.split(".")[0] in normalized
+        return base in normalized or name in normalized
     if normalized.startswith("kill "):
         parts = normalized.split()
         if len(parts) >= 2 and parts[1].lstrip("-").isdigit():
             return True
-        if command_only and any(token in normalized for token in ("-15", "-TERM", "-9", "-KILL")):
+        if any(token in normalized for token in ("-15", "-TERM", "-9", "-KILL", "-SIGTERM")):
             return True
     return False
 
@@ -237,15 +292,14 @@ def _sigterm_hang(cmd: str, *, command_only: bool) -> bool:
 
 def _verify_process_gone(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
     normalized = normalize_command(cmd)
-    if not (normalized.startswith("ps") or normalized.startswith("pgrep") or "|" in cmd):
+    if not (normalized.startswith("ps") or normalized.startswith("pgrep") or "grep" in normalized):
         return False
-    if command_only:
-        return name.split(".")[0] in normalized or name in cmd
-    if name not in out and f"{name}.sh" not in out:
-        return True
-    # grep often prints itself; a lone grep line without the target counts as gone.
-    lines = [line for line in out.splitlines() if name not in line and f"{name}.sh" not in line]
-    return len(lines) <= 1
+    script = f"{name}.sh"
+    if script in out or f"/bin/sh ./{script}" in out or f"./{script}" in out:
+        return False
+    if name in out and "grep" not in out:
+        return False
+    return True
 
 
 def _entry_matches_step(
@@ -253,6 +307,7 @@ def _entry_matches_step(
     entry: dict[str, Any],
     *,
     command_only: bool = False,
+    live_state: dict[str, Any] | None = None,
 ) -> bool:
     """Return True when a single history entry satisfies a lab step."""
     if entry.get("exitCode", 1) != 0:
@@ -265,8 +320,8 @@ def _entry_matches_step(
 
     if step_id in ("step-01-orient", "step-01-pwd"):
         if cmd == "pwd":
-            return command_only or _PROJECTS_DIR in out or not out
-        return entry_cwd == _PROJECTS_DIR and cmd not in ("", "cd", "cd .")
+            return command_only or _LAB01_ROOT in out or not out
+        return entry_cwd == _LAB01_ROOT and cmd not in ("", "cd", "cd .")
 
     if step_id in ("step-02-scan-projects", "step-02-ls"):
         return _scan_projects_listing(cmd, entry_cwd, out, command_only=command_only)
@@ -275,7 +330,7 @@ def _entry_matches_step(
         if not cmd.startswith("cd "):
             return False
         replayed_cwd = entry.get("cwd", "")
-        if replayed_cwd == _LABS_DIR:
+        if replayed_cwd == _LAB01_MISSION_DIR:
             return True
         return entry.get("exitCode", 1) == 0 and _is_cd_to_labs(cmd, replayed_cwd)
 
@@ -291,7 +346,9 @@ def _entry_matches_step(
         return _inspect_deploy_permissions(cmd, out, command_only=command_only)
 
     if step_id == "step-02-chmod":
-        return _chmod_deploy_executable(cmd, out, command_only=command_only)
+        return _chmod_deploy_executable(
+            cmd, out, command_only=command_only, live_state=live_state
+        )
 
     if step_id == "step-01-view-log":
         return _view_access_log(cmd, entry_cwd, out, command_only=command_only)
@@ -347,11 +404,12 @@ def check_lab_progress(
     history: list[dict[str, Any]],
     *,
     live_cwd: str | None = None,
+    live_state: dict[str, Any] | None = None,
     command_only: bool = False,
 ) -> dict[str, Any]:
     """Grade every lab step; return per-step status and feedback for incomplete work."""
     steps: list[dict[str, Any]] = lab.get("steps", [])
-    initial_cwd = lab.get("initialState", {}).get("cwd", "/home/guest/projects")
+    initial_cwd = lab.get("initialState", {}).get("cwd", _LAB01_ROOT)
     graded_history = replay_history(history, initial_cwd)
 
     if not steps:
@@ -366,20 +424,75 @@ def check_lab_progress(
             "stepStatuses": [],
         }
 
+    live_state = live_state or {}
     step_statuses: list[dict[str, Any]] = []
     completed_ids: list[str] = []
 
+    worker_seen = any(
+        _find_process("ps aux", "worker", _stdout_text(entry), command_only=False)
+        for entry in graded_history
+    )
+    hang_sigterm = any(
+        _sigterm_hang(normalize_command(entry.get("command", "")), command_only=False)
+        for entry in graded_history
+    )
+
     for step in steps:
+        step_id = step.get("id", "")
         completed = any(
-            _entry_matches_step(step, entry, command_only=command_only)
+            _entry_matches_step(
+                step,
+                entry,
+                command_only=command_only,
+                live_state=live_state,
+            )
             for entry in graded_history
         )
-        if (
-            not completed
-            and step.get("id") in ("step-03-enter-labs", "step-03-cd")
-            and live_cwd == "/home/guest/projects/labs"
-        ):
+        if not completed and step_id in ("step-03-enter-labs", "step-03-cd"):
+            if live_cwd == _LAB01_MISSION_DIR:
+                completed = True
+        if not completed and step_id == "step-04-find-mission":
+            if live_cwd == _LAB01_MISSION_DIR and live_state.get("missionExists"):
+                completed = True
+        if not completed and step_id == "step-02-chmod" and live_state.get("deployExecutable"):
             completed = True
+        if not completed and step_id == "step-01-start-worker":
+            if any(
+                _starts_background(normalize_command(entry.get("command", "")), "worker.sh")
+                for entry in graded_history
+            ):
+                completed = True
+        if not completed and step_id == "step-03-stop-worker":
+            if worker_seen and not live_state.get("workerRunning"):
+                completed = True
+        if not completed and step_id == "step-01-start-hang":
+            if any(
+                _starts_background(normalize_command(entry.get("command", "")), "hang.sh")
+                for entry in graded_history
+            ):
+                completed = True
+        if not completed and step_id == "step-02-sigterm" and hang_sigterm:
+            completed = True
+        if not completed and step_id == "step-03-verify-gone":
+            if hang_sigterm and not live_state.get("hangRunning"):
+                completed = True
+        if not completed and step_id == "step-01-view-log" and live_state.get("logExists"):
+            if any(
+                _view_access_log(
+                    normalize_command(entry.get("command", "")),
+                    entry.get("cwd", _LAB03_LOGS_DIR),
+                    _stdout_text(entry),
+                    command_only=command_only,
+                )
+                for entry in graded_history
+            ):
+                completed = True
+            elif any(
+                _is_listing_command(normalize_command(entry.get("command", "")))
+                or normalize_command(entry.get("command", "")).startswith(("cat ", "head"))
+                for entry in graded_history
+            ):
+                completed = True
 
         reason = None if completed else _failure_reason(step)
         step_statuses.append(

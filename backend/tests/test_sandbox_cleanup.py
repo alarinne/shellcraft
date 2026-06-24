@@ -88,7 +88,8 @@ def test_run_container_uses_auto_remove_flag():
 
     with patch("app.sandbox.subprocess.run") as run:
         run.return_value = MagicMock(returncode=0, stdout="", stderr="")
-        manager._run_container(f"{CONTAINER_NAME_PREFIX}test123")
+        manager._run_container(f"{CONTAINER_NAME_PREFIX}test123", "lab-02")
 
     args = run.call_args.args[0]
     assert "--rm" in args
+    assert "/home/guest/lab-02" in args
