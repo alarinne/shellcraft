@@ -6,6 +6,7 @@ import { EXECUTION_BACKEND } from '../../core/execution/execution-backend';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { SimulatedBackend } from '../../core/execution/simulated-backend';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
+import { LAB_02_PERMISSIONS } from '../../core/labs/lab-02-permissions';
 import { LabProgress } from '../../core/progress/lab-progress';
 import { CompletePage } from './complete.page';
 
@@ -59,6 +60,22 @@ describe('CompletePage', () => {
     expect(compiled.textContent).toContain('Filesystem Scout');
     expect(compiled.textContent).toContain('Mission Finder');
     expect(compiled.textContent).toContain('+120 XP');
+  });
+
+  it('renders the latest completed lab reward summary', async () => {
+    await claimLabOne();
+    TestBed.inject(LabProgress).complete(LAB_02_PERMISSIONS);
+
+    const fixture = TestBed.createComponent(CompletePage);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.textContent).toContain('Permission Scout');
+    expect(compiled.textContent).toContain('Permission Keeper');
+    expect(compiled.textContent).toContain('+150 XP');
+    expect(compiled.textContent).toContain('chmod');
+    expect(compiled.textContent).not.toContain('Filesystem Scout');
+    expect(compiled.querySelectorAll('.sc-complete-badge-dot.is-unlocked').length).toBe(2);
   });
 
   it('hides rewards again after claimed progress is reset', async () => {

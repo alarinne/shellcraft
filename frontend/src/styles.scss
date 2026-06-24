@@ -98,6 +98,7 @@ button {
   background: transparent;
   border: 0;
   text-align: left;
+  transition: transform 160ms ease, opacity 160ms ease;
 }
 
 .sc-brand-mark {
@@ -111,6 +112,20 @@ button {
   border-radius: var(--sc-radius);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-weight: 800;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.sc-brand:hover {
+  opacity: 0.94;
+}
+
+.sc-brand:hover .sc-brand-mark {
+  border-color: rgba(50, 239, 143, 0.5);
+  background: rgba(50, 239, 143, 0.11);
 }
 
 .sc-brand strong,
@@ -208,6 +223,12 @@ button {
   background: rgba(255, 255, 255, 0.04);
   font-size: 0.82rem;
   font-weight: 500;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .sc-session-action.is-primary {
@@ -215,6 +236,17 @@ button {
   border-color: transparent;
   background: var(--sc-blue);
   box-shadow: 0 12px 30px rgba(82, 168, 255, 0.18);
+}
+
+.sc-session-action:hover {
+  color: #f4faff;
+  border-color: rgba(82, 168, 255, 0.5);
+  background: rgba(82, 168, 255, 0.11);
+}
+
+.sc-session-action.is-primary:hover {
+  color: #06111d;
+  background: #6bb7ff;
 }
 
 .sc-screen {
@@ -360,6 +392,12 @@ button {
   color: var(--sc-text);
   font-size: 0.95rem;
   font-weight: 500;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .sc-btn-primary {
@@ -368,9 +406,26 @@ button {
   box-shadow: 0 12px 30px rgba(82, 168, 255, 0.25);
 }
 
+.sc-btn-primary:hover:not(:disabled):not(.sc-btn-disabled) {
+  color: #06111d;
+  background: #6bb7ff;
+}
+
 .sc-btn-ghost {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(142, 160, 180, 0.22);
+}
+
+.sc-btn-ghost:hover:not(:disabled):not(.sc-btn-disabled) {
+  color: #f4faff;
+  border-color: rgba(82, 168, 255, 0.42);
+  background: rgba(82, 168, 255, 0.09);
+}
+
+.sc-btn:active:not(:disabled):not(.sc-btn-disabled),
+.sc-session-action:active:not(:disabled),
+.sc-command-bar button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .sc-btn-disabled {
@@ -385,7 +440,109 @@ button {
 }
 
 .sc-hero-terminal {
+  position: relative;
+  overflow: visible;
   min-height: 318px;
+}
+
+.sc-hero-terminal .sc-terminal-body {
+  min-height: 258px;
+  padding: 28px 32px;
+}
+
+.sc-hero-terminal .sc-terminal-body .prompt span {
+  color: #dceaff;
+}
+
+.sc-hero-visualizer {
+  margin-top: 16px;
+  padding: 22px 26px;
+  border: 1px solid rgba(50, 239, 143, 0.22);
+  border-radius: var(--sc-radius);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(50, 239, 143, 0.08), transparent 34%),
+    rgba(4, 24, 15, 0.64);
+  box-shadow: inset 0 0 0 1px rgba(50, 239, 143, 0.04);
+}
+
+.sc-hero-visualizer-head,
+.sc-filesystem-flow {
+  display: flex;
+  align-items: center;
+}
+
+.sc-hero-visualizer-head {
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.sc-hero-visualizer-head strong {
+  color: var(--sc-green);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sc-hero-visualizer-head small {
+  color: rgba(142, 160, 180, 0.76);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sc-filesystem-flow {
+  justify-content: center;
+  gap: 28px;
+  margin-top: 22px;
+}
+
+.sc-filesystem-flow div {
+  display: grid;
+  gap: 8px;
+  min-width: 170px;
+  text-align: center;
+}
+
+.sc-filesystem-flow span {
+  color: rgba(142, 160, 180, 0.78);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sc-filesystem-flow code {
+  color: var(--sc-green);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.sc-filesystem-flow i {
+  color: var(--sc-green);
+  font-size: 1.6rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.sc-hero-progress {
+  height: 4px;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(142, 160, 180, 0.22);
+}
+
+.sc-hero-progress span {
+  display: block;
+  width: 58%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sc-green), rgba(50, 239, 143, 0.68));
 }
 
 .sc-window-bar {
@@ -442,20 +599,43 @@ button {
 }
 
 .sc-observation {
+  position: absolute;
+  bottom: -18px;
+  left: -18px;
   gap: 12px;
   width: fit-content;
-  margin: -86px 22px 22px auto;
-  padding: 16px 18px;
+  margin: 0;
+  padding: 14px 16px;
   border: 1px solid rgba(82, 168, 255, 0.32);
   border-radius: var(--sc-radius);
   background: rgba(10, 20, 30, 0.95);
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
-.sc-observation > span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--sc-green);
+.sc-observation:hover {
+  border-color: rgba(82, 168, 255, 0.46);
+  background: rgba(12, 25, 38, 0.97);
+  transform: translateY(-4px);
+}
+
+.sc-observation-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--sc-blue);
+  border-radius: 7px;
+  background: rgba(82, 168, 255, 0.18);
+}
+
+.sc-observation-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .sc-observation strong,
@@ -464,8 +644,12 @@ button {
 }
 
 .sc-observation small {
-  margin-top: 4px;
-  color: #a8c6e6;
+  color: var(--sc-blue);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .sc-feature-row {
@@ -1213,11 +1397,27 @@ button {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 500;
+  transition:
+    transform 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .sc-command-bar button.is-active {
   color: #06111d;
   background: var(--sc-green);
+}
+
+.sc-command-bar button:hover:not(:disabled):not(.is-active) {
+  color: #f4faff;
+  border-color: rgba(82, 168, 255, 0.34);
+  background: rgba(82, 168, 255, 0.1);
+}
+
+.sc-command-bar button.is-active:hover:not(:disabled) {
+  background: #67f5af;
 }
 
 .sc-inspector {
@@ -1310,6 +1510,118 @@ button {
   display: block;
   margin-top: 8px;
   color: var(--sc-purple);
+}
+
+.sc-complete-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sc-complete-badge-dot {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: rgba(154, 169, 186, 0.34);
+  border: 1px solid rgba(154, 169, 186, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+  will-change: transform;
+}
+
+.sc-complete-badge-dot.is-unlocked {
+  color: #bda8ff;
+  border-color: rgba(139, 92, 246, 0.42);
+  background:
+    radial-gradient(circle at 70% 20%, rgba(82, 168, 255, 0.24), transparent 18%),
+    rgba(139, 92, 246, 0.18);
+}
+
+.sc-complete-badge-dot:hover {
+  color: rgba(189, 203, 219, 0.6);
+  border-color: rgba(154, 169, 186, 0.24);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-2px);
+}
+
+.sc-complete-badge-dot.is-unlocked:hover {
+  color: #dbcfff;
+  border-color: rgba(139, 92, 246, 0.7);
+  background:
+    radial-gradient(circle at 70% 20%, rgba(120, 215, 255, 0.34), transparent 20%),
+    rgba(139, 92, 246, 0.26);
+  box-shadow:
+    0 0 0 4px rgba(139, 92, 246, 0.08),
+    0 12px 26px rgba(82, 168, 255, 0.14);
+  transform: translateY(-3px) scale(1.08);
+}
+
+.sc-complete-badge-dot.is-unlocked::after {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  content: '';
+  border-radius: 999px;
+  background: #78d7ff;
+  box-shadow: 0 0 10px rgba(120, 215, 255, 0.55);
+}
+
+.sc-complete-badge-dot.is-unlocked:hover::after {
+  animation: sc-badge-spark 700ms ease both;
+}
+
+.sc-complete-badge-dot svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+@keyframes sc-badge-spark {
+  0% {
+    box-shadow: 0 0 0 0 rgba(120, 215, 255, 0.45);
+    transform: scale(1);
+  }
+
+  45% {
+    box-shadow: 0 0 0 5px rgba(120, 215, 255, 0.08);
+    transform: scale(1.25);
+  }
+
+  100% {
+    box-shadow: 0 0 10px rgba(120, 215, 255, 0.55);
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-complete-badge-dot {
+    transition: none;
+    will-change: auto;
+  }
+
+  .sc-complete-badge-dot:hover,
+  .sc-complete-badge-dot.is-unlocked:hover {
+    transform: none;
+  }
+
+  .sc-complete-badge-dot.is-unlocked:hover::after {
+    animation: none;
+  }
 }
 
 .sc-complete-card.is-empty .sc-reward-grid strong {
@@ -1467,6 +1779,15 @@ button {
   background: transparent;
   padding: 0;
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color 160ms ease, text-decoration-color 160ms ease, transform 160ms ease;
+}
+
+.sc-auth-switch:hover {
+  color: #78bdff;
+  text-decoration-color: currentColor;
 }
 
 .sc-auth-terminal {
@@ -1512,7 +1833,7 @@ button {
 }
 
 .sc-footer-nav > span,
-.sc-footer-contact > span,
+.sc-footer-contact > span:not(.sc-footer-email),
 .sc-footer-bottom {
   color: rgba(142, 160, 180, 0.72);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -1523,7 +1844,7 @@ button {
 }
 
 .sc-footer-nav button,
-.sc-footer-contact a {
+.sc-footer-email {
   width: fit-content;
   color: var(--sc-text);
   border: 0;
@@ -1535,16 +1856,16 @@ button {
   text-decoration: none;
 }
 
-.sc-footer-nav button:hover,
-.sc-footer-contact a:hover {
+.sc-footer-nav button:hover {
   color: var(--sc-blue);
 }
 
-.sc-footer-contact a {
+.sc-footer-email {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-family: inherit;
+  text-transform: none;
 }
 
 .sc-footer-contact small {
@@ -1565,6 +1886,46 @@ button {
 
 .sc-btn:disabled {
   cursor: not-allowed;
+}
+
+.sc-btn:disabled,
+.sc-btn.sc-btn-disabled,
+.sc-btn-disabled,
+.sc-session-action:disabled {
+  transform: none;
+  box-shadow: none;
+}
+
+.sc-brand:focus-visible,
+.sc-nav button:focus-visible,
+.sc-session-action:focus-visible,
+.sc-btn:focus-visible,
+.sc-command-bar button:focus-visible,
+.sc-auth-switch:focus-visible,
+.sc-footer-nav button:focus-visible {
+  outline: 2px solid rgba(82, 168, 255, 0.78);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-brand,
+  .sc-brand-mark,
+  .sc-session-action,
+  .sc-btn,
+  .sc-command-bar button,
+  .sc-auth-switch {
+    transition: none;
+  }
+
+  .sc-brand:hover,
+  .sc-brand:hover .sc-brand-mark,
+  .sc-session-action:hover,
+  .sc-btn-primary:hover:not(:disabled):not(.sc-btn-disabled),
+  .sc-btn-ghost:hover:not(:disabled):not(.sc-btn-disabled),
+  .sc-command-bar button:hover:not(:disabled),
+  .sc-auth-switch:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 1080px) {

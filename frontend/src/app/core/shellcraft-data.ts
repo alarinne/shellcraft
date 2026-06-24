@@ -56,7 +56,7 @@ export const LABS: readonly LabCard[] = [
     accent: 'blue',
     locked: false,
     actionLabel: 'Start lab',
-    commands: ['pwd', 'ls -la', 'cd', 'cat'],
+    commands: ['pwd', 'ls', 'cd labs', 'cat mission.txt'],
   },
   {
     id: 'lab-02',
@@ -68,7 +68,7 @@ export const LABS: readonly LabCard[] = [
     accent: 'purple',
     locked: false,
     actionLabel: 'Start lab',
-    commands: ['chmod', 'stat', 'ls -l'],
+    commands: ['ls -l deploy.sh', 'chmod 755 deploy.sh'],
   },
   {
     id: 'lab-03',
@@ -80,7 +80,7 @@ export const LABS: readonly LabCard[] = [
     accent: 'orange',
     locked: false,
     actionLabel: 'Start lab',
-    commands: ['cat', 'grep', 'wc'],
+    commands: ['cat access.log', 'grep ERROR access.log', 'wc -l'],
   },
   {
     id: 'lab-04',
@@ -92,7 +92,7 @@ export const LABS: readonly LabCard[] = [
     accent: 'blue',
     locked: false,
     actionLabel: 'Start lab',
-    commands: ['ps', 'pgrep', 'pkill'],
+    commands: ['./worker.sh &', 'ps aux', 'pkill -f worker.sh'],
   },
   {
     id: 'lab-05',
@@ -104,7 +104,7 @@ export const LABS: readonly LabCard[] = [
     accent: 'purple',
     locked: false,
     actionLabel: 'Start lab',
-    commands: ['kill -15', 'ps', 'background &'],
+    commands: ['./hang.sh &', 'kill -15', 'ps aux'],
   },
 ];
 
