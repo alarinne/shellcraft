@@ -1,32 +1,81 @@
-@if (completed()) {
+@if (completion(); as summary) {
   <section class="sc-screen sc-complete" aria-label="Lab completed">
     <article class="sc-complete-card">
       <span class="sc-chip sc-chip-blue">Lab completed</span>
-      <h1>Filesystem Scout</h1>
-      <p>You found the mission file and mapped your first Linux workspace.</p>
+      <h1>{{ summary.reward.title }}</h1>
+      <p>{{ summary.reward.summary }}</p>
 
       <div class="sc-reward-grid">
         <div>
           <span>XP earned</span>
-          <strong>+120 XP</strong>
+          <strong>+{{ summary.lab.xp }} XP</strong>
           <div class="sc-progress"><i></i></div>
         </div>
         <div>
-          <span>Badge unlocked</span>
-          <strong>Mission Finder</strong>
-          <small>Tier 1</small>
+          <span>Badges unlocked</span>
+          <strong>{{ summary.reward.badge }}</strong>
+          <div class="sc-complete-badges" aria-label="Badges unlocked">
+            @for (badge of summary.badges; track badge.labId) {
+              <span
+                class="sc-complete-badge-dot"
+                [class.is-unlocked]="badge.unlocked"
+                [attr.aria-label]="badge.label + (badge.unlocked ? ' unlocked' : ' locked')"
+                [attr.title]="badge.label"
+              >
+                @switch (badge.icon) {
+                  @case ('shield') {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 4l6 2v5c0 4-2.4 7.2-6 9-3.6-1.8-6-5-6-9V6l6-2z" />
+                    </svg>
+                  }
+                  @case ('medal') {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 4h8v7l-4 3-4-3V4z" />
+                      <path d="M12 14l1.5 2.8 3.1.5-2.2 2.2.5 3.1-2.9-1.5-2.9 1.5.5-3.1-2.2-2.2 3.1-.5L12 14z" />
+                    </svg>
+                  }
+                  @case ('pipeline') {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 7h4l3 10h3" />
+                      <path d="M9 7l3-3 3 3" />
+                      <path d="M15 17l3-3 3 3" />
+                    </svg>
+                  }
+                  @case ('process') {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M6 17V7" />
+                      <path d="M12 17V4" />
+                      <path d="M18 17v-7" />
+                      <path d="M4 17h16" />
+                      <path d="M8 7H4" />
+                      <path d="M14 4h-4" />
+                      <path d="M20 10h-4" />
+                    </svg>
+                  }
+                  @case ('signal') {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 19v-3" />
+                      <path d="M8 16a6 6 0 0 1 8 0" />
+                      <path d="M5 12a10 10 0 0 1 14 0" />
+                      <path d="M2 8a14 14 0 0 1 20 0" />
+                    </svg>
+                  }
+                }
+              </span>
+            }
+          </div>
         </div>
       </div>
 
       <div class="sc-command-tags centered">
-        @for (command of learnedCommands; track command) {
+        @for (command of summary.lab.commands; track command) {
           <small>{{ command }}</small>
         }
       </div>
 
       <div class="sc-actions centered">
         <button class="sc-btn sc-btn-primary" type="button" (click)="continueNext()">
-          Continue to next lab
+          {{ summary.nextLab ? 'Continue to next lab' : 'Learning Path' }}
         </button>
         <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
           Learning Path

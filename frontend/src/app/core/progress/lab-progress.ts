@@ -50,6 +50,22 @@ export class LabProgress {
     });
   });
 
+  readonly latestCompletedLab = computed<LabCard | null>(() => {
+    const completedIds = this.completedLabIds();
+    for (let index = LABS.length - 1; index >= 0; index -= 1) {
+      const lab = LABS[index];
+      if (completedIds.has(lab.id)) {
+        return lab;
+      }
+    }
+    return null;
+  });
+
+  readonly nextLab = computed<LabCard | null>(() => {
+    const completedIds = this.completedLabIds();
+    return LABS.find((lab) => !completedIds.has(lab.id)) ?? null;
+  });
+
   isCompleted(labId: string): boolean {
     return this.completedLabIds().has(labId);
   }

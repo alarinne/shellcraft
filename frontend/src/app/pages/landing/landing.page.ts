@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { COMMAND_DEMOS, CommandDemo, DEFAULT_LAB_ID } from '../../core/shellcraft-data';
+import { DEFAULT_LAB_ID } from '../../core/shellcraft-data';
 
 @Component({
   selector: 'sc-landing-page',
@@ -8,9 +8,6 @@ import { COMMAND_DEMOS, CommandDemo, DEFAULT_LAB_ID } from '../../core/shellcraf
 })
 export class LandingPage {
   private readonly router = inject(Router);
-
-  protected readonly demo = signal<CommandDemo>(COMMAND_DEMOS[1]);
-  protected readonly promptLine = computed(() => `guest@shellcraft:~$ ${this.demo().command}`);
 
   protected startLearning(): void {
     void this.router.navigate(['/lab', DEFAULT_LAB_ID]);
