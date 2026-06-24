@@ -24,16 +24,40 @@
       <small>bash - lab-01-filesystem</small>
     </div>
     <div class="sc-terminal-body">
-      <p class="prompt">{{ promptLine() }}</p>
-      @for (line of demo().output; track line) {
-        <p>{{ line }}</p>
-      }
+      <p class="prompt">guest&#64;shellcraft:~$ <span>ls -la</span></p>
+      <p>drwxr-xr-x 2 guest guest 4096 labs</p>
+
+      <div class="sc-hero-visualizer" aria-label="Filesystem scan complete">
+        <div class="sc-hero-visualizer-head">
+          <strong>Filesystem scan complete</strong>
+          <small>Visualizer v1.0</small>
+        </div>
+        <div class="sc-filesystem-flow">
+          <div>
+            <span>Current path</span>
+            <code>/home/guest/lab-01</code>
+          </div>
+          <i aria-hidden="true">-&gt;</i>
+          <div>
+            <span>Detected</span>
+            <code>labs/</code>
+          </div>
+        </div>
+        <div class="sc-hero-progress" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
     </div>
     <div class="sc-observation">
-      <span></span>
+      <span class="sc-observation-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M2.5 12s3.6-6 9.5-6 9.5 6 9.5 6-3.6 6-9.5 6-9.5-6-9.5-6Z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </span>
       <div>
+        <small>Visual engine</small>
         <strong>Active observation</strong>
-        <small>{{ demo().label }}</small>
       </div>
     </div>
   </aside>
@@ -58,7 +82,7 @@
 
   <section class="sc-real-linux" aria-label="Real Linux sandbox">
     <div class="sc-real-linux-media" aria-label="Linux container illustration">
-      <img src="/real-linux-containers.png" alt="Shielded Linux containers running isolated lab sessions" />
+      <img src="screenshots/real-linux-containers.png" alt="Shielded Linux containers running isolated lab sessions" />
       <span class="sc-real-linux-media-label">LIVE_SANDBOX</span>
     </div>
 

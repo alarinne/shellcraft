@@ -83,6 +83,34 @@ def test_cleanup_orphaned_containers_removes_untracked_names():
     remove.assert_called_once_with(f"{CONTAINER_NAME_PREFIX}orphan")
 
 
+def test_cleanup_orphaned_containers_ignores_compose_service_names():
+    manager = SandboxManager.__new__(SandboxManager)
+    manager._sessions = {}
+    manager._lock = MagicMock()
+
+    def fake_run(cmd, **kwargs):
+        result = MagicMock()
+        result.returncode = 0
+        if cmd[:3] == ["docker", "ps", "-aq"]:
+            result.stdout = "cid-compose\ncid-session\n"
+        elif cmd[:3] == ["docker", "inspect", "--format"]:
+            container_id = cmd[4]
+            result.stdout = (
+                "/shellcraft-backend-1\n"
+                if container_id == "cid-compose"
+                else f"/{CONTAINER_NAME_PREFIX}orphan\n"
+            )
+        return result
+
+    with patch.object(manager, "_docker_available", return_value=True), patch(
+        "app.sandbox.subprocess.run",
+        side_effect=fake_run,
+    ), patch.object(manager, "_remove_container") as remove:
+        manager._cleanup_orphaned_containers()
+
+    remove.assert_called_once_with(f"{CONTAINER_NAME_PREFIX}orphan")
+
+
 def test_run_container_uses_auto_remove_flag():
     manager = SandboxManager.__new__(SandboxManager)
 
