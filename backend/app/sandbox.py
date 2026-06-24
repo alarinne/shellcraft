@@ -23,7 +23,7 @@ SANDBOX_IMAGE = os.environ.get("SHELLCRAFT_SANDBOX_IMAGE", "shellcraft-sandbox-l
 SANDBOX_LAB_IDS = frozenset({"lab-01", "lab-02", "lab-03", "lab-04", "lab-05"})
 EXEC_TIMEOUT_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_EXEC_TIMEOUT", "5"))
 SESSION_TTL_SEC = int(os.environ.get("SHELLCRAFT_SANDBOX_SESSION_TTL", "600"))
-CONTAINER_NAME_PREFIX = "shellcraft-"
+CONTAINER_NAME_PREFIX = "shellcraft-session-"
 
 
 def lab_root(lab_id: str) -> str:
