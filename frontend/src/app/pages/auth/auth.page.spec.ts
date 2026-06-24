@@ -38,7 +38,7 @@ describe('AuthPage', () => {
     inputs[0].dispatchEvent(new Event('input'));
     inputs[1].value = 'ada@shellcraft.dev';
     inputs[1].dispatchEvent(new Event('input'));
-    inputs[2].value = 'secret12';
+    inputs[2].value = 'Secret12!';
     inputs[2].dispatchEvent(new Event('input'));
 
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
@@ -49,12 +49,56 @@ describe('AuthPage', () => {
     expect(navigate).toHaveBeenCalledWith('/path');
   });
 
+  it('blocks weak passwords before calling the API', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const fixture = TestBed.createComponent(AuthPage);
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('.sc-auth-switch').click();
+    fixture.detectChanges();
+
+    const inputs = fixture.nativeElement.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+    inputs[0].value = 'Ada Lovelace';
+    inputs[0].dispatchEvent(new Event('input'));
+    inputs[1].value = 'ada@shellcraft.dev';
+    inputs[1].dispatchEvent(new Event('input'));
+    inputs[2].value = 'weakpass';
+    inputs[2].dispatchEvent(new Event('input'));
+
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+    await settle();
+    fixture.detectChanges();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('uppercase');
+  });
+
+  it('masks the password in the terminal preview', () => {
+    const fixture = TestBed.createComponent(AuthPage);
+    fixture.detectChanges();
+
+    const passwordInput = fixture.nativeElement.querySelectorAll('input')[1] as HTMLInputElement;
+    passwordInput.value = 'ab';
+    passwordInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('**');
+    expect(fixture.nativeElement.textContent).not.toContain('Secret12!');
+  });
+
   it('shows the backend message for invalid credentials', async () => {
     installApiMock({
       'POST /api/auth/login': { status: 401, body: { detail: 'Invalid credentials' } },
     });
     const fixture = TestBed.createComponent(AuthPage);
     fixture.detectChanges();
+
+    const inputs = fixture.nativeElement.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+    inputs[0].value = 'ada@shellcraft.dev';
+    inputs[0].dispatchEvent(new Event('input'));
+    inputs[1].value = 'wrongpass';
+    inputs[1].dispatchEvent(new Event('input'));
 
     fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
     await settle();

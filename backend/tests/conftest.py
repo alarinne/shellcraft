@@ -55,12 +55,15 @@ async def client() -> AsyncIterator[AsyncClient]:
     await engine.dispose()
 
 
+TEST_PASSWORD = "Secret12!"
+
+
 async def register_user(
     client: AsyncClient,
     *,
     name: str = "Ada",
     email: str = "ada@example.com",
-    password: str = "supersecret",
+    password: str = TEST_PASSWORD,
 ) -> dict:
     res = await client.post(
         "/api/auth/register",

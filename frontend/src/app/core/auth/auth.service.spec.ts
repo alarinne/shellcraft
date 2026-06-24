@@ -32,7 +32,7 @@ describe('AuthService', () => {
     installApiMock({ 'POST /api/auth/register': { status: 201, body: ada } });
     const auth = service();
 
-    const result = await auth.register('Ada Lovelace', 'ada@shellcraft.dev', 'secret12');
+    const result = await auth.register('Ada Lovelace', 'ada@shellcraft.dev', 'Secret12!');
 
     expect(result.ok).toBe(true);
     expect(auth.isAuthenticated()).toBe(true);
@@ -46,7 +46,7 @@ describe('AuthService', () => {
     });
     const auth = service();
 
-    const result = await auth.register('Ada', 'ada@shellcraft.dev', 'secret12');
+    const result = await auth.register('Ada', 'ada@shellcraft.dev', 'Secret12!');
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe('This email is already registered.');

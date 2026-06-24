@@ -9,8 +9,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 
 from . import __version__
 from .api.routes import (
@@ -58,6 +60,13 @@ def create_app() -> FastAPI:
     app.include_router(users.router)
     app.include_router(progress.router)
     app.include_router(settings.router)
+
+    @app.exception_handler(OperationalError)
+    async def database_unavailable(_request: Request, _exc: OperationalError) -> JSONResponse:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "database temporarily unavailable"},
+        )
 
     return app
 

@@ -425,6 +425,83 @@ def test_lab_03_pipes_quest():
     assert result["completed"] is True
 
 
+def test_lab_03_passes_when_grep_stdout_missing_but_cat_captured():
+    """PTY often captures cat output but misses short grep lines (command_only=False)."""
+    from app.sandbox import merge_command_histories
+
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-03/logs"},
+        "steps": [
+            {"id": "step-01-view-log"},
+            {"id": "step-02-grep-errors"},
+            {"id": "step-03-count-errors"},
+        ],
+    }
+    pty = [
+        {
+            "command": "cat access.log",
+            "stdout": ["2026-06-01 ERROR disk full on /var"],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": "grep ERROR access.log | wc -l",
+            "stdout": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+    ]
+    shell = [
+        {"command": "cat access.log", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-03/logs"},
+        {"command": "grep ERROR access.log", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-03/logs"},
+        {"command": "wc -l", "stdout": [], "exitCode": 0, "cwd": "/home/guest/lab-03/logs"},
+    ]
+    merged = merge_command_histories(pty, shell)
+    command_only = not any(entry.get("stdout") for entry in merged)
+    assert command_only is False
+
+    result = check_lab_progress(
+        lab,
+        merged,
+        command_only=command_only,
+        live_state={"logExists": True},
+    )
+    assert result["completed"] is True
+
+
+def test_lab_03_accepts_quoted_grep_and_grep_c():
+    lab = {
+        "initialState": {"cwd": "/home/guest/lab-03/logs"},
+        "steps": [
+            {"id": "step-01-view-log"},
+            {"id": "step-02-grep-errors"},
+            {"id": "step-03-count-errors"},
+        ],
+    }
+    history = [
+        {
+            "command": "cat access.log",
+            "stdout": ["2026-06-01 ERROR disk full on /var"],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": 'grep "ERROR" access.log',
+            "stdout": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+        {
+            "command": 'grep -c "ERROR" access.log',
+            "stdout": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-03/logs",
+        },
+    ]
+    result = check_lab_progress(lab, history, command_only=False, live_state={"logExists": True})
+    assert result["completed"] is True
+
+
 def test_lab_03_accepts_cat_pipe_grep():
     lab = {
         "initialState": {"cwd": "/home/guest/lab-03/logs"},
@@ -484,6 +561,50 @@ def test_lab_04_process_quest_command_only():
     ]
     result = check_lab_progress(lab, history, command_only=True)
     assert result["completed"] is True
+
+
+def test_lab_04_accepts_bash_worker_without_ampersand_in_debug_trap_log():
+    """DEBUG trap logs BASH_COMMAND without the trailing ``&``."""
+    lab = {
+        "steps": [
+            {"id": "step-01-start-worker"},
+            {"id": "step-02-find-worker"},
+            {"id": "step-03-stop-worker"},
+        ],
+    }
+    history = [
+        {"command": "bash worker.sh", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-04"},
+        {
+            "command": "ps aux | grep worker",
+            "stdout": ["learner 47 bash worker.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-04",
+        },
+        {"command": "kill 47", "stdout": [], "stderr": [], "exitCode": 0, "cwd": "/home/guest/lab-04"},
+    ]
+    result = check_lab_progress(lab, history, command_only=True)
+    assert result["completed"] is True
+
+
+def test_lab_04_start_worker_passes_when_worker_seen_in_ps_even_without_start_command():
+    lab = {
+        "steps": [
+            {"id": "step-01-start-worker"},
+            {"id": "step-02-find-worker"},
+        ],
+    }
+    history = [
+        {
+            "command": "ps aux | grep worker",
+            "stdout": ["learner 47 bash worker.sh"],
+            "stderr": [],
+            "exitCode": 0,
+            "cwd": "/home/guest/lab-04",
+        },
+    ]
+    result = check_lab_progress(lab, history, command_only=True)
+    assert result["stepsCompleted"] == 2
 
 
 def test_lab_05_signals_quest_command_only():

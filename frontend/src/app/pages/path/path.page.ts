@@ -1,8 +1,21 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { LABS, LabCard } from '../../core/shellcraft-data';
 import { LabProgress } from '../../core/progress/lab-progress';
+
+interface LearningPathEntry {
+  slug: string;
+  status: 'done' | 'current' | 'next' | 'locked';
+}
+
+const LEARNING_PATH_SLUGS: Record<string, string> = {
+  'lab-01': 'lab_01_filesystem',
+  'lab-02': 'lab_02_permissions',
+  'lab-03': 'lab_03_pipes',
+  'lab-04': 'lab_04_processes',
+  'lab-05': 'lab_05_signals',
+};
 
 interface RoadmapLab extends LabCard {
   node: string;
@@ -36,6 +49,22 @@ export class PathPage {
   protected readonly roadmapLabs = ROADMAP_LABS;
   protected readonly totalRoadmapXp = TOTAL_ROADMAP_XP;
 
+  protected readonly whoamiLine = computed(() => {
+    const user = this.auth.currentUser();
+    if (!user) {
+      return 'guest_student';
+    }
+    const name = user.name?.trim();
+    return name || user.email;
+  });
+
+  protected readonly learningPathEntries = computed((): readonly LearningPathEntry[] =>
+    this.labs().map((lab) => ({
+      slug: LEARNING_PATH_SLUGS[lab.id] ?? lab.id.replace('-', '_'),
+      status: learningPathStatus(lab.status),
+    })),
+  );
+
   protected startLab(lab: LabCard): void {
     if (lab.locked) {
       return;
@@ -47,5 +76,18 @@ export class PathPage {
     void this.router.navigate(['/auth'], {
       queryParams: { mode: 'register', returnUrl: '/lab/lab-01' },
     });
+  }
+}
+
+function learningPathStatus(status: string): LearningPathEntry['status'] {
+  switch (status) {
+    case 'Completed':
+      return 'done';
+    case 'Current':
+      return 'current';
+    case 'Next':
+      return 'next';
+    default:
+      return 'locked';
   }
 }

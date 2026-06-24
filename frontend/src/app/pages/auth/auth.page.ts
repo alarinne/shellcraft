@@ -2,6 +2,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import {
+  maskPasswordPreview,
+  PASSWORD_REQUIREMENTS_TEXT,
+  validateLoginForm,
+  validateRegisterForm,
+} from '../../core/auth/password-policy';
 
 type AuthMode = 'login' | 'register';
 
@@ -40,6 +46,14 @@ export class AuthPage {
     const label = this.returnTarget();
     return label ? `Sign in to open ${label}.` : 'Sign in to keep your XP and lab progress.';
   });
+  protected readonly passwordRequirements = PASSWORD_REQUIREMENTS_TEXT;
+  protected readonly whoamiLine = computed(() => {
+    const identifier = this.isRegister()
+      ? this.name().trim() || this.email().trim()
+      : this.email().trim();
+    return identifier || 'guest_student';
+  });
+  protected readonly passwordPreview = computed(() => maskPasswordPreview(this.password()));
 
   constructor() {
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
@@ -50,14 +64,17 @@ export class AuthPage {
 
   protected setName(value: string): void {
     this.name.set(value);
+    this.error.set(null);
   }
 
   protected setEmail(value: string): void {
     this.email.set(value);
+    this.error.set(null);
   }
 
   protected setPassword(value: string): void {
     this.password.set(value);
+    this.error.set(null);
   }
 
   protected toggleMode(): void {
@@ -82,6 +99,14 @@ export class AuthPage {
 
     this.submitting.set(true);
     try {
+      const validationError = this.isRegister()
+        ? validateRegisterForm(this.name(), this.email(), this.password())
+        : validateLoginForm(this.email(), this.password());
+      if (validationError) {
+        this.error.set(validationError);
+        return;
+      }
+
       const result = this.isRegister()
         ? await this.auth.register(this.name(), this.email(), this.password())
         : await this.auth.login(this.email(), this.password());

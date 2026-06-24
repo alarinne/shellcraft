@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
-from .conftest import register_user
+from unittest.mock import AsyncMock
+
+import pytest
+from sqlalchemy.exc import IntegrityError
+
+from app.services import auth_service
+
+from .conftest import TEST_PASSWORD, register_user
 
 
 async def test_register_creates_user_and_sets_cookie(client):
     res = await client.post(
         "/api/auth/register",
-        json={"name": "Ada", "email": "ada@example.com", "password": "supersecret"},
+        json={"name": "Ada", "email": "ada@example.com", "password": TEST_PASSWORD},
     )
     assert res.status_code == 201, res.text
     body = res.json()
@@ -23,7 +30,7 @@ async def test_register_duplicate_email_conflicts(client):
     await register_user(client)
     res = await client.post(
         "/api/auth/register",
-        json={"name": "Ada2", "email": "ada@example.com", "password": "supersecret"},
+        json={"name": "Ada2", "email": "ada@example.com", "password": TEST_PASSWORD},
     )
     assert res.status_code == 409
 
@@ -34,13 +41,13 @@ async def test_login_with_email_and_with_name(client):
 
     by_email = await client.post(
         "/api/auth/login",
-        json={"identifier": "linus@example.com", "password": "supersecret"},
+        json={"identifier": "linus@example.com", "password": TEST_PASSWORD},
     )
     assert by_email.status_code == 200
 
     by_name = await client.post(
         "/api/auth/login",
-        json={"identifier": "Linus", "password": "supersecret"},
+        json={"identifier": "Linus", "password": TEST_PASSWORD},
     )
     assert by_name.status_code == 200
 
@@ -83,3 +90,41 @@ async def test_short_password_rejected(client):
         json={"name": "Ada", "email": "ada@example.com", "password": "short"},
     )
     assert res.status_code == 422
+
+
+async def test_weak_password_missing_symbol_rejected(client):
+    res = await client.post(
+        "/api/auth/register",
+        json={"name": "Ada", "email": "weak@example.com", "password": "Secret12"},
+    )
+    assert res.status_code == 422
+    assert "symbol" in res.text.lower()
+
+
+async def test_weak_password_missing_uppercase_rejected(client):
+    res = await client.post(
+        "/api/auth/register",
+        json={"name": "Ada", "email": "weak2@example.com", "password": "secret12!"},
+    )
+    assert res.status_code == 422
+    assert "uppercase" in res.text.lower()
+
+
+async def test_register_maps_integrity_error_to_conflict(monkeypatch):
+    db = AsyncMock()
+    db.commit = AsyncMock(side_effect=IntegrityError("stmt", {}, Exception("duplicate key")))
+    db.rollback = AsyncMock()
+    db.refresh = AsyncMock()
+
+    monkeypatch.setattr(auth_service.user_repo, "get_by_email", AsyncMock(return_value=None))
+    monkeypatch.setattr(auth_service.user_repo, "create", AsyncMock(return_value=object()))
+
+    with pytest.raises(auth_service.EmailAlreadyRegistered):
+        await auth_service.register(
+            db,
+            name="Ada",
+            email="race@example.com",
+            password=TEST_PASSWORD,
+        )
+
+    db.rollback.assert_awaited_once()

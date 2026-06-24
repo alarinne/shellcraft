@@ -66,5 +66,10 @@ describe('PathPage', () => {
     expect(compiled.textContent).toContain('Review');
     expect(compiled.textContent).toContain('Permissions');
     expect(compiled.textContent).toContain('Current');
+    expect(compiled.textContent).toContain('Ada Lovelace');
+    expect(compiled.textContent).toContain('lab_01_filesystem');
+    expect(compiled.textContent).toContain('lab_04_processes');
+    expect(compiled.textContent).toContain('lab_05_signals');
+    expect(compiled.querySelector('.sc-path-lab[data-status="done"]')).toBeTruthy();
   });
 });

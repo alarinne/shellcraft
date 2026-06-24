@@ -29,10 +29,14 @@ _STEP_FAILURE_HINTS: dict[str, str] = {
         "Run `grep ERROR access.log | wc -l`, `grep -c ERROR access.log`, "
         "or `cat access.log | grep ERROR | wc -l`."
     ),
-    "step-01-start-worker": "Run `./worker.sh &` to start the worker in the background.",
+    "step-01-start-worker": (
+        "Run `./worker.sh &`, `bash worker.sh &`, or `sh worker.sh &` to start the worker in the background."
+    ),
     "step-02-find-worker": "Run `ps aux` or `pgrep -f worker` to locate the worker process.",
     "step-03-stop-worker": "Run `pkill -f worker.sh` or `kill` with the worker PID.",
-    "step-01-start-hang": "Run `./hang.sh &` to launch the script in the background.",
+    "step-01-start-hang": (
+        "Run `./hang.sh &`, `bash hang.sh &`, or `sh hang.sh &` to launch the script in the background."
+    ),
     "step-02-sigterm": "Run `kill -15 <pid>` or `kill -TERM` to send SIGTERM to hang.sh.",
     "step-03-verify-gone": "Run `ps aux | grep hang` — hang.sh should no longer appear.",
 }
@@ -235,7 +239,9 @@ def _grep_errors(cmd: str, out: str, *, command_only: bool) -> bool:
     normalized = normalize_command(cmd)
     if "|" not in cmd and not normalized.startswith("grep"):
         return False
-    if command_only:
+    # PTY capture often misses short grep output when another command (e.g. cat)
+    # already populated history — trust the command shape when stdout is empty.
+    if command_only or not out.strip():
         return "error" in normalized.lower()
     return _output_has_error_lines(out)
 
@@ -243,15 +249,38 @@ def _grep_errors(cmd: str, out: str, *, command_only: bool) -> bool:
 def _count_errors(cmd: str, out: str, *, command_only: bool) -> bool:
     if not _counts_access_log_errors(cmd):
         return False
-    if command_only:
+    if command_only or not out.strip():
         return True
     return _output_shows_count(out, "2")
 
 
+def _split_pipe_count_in_history(history: list[dict[str, Any]]) -> bool:
+    """DEBUG trap logs pipeline stages separately (grep, then wc -l)."""
+    for index, entry in enumerate(history):
+        cmd = normalize_command(entry.get("command", ""))
+        if entry.get("exitCode", 1) != 0 or not _grep_filters_access_log(cmd):
+            continue
+        cwd = entry.get("cwd", "")
+        for follow in history[index + 1 : index + 4]:
+            if follow.get("cwd", "") != cwd:
+                break
+            next_cmd = normalize_command(follow.get("command", ""))
+            if next_cmd == "wc -l" or next_cmd.startswith("wc "):
+                return True
+    return False
+
+
 def _starts_background(cmd: str, script: str) -> bool:
+    """Match background script launches, including DEBUG-trap logs that omit ``&``."""
     normalized = normalize_command(cmd)
     base = script.lstrip("./")
-    return base in normalized and "&" in normalized
+    if base not in normalized:
+        return False
+    if "&" in normalized or normalized.startswith("nohup "):
+        return True
+    # Shell DEBUG trap records BASH_COMMAND without the trailing job-control ``&``.
+    launchers = (f"./{base}", f"bash {base}", f"sh {base}", f"/bin/sh {base}", f"/bin/bash {base}")
+    return normalized in launchers
 
 
 def _find_process(cmd: str, name: str, out: str, *, command_only: bool) -> bool:
@@ -456,8 +485,11 @@ def check_lab_progress(
                 completed = True
         if not completed and step_id == "step-02-chmod" and live_state.get("deployExecutable"):
             completed = True
+        if not completed and step_id == "step-03-count-errors":
+            if _split_pipe_count_in_history(graded_history):
+                completed = True
         if not completed and step_id == "step-01-start-worker":
-            if any(
+            if worker_seen or any(
                 _starts_background(normalize_command(entry.get("command", "")), "worker.sh")
                 for entry in graded_history
             ):
@@ -466,7 +498,16 @@ def check_lab_progress(
             if worker_seen and not live_state.get("workerRunning"):
                 completed = True
         if not completed and step_id == "step-01-start-hang":
-            if any(
+            hang_seen = any(
+                _find_process(
+                    normalize_command(entry.get("command", "")),
+                    "hang",
+                    _stdout_text(entry),
+                    command_only=False,
+                )
+                for entry in graded_history
+            )
+            if hang_seen or hang_sigterm or any(
                 _starts_background(normalize_command(entry.get("command", "")), "hang.sh")
                 for entry in graded_history
             ):

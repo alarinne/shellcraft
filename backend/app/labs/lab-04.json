@@ -18,7 +18,7 @@
       "acceptedCommands": ["./worker.sh &", "bash worker.sh &", "sh worker.sh &", "./worker.sh & disown"],
       "expectedOutput": [],
       "explanation": "Appending & runs a command in the background so your shell stays free.",
-      "hint": "Run ./worker.sh with & at the end."
+      "hint": "Run ./worker.sh, bash worker.sh, or sh worker.sh with & at the end."
     },
     {
       "id": "step-02-find-worker",

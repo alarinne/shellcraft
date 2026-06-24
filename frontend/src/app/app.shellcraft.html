@@ -45,7 +45,7 @@
 
     <nav class="sc-footer-nav" aria-label="Footer navigation">
       <span>Navigation</span>
-      @for (item of nav(); track item.path) {
+      @for (item of footerNav(); track item.path) {
         <button type="button" (click)="go(item.path)">{{ item.label }}</button>
       }
       @if (currentUser()) {
