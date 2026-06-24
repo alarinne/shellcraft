@@ -90,7 +90,7 @@ Backend docs: http://localhost:8000/docs
 Notes:
 
 - Docker must be running before starting the full profile.
-- Postgres stores users, XP, progress, and settings; Redis stores sessions. Data persists in named Docker volumes (`postgres-data`, `redis-data`).
+- Postgres stores users, XP, progress, and settings; Redis stores sessions. Data persists in `./.docker/postgres` and `./.docker/redis` (created on first run, gitignored).
 - Real Linux lab sessions require access to the Docker socket from the backend container.
 - On Docker Desktop, use Linux containers mode.
 

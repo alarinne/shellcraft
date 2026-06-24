@@ -17,6 +17,7 @@ from sqlalchemy.exc import OperationalError
 from . import __version__
 from .api.routes import (
     auth,
+    certificates,
     commands,
     labs,
     progress,
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(users.router)
     app.include_router(progress.router)
+    app.include_router(certificates.router)
     app.include_router(settings.router)
 
     @app.exception_handler(OperationalError)

@@ -62,4 +62,36 @@ describe('LabProgress', () => {
     await settle();
     expect(progress.isCompleted(LAB_01_FILESYSTEM.id)).toBe(true);
   });
+
+  it('unlocks labs progressively', async () => {
+    installApiMock({
+      'GET /api/progress': { status: 200, body: [] },
+    });
+    configure();
+    const progress = TestBed.inject(LabProgress);
+    await progress.ensureLoaded();
+
+    expect(progress.isLabUnlocked('lab-01')).toBe(true);
+    expect(progress.isLabUnlocked('lab-02')).toBe(false);
+    expect(progress.allLabsCompleted()).toBe(false);
+  });
+
+  it('allows review of completed labs', async () => {
+    installApiMock({
+      'GET /api/auth/me': { status: 200, body: member },
+      'GET /api/progress': {
+        status: 200,
+        body: [{ labId: 'lab-01', status: 'completed' }],
+      },
+    });
+    configure();
+    const auth = TestBed.inject(AuthService);
+    const progress = TestBed.inject(LabProgress);
+
+    await auth.restoreSession();
+    await progress.ensureLoaded();
+
+    expect(progress.isLabUnlocked('lab-01')).toBe(true);
+    expect(progress.isLabUnlocked('lab-02')).toBe(true);
+  });
 });

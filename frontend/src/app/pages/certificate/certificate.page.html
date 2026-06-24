@@ -1,0 +1,111 @@
+<section class="sc-screen sc-certificate" aria-label="Mission complete">
+  @if (loading()) {
+    <article class="sc-complete-card">
+      <span class="sc-chip sc-chip-blue">Loading</span>
+      <h1>Preparing your certificate…</h1>
+    </article>
+  } @else if (certificate(); as cert) {
+    <article class="sc-certificate-wrap">
+      <header class="sc-certificate-hero">
+        <span class="sc-chip sc-chip-orange">Mission Complete</span>
+        <h1>Congratulations, {{ userName() }}!</h1>
+        <p>
+          You mastered all five ShellCraft labs — filesystem navigation, permissions,
+          pipelines, processes, and signals. Your terminal journey is complete.
+        </p>
+      </header>
+
+      <div class="sc-certificate-card" aria-label="Completion certificate">
+        <div class="sc-certificate-card-inner">
+          <span class="sc-certificate-brand">ShellCraft</span>
+          <h2>Certificate of Completion</h2>
+          <p class="sc-certificate-subtitle">Linux Fundamentals — All 5 Labs Mastered</p>
+          <p class="sc-certificate-name">{{ cert.holderName }}</p>
+          <p class="sc-certificate-meta">Issued {{ formatDate(cert.issuedAt) }}</p>
+          <p class="sc-certificate-meta">Total XP: {{ totalXp() }}</p>
+
+          @if (qrImage(); as qr) {
+            <div class="sc-certificate-qr">
+              <img [src]="qr" width="140" height="140" alt="Verification QR code" />
+              <small>Scan to verify</small>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="sc-complete-badges sc-certificate-badges" aria-label="All badges earned">
+        @for (badge of badges(); track badge.labId) {
+          <span
+            class="sc-complete-badge-dot is-unlocked"
+            [attr.aria-label]="badge.label + ' unlocked'"
+            [attr.title]="badge.label"
+          >
+            @switch (badge.icon) {
+              @case ('shield') {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 4l6 2v5c0 4-2.4 7.2-6 9-3.6-1.8-6-5-6-9V6l6-2z" />
+                </svg>
+              }
+              @case ('medal') {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 4h8v7l-4 3-4-3V4z" />
+                  <path d="M12 14l1.5 2.8 3.1.5-2.2 2.2.5 3.1-2.9-1.5-2.9 1.5.5-3.1-2.2-2.2 3.1-.5L12 14z" />
+                </svg>
+              }
+              @case ('pipeline') {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 7h4l3 10h3" />
+                  <path d="M9 7l3-3 3 3" />
+                  <path d="M15 17l3-3 3 3" />
+                </svg>
+              }
+              @case ('process') {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 17V7" />
+                  <path d="M12 17V4" />
+                  <path d="M18 17v-7" />
+                  <path d="M4 17h16" />
+                </svg>
+              }
+              @case ('signal') {
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 19v-3" />
+                  <path d="M8 16a6 6 0 0 1 8 0" />
+                  <path d="M5 12a10 10 0 0 1 14 0" />
+                </svg>
+              }
+            }
+          </span>
+        }
+      </div>
+
+      <div class="sc-actions centered sc-certificate-actions">
+        <button
+          class="sc-btn sc-btn-primary"
+          type="button"
+          [disabled]="downloadBusy()"
+          (click)="downloadPng()"
+        >
+          {{ downloadBusy() ? 'Generating…' : 'Download certificate' }}
+        </button>
+        <button class="sc-btn sc-btn-ghost" type="button" (click)="backToPath()">
+          Learning Path
+        </button>
+        <button class="sc-btn sc-btn-ghost" type="button" (click)="reviewLabs()">
+          Review labs
+        </button>
+      </div>
+    </article>
+  } @else {
+    <article class="sc-complete-card is-empty">
+      <span class="sc-chip sc-chip-blue">Certificate</span>
+      <h1>Certificate unavailable</h1>
+      <p>Complete all five labs to unlock your certificate.</p>
+      <div class="sc-actions centered">
+        <button class="sc-btn sc-btn-primary" type="button" (click)="backToPath()">
+          Learning Path
+        </button>
+      </div>
+    </article>
+  }
+</section>

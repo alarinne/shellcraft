@@ -1,0 +1,43 @@
+<section class="sc-screen sc-verify" aria-label="Certificate verification">
+  <article class="sc-verify-card">
+    <span class="sc-chip sc-chip-blue">Verification</span>
+
+    @if (loading()) {
+      <h1>Checking certificate…</h1>
+    } @else if (missingParams()) {
+      <h1>Missing verification data</h1>
+      <p class="sc-verify-invalid">
+        Scan the QR code on a ShellCraft certificate or open the full verification link.
+      </p>
+    } @else if (result(); as verify) {
+      @if (verify.valid) {
+        <h1 class="sc-verify-valid">Valid certificate</h1>
+        <p>This ShellCraft completion certificate is authentic.</p>
+        <dl class="sc-verify-details">
+          <div>
+            <dt>Holder</dt>
+            <dd>{{ verify.holderName }}</dd>
+          </div>
+          <div>
+            <dt>Program</dt>
+            <dd>ShellCraft Linux Fundamentals</dd>
+          </div>
+          <div>
+            <dt>Issued</dt>
+            <dd>{{ formatDate(verify.issuedAt) }}</dd>
+          </div>
+          <div>
+            <dt>Labs completed</dt>
+            <dd>{{ verify.labsCompleted }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <h1 class="sc-verify-invalid">Invalid certificate</h1>
+        <p>
+          This verification link could not be confirmed. The certificate may be tampered with,
+          expired, or never issued.
+        </p>
+      }
+    }
+  </article>
+</section>

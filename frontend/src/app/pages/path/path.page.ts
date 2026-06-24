@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { LAB_ORDER } from '../../core/progress/lab-progress';
 import { LABS, LabCard } from '../../core/shellcraft-data';
 import { LabProgress } from '../../core/progress/lab-progress';
 
@@ -40,6 +41,7 @@ const TOTAL_ROADMAP_XP = ROADMAP_LABS.reduce((total, lab) => total + lab.xp, 0);
 })
 export class PathPage {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly progress = inject(LabProgress);
 
@@ -48,6 +50,25 @@ export class PathPage {
   protected readonly labs = this.progress.labs;
   protected readonly roadmapLabs = ROADMAP_LABS;
   protected readonly totalRoadmapXp = TOTAL_ROADMAP_XP;
+  protected readonly allLabsCompleted = computed(() => this.progress.allLabsCompleted());
+
+  protected readonly lockedNotice = computed(() => {
+    const lockedId = this.route.snapshot.queryParamMap.get('locked');
+    if (!lockedId) {
+      return null;
+    }
+    const index = LAB_ORDER.indexOf(lockedId);
+    if (index <= 0) {
+      return null;
+    }
+    const priorId = LAB_ORDER[index - 1];
+    const priorLab = LABS.find((lab) => lab.id === priorId);
+    const lockedLab = LABS.find((lab) => lab.id === lockedId);
+    if (!priorLab || !lockedLab) {
+      return null;
+    }
+    return `Finish ${priorLab.title} before starting ${lockedLab.title}.`;
+  });
 
   protected readonly whoamiLine = computed(() => {
     const user = this.auth.currentUser();
@@ -76,6 +97,10 @@ export class PathPage {
     void this.router.navigate(['/auth'], {
       queryParams: { mode: 'register', returnUrl: '/lab/lab-01' },
     });
+  }
+
+  protected viewCertificate(): void {
+    void this.router.navigate(['/certificate']);
   }
 }
 

@@ -8,9 +8,27 @@ import { Lab } from '../execution/types';
 const PROGRESS_KEY = 'shellcraft.progress.by-user.v1';
 const GUEST_PROGRESS_KEY = 'guest';
 
+/** Keep in sync with backend `LAB_ORDER` in progress_service.py. */
+export const LAB_ORDER: readonly string[] = [
+  'lab-01',
+  'lab-02',
+  'lab-03',
+  'lab-04',
+  'lab-05',
+];
+
 interface ProgressRow {
   labId: string;
   status: string;
+}
+
+export interface CertificateData {
+  id: string;
+  holderName: string;
+  issuedAt: string;
+  labsCompleted: number;
+  signature: string;
+  verificationUrl: string;
 }
 
 /**
@@ -27,6 +45,8 @@ export class LabProgress {
     readProgress(this.storage),
   );
   private readonly backendCompleted = signal<ReadonlySet<string>>(new Set());
+  private readonly ready = signal(false);
+  private inflight: Promise<void> | null = null;
 
   private readonly completedLabIds = computed<ReadonlySet<string>>(() => {
     if (this.auth.isAuthenticated()) {
@@ -36,10 +56,11 @@ export class LabProgress {
   });
 
   constructor() {
-    // Reload progress whenever the signed-in user changes.
     effect(() => {
       const user = this.auth.currentUser();
-      void this.syncFromSource(user);
+      this.ready.set(false);
+      this.inflight = null;
+      void this.syncFromSource(user).then(() => this.ready.set(true));
     });
   }
 
@@ -96,6 +117,42 @@ export class LabProgress {
     return this.completedLabIds().has(labId);
   }
 
+  isLabUnlocked(labId: string): boolean {
+    if (!LAB_ORDER.includes(labId)) {
+      return false;
+    }
+    if (labId === LAB_ORDER[0]) {
+      return true;
+    }
+    if (this.isCompleted(labId)) {
+      return true;
+    }
+    const index = LAB_ORDER.indexOf(labId);
+    const prior = LAB_ORDER[index - 1];
+    return this.isCompleted(prior);
+  }
+
+  currentLab(): LabCard | null {
+    return this.nextLab();
+  }
+
+  allLabsCompleted(): boolean {
+    return LAB_ORDER.every((labId) => this.isCompleted(labId));
+  }
+
+  async ensureLoaded(): Promise<void> {
+    if (this.ready()) {
+      return;
+    }
+    if (!this.inflight) {
+      this.inflight = this.syncFromSource(this.auth.currentUser()).finally(() => {
+        this.ready.set(true);
+        this.inflight = null;
+      });
+    }
+    await this.inflight;
+  }
+
   async complete(lab: Lab | LabCard): Promise<void> {
     if (this.auth.isAuthenticated()) {
       const result = await apiFetch<unknown>(`/api/progress/${lab.id}/complete`, {
@@ -104,7 +161,6 @@ export class LabProgress {
       });
       if (result.ok) {
         this.backendCompleted.update((ids) => new Set(ids).add(lab.id));
-        // Refresh XP/level from the server.
         await this.auth.restoreSession();
       }
       return;
@@ -113,9 +169,16 @@ export class LabProgress {
     this.updateGuestProgress((ids) => ids.add(lab.id));
   }
 
+  async fetchCertificate(): Promise<CertificateData | null> {
+    const result = await apiFetch<CertificateData>('/api/certificates/me');
+    if (result.ok && result.data) {
+      return result.data;
+    }
+    return null;
+  }
+
   resetLab(labId: string): void {
     if (this.auth.isAuthenticated()) {
-      // No backend reset endpoint; clear locally for the current session.
       this.backendCompleted.update((ids) => {
         const next = new Set(ids);
         next.delete(labId);
@@ -131,7 +194,6 @@ export class LabProgress {
   }
 
   private async syncFromSource(user: AuthUser | null): Promise<void> {
-    // Defer signal writes out of the effect's synchronous run.
     await Promise.resolve();
     if (!user) {
       this.backendCompleted.set(new Set());

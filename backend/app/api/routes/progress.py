@@ -13,8 +13,9 @@ from ...schemas.progress import (
     CompleteLabResponse,
     LabProgressPublic,
 )
-from ...services import auth_service
 from ...repositories import progress_repo
+from ...services import auth_service, certificate_service
+from ...services.progress_service import assert_lab_unlocked
 from ..deps import get_current_user
 
 router = APIRouter(prefix="/api/progress", tags=["progress"])
@@ -43,6 +44,7 @@ async def complete_lab(
         )
 
     score = payload.score if payload is not None else 100
+    await assert_lab_unlocked(db, user.id, lab_id)
     progress, refreshed_user, xp_gained = await auth_service.award_lab_completion(
         db,
         user=user,
@@ -50,6 +52,7 @@ async def complete_lab(
         lab_xp=int(lab.get("xp", 0)),
         score=score,
     )
+    await certificate_service.issue_certificate_if_eligible(db, refreshed_user)
     return CompleteLabResponse(
         progress=LabProgressPublic.model_validate(progress),
         user=refreshed_user,

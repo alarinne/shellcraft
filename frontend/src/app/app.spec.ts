@@ -86,9 +86,9 @@ describe('App shell', () => {
     await harness.navigateByUrl('/path');
     expect(harness.routeNativeElement?.textContent).toContain('Pro Developer Track');
 
-    await harness.navigateByUrl('/lab/lab-02');
+    await harness.navigateByUrl('/lab/lab-01');
     expect(harness.routeNativeElement?.textContent).toContain(
-      'Inspect the current permissions of deploy.sh',
+      'Check where this terminal session starts.',
     );
   });
 });
