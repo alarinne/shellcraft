@@ -7,6 +7,48 @@ export const LAB_01_FILESYSTEM: Lab = {
   durationMinutes: 12,
   xp: 120,
   summary: 'Find the hidden mission file by navigating a tiny Linux workspace.',
+  commandGuide: [
+    {
+      command: 'pwd',
+      pattern: 'pwd',
+      summary: 'Show your current folder in the filesystem.',
+      detail: [
+        'pwd means print working directory. It answers “where am I?” before you move or open files.',
+        'The output is an absolute path, such as /home/guest/lab-01. Your shell prompt often shows a shorter version of the same location.',
+      ],
+    },
+    {
+      command: 'ls',
+      pattern: 'ls [flags]',
+      summary: 'List files and folders in the current directory.',
+      detail: [
+        'ls prints names in the directory you are in. With no flags you see visible files and folders only.',
+        'Common flags:',
+        '• -l (long) — extra columns: permissions, owner, group, size, and modified time',
+        '• -a (all) — include hidden entries (names starting with .)',
+        '• Combine them: ls -la gives a detailed list including hidden items.',
+      ],
+    },
+    {
+      command: 'cd',
+      pattern: 'cd <directory>',
+      summary: 'Move into another folder.',
+      detail: [
+        'cd changes your working directory. After cd, pwd and ls apply to the new location.',
+        'Replace <directory> with a folder name (cd labs), a relative path (cd ../), or an absolute path (cd /home/guest).',
+        'Use cd .. to go up one level, and cd ~ or cd to return to your home directory.',
+      ],
+    },
+    {
+      command: 'cat',
+      pattern: 'cat <filename>',
+      summary: 'Print a file’s contents to the terminal.',
+      detail: [
+        'cat concatenates and prints files. Replace <filename> with the file you want to read, e.g. cat mission.txt.',
+        'Use it for short text files. For long logs, head shows the first lines and tail shows the last lines instead of dumping everything at once.',
+      ],
+    },
+  ],
   initialState: {
     cwd: '/home/guest/lab-01',
     files: [

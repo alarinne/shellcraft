@@ -76,6 +76,42 @@ describe('LabPage', () => {
     expect(compiled.textContent).toContain('0/5 steps cleared');
     expect(compiled.textContent).not.toContain('Accepted');
     expect(compiled.textContent).not.toContain('Owner');
+    expect(compiled.textContent).toContain('Command reference');
+    expect(compiled.textContent).toContain('pwd');
+    expect(compiled.textContent).toContain('cat <filename>');
+    expect(compiled.textContent).toContain('Show your current folder in the filesystem.');
+    expect(compiled.textContent).toContain('Learn more');
+  });
+
+  it('opens the command guide dialog with deep explanation', () => {
+    const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-01');
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    const learnMore = Array.from(
+      compiled.querySelectorAll<HTMLButtonElement>('.sc-command-guide-item'),
+    ).find((button) => button.textContent?.includes('ls [flags]'));
+    expect(learnMore).toBeTruthy();
+    learnMore!.click();
+    fixture.detectChanges();
+
+    const dialog = compiled.querySelector('.sc-command-guide-dialog');
+    expect(dialog).toBeTruthy();
+    expect(dialog?.textContent).toContain('Common flags:');
+    expect(dialog?.textContent).toContain('• -l (long)');
+  });
+
+  it('shows lab-specific command reference for Lab 02', () => {
+    const fixture = TestBed.createComponent(LabPage);
+    fixture.componentRef.setInput('id', 'lab-02');
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.textContent).toContain('Command reference');
+    expect(compiled.textContent).toContain('chmod <mode> <file>');
+    expect(compiled.textContent).toContain('Change who can read, write, or execute a file.');
+    expect(compiled.textContent).not.toContain('cat <filename>');
   });
 
   it('submits a typed command through LabEngine and advances the step', async () => {

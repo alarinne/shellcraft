@@ -1029,6 +1029,70 @@ button {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
 }
 
+.sc-command-guide {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.sc-command-guide li {
+  display: grid;
+  gap: 6px;
+}
+
+.sc-command-guide-item {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.sc-command-guide-item:hover {
+  opacity: 0.88;
+}
+
+.sc-command-guide-item:focus-visible {
+  outline: 2px solid rgba(50, 239, 143, 0.45);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.sc-command-guide-more {
+  color: var(--sc-green);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.sc-command-guide code {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--sc-line-soft);
+  border-radius: 8px;
+  color: #c7d5e6;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sc-command-guide p {
+  margin: 0;
+  color: var(--sc-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .sc-path-terminal {
   overflow: hidden;
 }
@@ -2285,4 +2349,86 @@ button {
   margin: 4px 0 0;
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.sc-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 6, 10, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.sc-dialog {
+  width: min(100%, 520px);
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  border: 1px solid var(--sc-line-soft);
+  border-radius: var(--sc-radius);
+  background: rgba(10, 15, 21, 0.96);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+.sc-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 0;
+}
+
+.sc-dialog-head h2 {
+  margin: 12px 0 0;
+  color: var(--sc-text);
+  font-size: 1.15rem;
+}
+
+.sc-dialog-head h2 code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 1rem;
+}
+
+.sc-dialog-lead {
+  margin: 10px 0 0;
+  color: var(--sc-muted);
+  line-height: 1.55;
+}
+
+.sc-dialog-close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--sc-line-soft);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--sc-text);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sc-dialog-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sc-dialog-body {
+  padding: 16px 20px 22px;
+}
+
+.sc-dialog-body p {
+  margin: 0 0 12px;
+  color: #c7d5e6;
+  line-height: 1.65;
+}
+
+.sc-dialog-body p:last-child {
+  margin-bottom: 0;
+}
+
+.sc-dialog-body p.is-bullet {
+  padding-left: 4px;
+  color: var(--sc-muted);
 }

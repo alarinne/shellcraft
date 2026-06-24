@@ -7,6 +7,27 @@ export const LAB_02_PERMISSIONS: Lab = {
   durationMinutes: 12,
   xp: 150,
   summary: 'Read and change the owner/group/others permission model with chmod.',
+  commandGuide: [
+    {
+      command: 'ls -l',
+      pattern: 'ls -l <file>',
+      summary: 'Inspect permissions and metadata for a file.',
+      detail: [
+        'ls -l prints a long listing. The first column is the permission string (e.g. -rw-r--r--); the next columns are link count, owner, group, size, date, and name.',
+        'The leading character tells you the type: - for a regular file, d for a directory. The next nine characters are owner, group, and others permissions (r read, w write, x execute).',
+      ],
+    },
+    {
+      command: 'chmod',
+      pattern: 'chmod <mode> <file>',
+      summary: 'Change who can read, write, or execute a file.',
+      detail: [
+        'chmod changes permission bits. Numeric mode uses three digits: owner, group, others. Each digit is the sum of r=4, w=2, x=1.',
+        'Example: chmod 755 deploy.sh gives the owner rwx (7), and group and others r-x (5).',
+        'You can also use symbolic forms like chmod u+x file, but this lab focuses on numeric modes.',
+      ],
+    },
+  ],
   initialState: {
     cwd: '/home/guest/lab-02',
     files: [

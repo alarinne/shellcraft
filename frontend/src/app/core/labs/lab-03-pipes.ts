@@ -7,6 +7,48 @@ export const LAB_03_PIPES: Lab = {
   durationMinutes: 15,
   xp: 180,
   summary: 'Filter logs and connect commands through streams with grep and pipes.',
+  commandGuide: [
+    {
+      command: 'cat',
+      pattern: 'cat <filename>',
+      summary: 'Display a log or text file in the terminal.',
+      detail: [
+        'cat prints the entire file to stdout. Replace <filename> with the path to your log, e.g. cat access.log.',
+        'Useful to skim contents before filtering. For very large files, head -n 20 <filename> shows just the first 20 lines.',
+      ],
+    },
+    {
+      command: 'grep',
+      pattern: 'grep <pattern> <file>',
+      summary: 'Show only lines that match a search pattern.',
+      detail: [
+        'grep scans each line and prints matches. Replace <pattern> with text to find (ERROR) and <file> with the file to search.',
+        'Useful flags:',
+        '• -i — case-insensitive search',
+        '• -c — count matching lines instead of printing them',
+        'Patterns are literal text unless you use regular-expression options.',
+      ],
+    },
+    {
+      command: 'wc -l',
+      pattern: 'wc -l',
+      summary: 'Count how many lines were received.',
+      detail: [
+        'wc counts words, lines, and bytes. -l limits the output to line count only.',
+        'Often used after a pipe: grep ERROR access.log | wc -l counts ERROR lines in the log.',
+      ],
+    },
+    {
+      command: '|',
+      pattern: 'cmd1 | cmd2',
+      summary: 'Send the output of one command into the next.',
+      detail: [
+        'The pipe operator | connects stdout of cmd1 to stdin of cmd2, so you chain small tools into one workflow.',
+        'Example: cat access.log | grep ERROR runs grep on cat’s output without creating a temporary file.',
+        'Read pipes left to right: the left command produces data; the right command consumes it.',
+      ],
+    },
+  ],
   initialState: {
     cwd: '/home/guest/lab-03/logs',
     files: [

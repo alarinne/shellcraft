@@ -9,10 +9,11 @@ import {
   untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommandGuideDialogComponent } from '../../components/command-guide-dialog/command-guide-dialog.component';
 import { FilesystemMapComponent } from '../../components/filesystem-map/filesystem-map.component';
 import { PtyTerminalComponent } from '../../components/terminal/pty-terminal.component';
 import { TerminalComponent } from '../../components/terminal/terminal.component';
-import { CommandResult, Lab, LabFile, LabState } from '../../core/execution/types';
+import { CommandResult, Lab, LabCommandGuide, LabFile, LabState } from '../../core/execution/types';
 import { LabEngine } from '../../core/execution/lab-engine';
 import { getLab, DOCKER_LAB_IDS } from '../../core/labs';
 import { LAB_01_FILESYSTEM } from '../../core/labs/lab-01-filesystem';
@@ -32,7 +33,7 @@ const DEFAULT_LAB: Lab = LAB_01_FILESYSTEM;
 
 @Component({
   selector: 'sc-lab-page',
-  imports: [FilesystemMapComponent, TerminalComponent, PtyTerminalComponent],
+  imports: [FilesystemMapComponent, TerminalComponent, PtyTerminalComponent, CommandGuideDialogComponent],
   templateUrl: './lab.page.html',
 })
 export class LabPage {
@@ -51,6 +52,7 @@ export class LabPage {
   protected readonly dockerMode = signal(false);
   protected readonly checkMessage = signal<string | null>(null);
   protected readonly dockerChecked = signal(false);
+  protected readonly selectedGuide = signal<LabCommandGuide | null>(null);
 
   protected readonly lab = computed(() => getLab(this.id()) ?? DEFAULT_LAB);
   protected readonly usesDocker = computed(
@@ -155,6 +157,15 @@ export class LabPage {
   protected readonly filesystemCwd = computed(
     () => this.filesystemState()?.cwd ?? 'workspace',
   );
+  protected readonly commandGuide = computed(() => this.lab().commandGuide);
+
+  protected openGuide(entry: LabCommandGuide): void {
+    this.selectedGuide.set(entry);
+  }
+
+  protected closeGuide(): void {
+    this.selectedGuide.set(null);
+  }
 
   constructor() {
     effect(() => {
@@ -164,6 +175,7 @@ export class LabPage {
       this.lastResult.set(null);
       this.checkMessage.set(null);
       this.dockerChecked.set(false);
+      this.selectedGuide.set(null);
     });
 
     // Start docker only when the lab id changes. Never tear down in effect
